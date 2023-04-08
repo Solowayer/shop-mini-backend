@@ -29,7 +29,6 @@ model User {
 
 enum Role {
   USER
-  VENDOR
   MODERATOR
   ADMIN
 }
@@ -43,29 +42,6 @@ model Seller {
   password  String
   firstName String
   lastName  String
-
-  store Store[]
-}
-
-model Category {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  parent   Category @relation("SubCategories", fields: [parentId], references: [id])
-  parentId Int
-
-  subCategories Category[] @relation("SubCategories")
-
-  product Product[]
-}
-
-model Store {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  seller   Seller @relation(fields: [sellerId], references: [id])
-  sellerId Int
 
   name        String
   description String
@@ -87,12 +63,24 @@ model Product {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId Int
 
-  store   Store? @relation(fields: [storeId], references: [id])
-  storeId Int?
+  seller   Seller? @relation(fields: [sellerId], references: [id])
+  sellerId Int?
 
   orderItems OrderItem[]
   review     Review[]
   cartItem   CartItem[]
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  parent   Category @relation("SubCategories", fields: [parentId], references: [id])
+  parentId Int
+
+  subCategories Category[] @relation("SubCategories")
+
+  product Product[]
 }
 
 model Review {
@@ -148,8 +136,8 @@ model Order {
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  store   Store? @relation(fields: [storeId], references: [id])
-  storeId Int?
+  seller   Seller? @relation(fields: [sellerId], references: [id])
+  sellerId Int?
 }
 
 enum OrderStatus {
