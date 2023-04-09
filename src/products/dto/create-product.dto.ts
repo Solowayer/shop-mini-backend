@@ -12,4 +12,8 @@ export class CreateProductDto {
 
 	@IsNumber()
 	price: number
+
+	@IsNotEmpty()
+	@IsString()
+	slug: string
 }
