@@ -13,22 +13,22 @@ export class CategoriesController {
 	}
 
 	@Get()
-	findAll() {
-		return this.categoriesService.findAll()
+	findAllCategories() {
+		return this.categoriesService.findAllCategories()
 	}
 
 	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.categoriesService.findOne(+id)
+	findCategoryById(@Param('id') id: string) {
+		return this.categoriesService.findCategoryById(+id)
 	}
 
 	@Patch(':id')
-	update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-		return this.categoriesService.update(+id, updateCategoryDto)
+	updateCategory(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+		return this.categoriesService.updateCategory(+id, updateCategoryDto)
 	}
 
 	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.categoriesService.remove(+id)
+	removeCategory(@Param('id') id: string) {
+		return this.categoriesService.removeCategory(+id)
 	}
 }

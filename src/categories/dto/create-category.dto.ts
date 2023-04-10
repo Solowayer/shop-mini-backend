@@ -9,4 +9,5 @@ export class CreateCategoryDto {
 
 	@IsOptional()
 	subCategories?: CreateCategoryDto[]
+	id: any
 }

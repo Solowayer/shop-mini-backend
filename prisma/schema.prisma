@@ -78,7 +78,7 @@ model Product {
 model Category {
   id Int @id @default(autoincrement())
 
-  name String
+  name String @unique
 
   parent   Category? @relation("SubCategories", fields: [parentId], references: [id])
   parentId Int?
