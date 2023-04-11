@@ -1,6 +1,14 @@
-import { IsString, IsOptional, MaxLength, IsNumber, IsNotEmpty } from 'class-validator'
+import { IsString, IsOptional, MaxLength, IsNumber, IsNotEmpty, IsArray, IsBoolean } from 'class-validator'
 
 export class CreateProductDto {
+	@IsNotEmpty()
+	@IsString()
+	slug: string
+
+	@IsArray()
+	@IsOptional()
+	images: string[]
+
 	@IsString()
 	@IsNotEmpty()
 	name: string
@@ -13,7 +21,17 @@ export class CreateProductDto {
 	@IsNumber()
 	price: number
 
-	@IsNotEmpty()
-	@IsString()
-	slug: string
+	@IsOptional()
+	@IsNumber()
+	categoryId?: number
+
+	@IsOptional()
+	@IsNumber()
+	sellerId?: number
+
+	@IsBoolean()
+	published: boolean
+
+	@IsNumber()
+	rating: number
 }
