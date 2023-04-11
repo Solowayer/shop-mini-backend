@@ -1,39 +1,45 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
 import { PrismaService } from 'prisma/prisma.service'
+import { Category } from '@prisma/client'
 
 @Injectable()
 export class CategoriesService {
 	constructor(private prisma: PrismaService) {}
 
-	async createCategory(createCategoryDto: CreateCategoryDto) {
+	async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
 		const { name, parentId, subCategories } = createCategoryDto
 
 		const existingCategory = await this.prisma.category.findUnique({ where: { name } })
 		if (existingCategory) throw new BadRequestException('Категорія з такою назвою вже існує')
 
-		// create category
-		const category = await this.prisma.category.create({ data: { name, parentId } })
+		const category = await this.prisma.category.create({
+			data: {
+				name,
+				parent: parentId ? { connect: { id: parentId } } : undefined
+			}
+		})
 
-		// create sub-categories
 		if (subCategories && subCategories.length > 0) {
-			await Promise.all(subCategories.map(subCategory => this.createSubCategory(subCategory, category.id)))
+			await this.createSubcategories(subCategories, category.id)
 		}
 
 		return category
 	}
 
-	private async createSubCategory(subCategoryDto: CreateCategoryDto, parentId: number) {
-		const { name, subCategories } = subCategoryDto
+	private async createSubcategories(subCategories: CreateCategoryDto[], parentId: number) {
+		for (const subCategoryDto of subCategories) {
+			const { name, subCategories } = subCategoryDto
+			const subCategory = await this.prisma.category.create({
+				data: {
+					name,
+					parent: { connect: { id: parentId } }
+				}
+			})
 
-		// create sub-category
-		const subCategory = await this.prisma.category.create({ data: { name, parentId } })
-
-		// create sub-categories recursively
-		if (subCategories && subCategories.length > 0) {
-			for (const subCategoryDto of subCategories) {
-				await this.createSubCategory(subCategoryDto, subCategory.id)
+			if (subCategories && subCategories.length > 0) {
+				await this.createSubcategories(subCategoryDto.subCategories, subCategory.id)
 			}
 		}
 	}
@@ -43,32 +49,18 @@ export class CategoriesService {
 	}
 
 	async findCategoryById(id: number) {
-		return await this.prisma.category.findUnique({ where: { id } })
+		return await this.prisma.category.findUnique({ where: { id }, include: { subCategories: true } })
 	}
 
 	async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto) {
-		const { subCategories, ...data } = updateCategoryDto
+		const { name } = updateCategoryDto
 
-		if (subCategories && subCategories.length > 0) {
-			for (const subCategoryDto of subCategories) {
-				if (subCategoryDto.id) {
-					await this.prisma.category.update({
-						where: { id: subCategoryDto.id },
-						data: { name: subCategoryDto.name, parentId: id }
-					})
-				} else {
-					const subCategory = await this.prisma.category.create({
-						data: {
-							name: subCategoryDto.name,
-							parentId: id
-						}
-					})
-					await this.createSubCategory(subCategoryDto, subCategory.id)
-				}
-			}
-		}
+		const category = await this.prisma.category.findUnique({ where: { id } })
+		if (!category) throw new NotFoundException('Категорія не знайдена')
 
-		return this.prisma.category.update({ where: { id }, data })
+		const updatedCategory = await this.prisma.category.update({ where: { id }, data: { name } })
+
+		return updatedCategory
 	}
 
 	removeCategory(id: number) {
