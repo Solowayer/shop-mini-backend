@@ -26,23 +26,23 @@ export class ProductsService {
 		})
 	}
 
-	findAll() {
-		return `This action returns all products`
+	findAllProducts() {
+		return this.prisma.product.findMany()
 	}
 
-	findById(id: number) {
-		return `This action returns a id: #${id}`
+	findProductById(id: number) {
+		return this.prisma.product.findUnique({ where: { id } })
 	}
 
-	findBySlug(slug: string) {
-		return `This action returns a slug: #${slug}`
+	findProductBySlug(slug: string) {
+		return this.prisma.product.findUnique({ where: { slug } })
 	}
 
-	update(id: number, updateProductDto: UpdateProductDto) {
-		return `This action updates a #${id} product`
+	updateProduct(id: number, updateProductDto: UpdateProductDto) {
+		return this.prisma.product.update({ where: { id }, data: updateProductDto })
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} product`
+	removeProduct(id: number) {
+		return this.prisma.product.delete({ where: { id } })
 	}
 }

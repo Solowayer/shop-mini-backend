@@ -13,27 +13,27 @@ export class ProductsController {
 	}
 
 	@Get()
-	findAll() {
-		return this.productsService.findAll()
+	findAllProducts() {
+		return this.productsService.findAllProducts()
 	}
 
 	@Get(':id')
 	findById(@Param('id') id: string) {
-		return this.productsService.findById(+id)
+		return this.productsService.findProductById(+id)
 	}
 
 	@Get(':slug')
 	findBySlug(@Param('slug') slug: string) {
-		return this.productsService.findBySlug(slug)
+		return this.productsService.findProductBySlug(slug)
 	}
 
 	@Patch(':id')
 	update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-		return this.productsService.update(+id, updateProductDto)
+		return this.productsService.updateProduct(+id, updateProductDto)
 	}
 
 	@Delete(':id')
 	remove(@Param('id') id: string) {
-		return this.productsService.remove(+id)
+		return this.productsService.removeProduct(+id)
 	}
 }
