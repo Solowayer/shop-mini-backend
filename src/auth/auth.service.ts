@@ -1,11 +1,13 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
-import { SignupDto, SigninDto } from './dto'
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
+import { JwtService } from '@nestjs/jwt'
+import { SignupDto, SigninDto } from './dto'
 import * as argon from 'argon2'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class AuthService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService) {}
 
 	async signup(signupDto: SignupDto) {
 		const { username, email, password, phoneNumber } = signupDto
@@ -17,7 +19,7 @@ export class AuthService {
 
 		const newUser = await this.prisma.user.create({ data: { username, email, passwordHash, phoneNumber } })
 
-		return newUser
+		return this.signToken(newUser.id, newUser.email)
 	}
 
 	async signin(signinDto: SigninDto) {
@@ -29,6 +31,13 @@ export class AuthService {
 		const isMatch = await argon.verify(user.passwordHash, password)
 		if (!isMatch) throw new ForbiddenException('Невірні дані')
 
-		return user
+		return await this.signToken(user.id, user.email)
+	}
+
+	private signToken(userId: number, email: string) {
+		return this.jwt.signAsync(
+			{ sub: userId, email },
+			{ secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'), expiresIn: '1h' }
+		)
 	}
 }
