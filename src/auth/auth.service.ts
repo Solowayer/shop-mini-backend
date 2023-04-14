@@ -19,7 +19,9 @@ export class AuthService {
 
 		const newUser = await this.prisma.user.create({ data: { username, email, passwordHash, phoneNumber } })
 
-		return this.signToken(newUser.id, newUser.email)
+		const token = this.signToken(newUser.id, newUser.email)
+
+		return { access_token: token }
 	}
 
 	async signin(signinDto: SigninDto) {
@@ -31,7 +33,9 @@ export class AuthService {
 		const isMatch = await argon.verify(user.passwordHash, password)
 		if (!isMatch) throw new ForbiddenException('Невірні дані')
 
-		return await this.signToken(user.id, user.email)
+		const token = this.signToken(user.id, user.email)
+
+		return { access_token: token }
 	}
 
 	private signToken(userId: number, email: string) {

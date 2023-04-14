@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateProductDto } from './dto/create-product.dto'
 import { UpdateProductDto } from './dto/update-product.dto'
 import { PrismaService } from 'prisma/prisma.service'
@@ -8,22 +8,24 @@ import { Category, Product } from '@prisma/client'
 export class ProductsService {
 	constructor(private prisma: PrismaService) {}
 
-	async create(createProductDto: CreateProductDto): Promise<Product> {
-		const { categoryId, sellerId, ...productData } = createProductDto
-		const category: Category = await this.prisma.category.findUnique({
-			where: { id: categoryId }
-		})
-		if (!category) {
-			throw new NotFoundException('Category not found')
-		}
-		return this.prisma.product.create({
+	async createProduct(createProductDto: CreateProductDto): Promise<Product> {
+		const { categoryId, ...productData } = createProductDto
+
+		const category: Category = categoryId ? await this.prisma.category.findUnique({ where: { id: categoryId } }) : null
+
+		if (categoryId && !category) throw new NotFoundException('Такої категорії не існує')
+
+		const existingProduct = await this.prisma.product.findUnique({ where: { slug: createProductDto.slug } })
+		if (existingProduct) throw new BadRequestException('Такий товар вже існує')
+
+		const product = await this.prisma.product.create({
 			data: {
 				...productData,
-				category: {
-					connect: { id: category.id }
-				}
+				category: category ? { connect: { id: category.id } } : undefined
 			}
 		})
+
+		return product
 	}
 
 	findAllProducts() {
