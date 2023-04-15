@@ -9,4 +9,8 @@ export class UsersController {
 	findAll() {
 		return this.usersService.findAll()
 	}
+
+	getUserInfo() {
+		return 'my info'
+	}
 }

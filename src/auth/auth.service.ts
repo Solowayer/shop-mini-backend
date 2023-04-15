@@ -21,7 +21,7 @@ export class AuthService {
 
 		const token = this.signToken(newUser.id, newUser.email)
 
-		return { access_token: token }
+		return token
 	}
 
 	async signin(signinDto: SigninDto) {
@@ -35,13 +35,21 @@ export class AuthService {
 
 		const token = this.signToken(user.id, user.email)
 
-		return { access_token: token }
+		return token
 	}
 
-	private signToken(userId: number, email: string) {
-		return this.jwt.signAsync(
-			{ sub: userId, email },
-			{ secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'), expiresIn: '1h' }
-		)
+	private async signToken(userId: number, email: string): Promise<{ access_token: string }> {
+		const payload = {
+			sub: userId,
+			email
+		}
+
+		const secret = this.config.get('JWT_ACCESS_TOKEN_SECRET')
+
+		const accessToken = await this.jwt.signAsync(payload, { secret, expiresIn: '1h' })
+
+		return {
+			access_token: accessToken
+		}
 	}
 }
