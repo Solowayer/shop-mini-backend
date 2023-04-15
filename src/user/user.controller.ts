@@ -1,14 +1,14 @@
 import { Controller, Get, UseGuards } from '@nestjs/common'
-import { UsersService } from './users.service'
+import { UserService } from './user.service'
 import { JwtGuard } from 'src/auth/guard'
 
 @Controller('users')
-export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+export class UserController {
+	constructor(private readonly userService: UserService) {}
 
 	@Get()
 	findAll() {
-		return this.usersService.findAll()
+		return this.userService.findAll()
 	}
 
 	@UseGuards(JwtGuard)
