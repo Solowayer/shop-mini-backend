@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { CreateOrderDto } from './dto/create-order.dto'
-import { UpdateOrderDto } from './dto/update-order.dto'
+import { CreateOrderDto } from './dto'
 import { Order } from '@prisma/client'
 import { PrismaService } from 'prisma/prisma.service'
 
@@ -9,14 +8,29 @@ export class OrderService {
 	constructor(private prisma: PrismaService) {}
 
 	async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
-		const { orderItems, userId, adress, totalAmount } = createOrderDto
+		const { orderItems, userId, ...orderData } = createOrderDto
+
+		const orderItemsWithPrice = await Promise.all(
+			orderItems.map(async item => {
+				const { price } = await this.prisma.product.findUnique({
+					where: { id: item.productId }
+				})
+
+				return {
+					...item,
+					price
+				}
+			})
+		)
+
+		const totalAmount = orderItemsWithPrice.reduce((total, item) => total + item.price * item.quantity, 0)
 
 		const order = await this.prisma.order.create({
 			data: {
+				...orderData,
 				user: {
 					connect: { id: userId }
 				},
-				adress,
 				totalAmount,
 				orderItems: {
 					create: orderItems.map(item => {
@@ -41,19 +55,11 @@ export class OrderService {
 		return order
 	}
 
-	findAll() {
-		return `This action returns all order`
+	findAllOrders() {
+		return this.prisma.order.findMany()
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} order`
-	}
-
-	update(id: number, updateOrderDto: UpdateOrderDto) {
-		return `This action updates a #${id} order`
-	}
-
-	remove(id: number) {
-		return `This action removes a #${id} order`
+	findOrderById(id: number) {
+		return this.prisma.order.findUnique({ where: { id } })
 	}
 }

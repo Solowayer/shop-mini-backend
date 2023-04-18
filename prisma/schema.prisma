@@ -137,7 +137,7 @@ model Order {
   createdAt DateTime @default(now())
 
   adress      String
-  totalAmount Float
+  totalAmount Float       @default(0)
   status      OrderStatus @default(PENDING)
 
   orderItems OrderItem[]
