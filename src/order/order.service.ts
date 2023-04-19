@@ -7,8 +7,8 @@ import { PrismaService } from 'prisma/prisma.service'
 export class OrderService {
 	constructor(private prisma: PrismaService) {}
 
-	async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
-		const { orderItems, userId, ...orderData } = createOrderDto
+	async createOrder(authorizedUserId: number, createOrderDto: CreateOrderDto): Promise<Order> {
+		const { orderItems, ...orderData } = createOrderDto
 
 		const orderItemsWithPrice = await Promise.all(
 			orderItems.map(async item => {
@@ -29,7 +29,7 @@ export class OrderService {
 			data: {
 				...orderData,
 				user: {
-					connect: { id: userId }
+					connect: { id: authorizedUserId }
 				},
 				totalAmount,
 				orderItems: {

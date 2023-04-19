@@ -1,8 +1,8 @@
 import { Controller, Get, Body, Patch, UseGuards } from '@nestjs/common'
 import { AccountService } from './account.service'
-import { UpdateUserDto } from './dto'
+import { UpdateUserDto } from './account.dto'
 import { User } from '@prisma/client'
-import { JwtGuard } from 'src/auth/guard'
+import { JwtGuard } from 'src/auth/auth.guard'
 import { GetUser } from 'src/user/decorator'
 
 @Controller('account')

@@ -22,9 +22,6 @@ export class CreateOrderDto {
 	@IsNotEmpty()
 	orderItems: OrderItemDto[]
 
-	@IsNumber()
-	userId: number
-
 	// @IsOptional()
 	// sellerId?: number
 }
