@@ -167,3 +167,15 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   productId Int
 }
+
+// model OrderDetails {
+//   id         String   @id @default(uuid())
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+//   orderId    String
+//   address    String
+//   city       String
+//   state      String
+//   country    String
+//   postalCode String
+// }

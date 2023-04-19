@@ -1,5 +1,18 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator'
-import { CreateOrderItemDto } from 'src/order-item/dto'
+
+export class OrderItemDto {
+	@IsNumber()
+	@IsNotEmpty()
+	quantity: number
+
+	@IsNumber()
+	@IsNotEmpty()
+	orderId: number
+
+	@IsNumber()
+	@IsNotEmpty()
+	productId: number
+}
 
 export class CreateOrderDto {
 	@IsString()
@@ -7,7 +20,7 @@ export class CreateOrderDto {
 	adress: string
 
 	@IsNotEmpty()
-	orderItems: CreateOrderItemDto[]
+	orderItems: OrderItemDto[]
 
 	@IsNumber()
 	userId: number
