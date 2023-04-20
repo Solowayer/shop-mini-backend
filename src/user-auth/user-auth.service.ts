@@ -1,12 +1,12 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
 import { JwtService } from '@nestjs/jwt'
-import { SignupDto, SigninDto } from './auth.dto'
+import { SignupDto, SigninDto } from './user-auth.dto'
 import * as argon from 'argon2'
 import { ConfigService } from '@nestjs/config'
 
 @Injectable()
-export class AuthService {
+export class UserAuthService {
 	constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService) {}
 
 	async signup(signupDto: SignupDto) {

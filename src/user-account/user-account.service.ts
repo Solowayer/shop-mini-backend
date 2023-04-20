@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { UpdateUserDto } from './account.dto'
+import { UpdateUserDto } from './user-account.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { User } from '@prisma/client'
 
 @Injectable()
-export class AccountService {
+export class UserAccountService {
 	constructor(private prisma: PrismaService) {}
 
 	async getProfile(user: User) {
