@@ -1,16 +1,16 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
 import { JwtService } from '@nestjs/jwt'
-import { SignupDto, SigninDto } from './user-auth.dto'
-import * as argon from 'argon2'
+import { SignupUserDto, SigninUserDto } from './user-auth.dto'
 import { ConfigService } from '@nestjs/config'
+import * as argon from 'argon2'
 
 @Injectable()
 export class UserAuthService {
 	constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService) {}
 
-	async signup(signupDto: SignupDto) {
-		const { username, email, password, phoneNumber } = signupDto
+	async signupUser(signupUserDto: SignupUserDto) {
+		const { username, email, password, phoneNumber } = signupUserDto
 
 		const existingUser = await this.prisma.user.findUnique({ where: { email } })
 		if (existingUser) throw new BadRequestException('Користувач з таким email вже існує')
@@ -24,8 +24,8 @@ export class UserAuthService {
 		return token
 	}
 
-	async signin(signinDto: SigninDto) {
-		const { email, password, phoneNumber } = signinDto
+	async signinUser(signinUserDto: SigninUserDto) {
+		const { email, password, phoneNumber } = signinUserDto
 
 		const user = await this.prisma.user.findFirst({ where: { OR: [{ email }, { phoneNumber }] } })
 		if (!user) throw new ForbiddenException('Невірні дані')

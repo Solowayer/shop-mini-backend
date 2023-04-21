@@ -9,25 +9,38 @@ import {
 	ValidateIf
 } from 'class-validator'
 
-export class SignupUserDto {
+export class SignupSellerDto {
 	@IsString()
 	@IsNotEmpty()
-	username: string
+	name: string
+
+	@IsString()
+	@IsNotEmpty()
+	adress: string
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(300, { message: 'Shouldn`t have more than 300 symbols' })
+	description?: string
 
 	@IsEmail()
 	email: string
 
-	@IsOptional()
+	@IsNotEmpty()
 	@IsMobilePhone('uk-UA')
-	phoneNumber?: string
+	phoneNumber: string
 
 	@IsString()
 	@MinLength(6, { message: 'The password must contain at least 6 characters' })
 	@MaxLength(20, { message: 'Password shouldn`t have more than 20 symbols' })
 	password: string
+
+	@IsString()
+	@IsNotEmpty()
+	pib: string
 }
 
-export class SigninUserDto {
+export class SigninSellerDto {
 	@ValidateIf(o => o.phoneNumber === undefined)
 	@IsEmail()
 	email: string
