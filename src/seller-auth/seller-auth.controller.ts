@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common'
 import { SellerAuthService } from './seller-auth.service'
-import { SignupSellerDto } from './seller-auth.dto'
+import { SignupSellerDto, SigninSellerDto } from './seller-auth.dto'
 
 @Controller('seller-auth')
 export class SellerAuthController {
@@ -12,7 +12,7 @@ export class SellerAuthController {
 	}
 
 	@Post('signin')
-	signinSeller(@Body() signinSellerDto: SignupSellerDto) {
+	signinSeller(@Body() signinSellerDto: SigninSellerDto) {
 		return this.sellerService.signinSeller(signinSellerDto)
 	}
 }

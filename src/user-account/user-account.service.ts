@@ -7,7 +7,7 @@ import { User } from '@prisma/client'
 export class UserAccountService {
 	constructor(private prisma: PrismaService) {}
 
-	async getProfile(user: User) {
+	getProfile(user: User) {
 		return user
 	}
 

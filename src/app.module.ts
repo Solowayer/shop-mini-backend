@@ -9,6 +9,7 @@ import { SellerModule } from './seller/seller.module'
 import { ProductModule } from './product/product.module'
 import { CategoryModule } from './category/category.module'
 import { OrderModule } from './order/order.module'
+import { SellerDashboardModule } from './seller-dashboard/seller-dashboard.module';
 
 @Module({
 	imports: [
@@ -24,7 +25,8 @@ import { OrderModule } from './order/order.module'
 
 		ProductModule,
 		CategoryModule,
-		OrderModule
+		OrderModule,
+		SellerDashboardModule
 	]
 })
 export class AppModule {}

@@ -6,6 +6,6 @@ export class SellerService {
 	constructor(private prisma: PrismaService) {}
 
 	findAllSellers() {
-		return this.prisma.seller.findMany()
+		return this.prisma.seller.findMany({ include: { products: true, orders: true } })
 	}
 }
