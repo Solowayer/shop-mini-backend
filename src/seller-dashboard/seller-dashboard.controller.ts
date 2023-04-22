@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Post, UseGuards } from '@nestjs/common'
+import { Controller, Get, Body, Patch, UseGuards } from '@nestjs/common'
 import { SellerDashboardService } from './seller-dashboard.service'
 import { UpdateSellerDto } from './seller-dashboard.dto'
 import { JwtSellerGuard } from 'src/common/guards'
@@ -21,8 +21,9 @@ export class SellerDashboardController {
 		return this.sellerDashboardService.update(seller.id, updateSellerDto)
 	}
 
-	@Post('products')
-	addSellerProduct() {
-		return this.sellerDashboardService.addSellerProduct()
+	@UseGuards(JwtSellerGuard)
+	@Get('products')
+	getSellerProducts(@GetUser() seller: Seller) {
+		return this.sellerDashboardService.getSellerProducts(seller)
 	}
 }

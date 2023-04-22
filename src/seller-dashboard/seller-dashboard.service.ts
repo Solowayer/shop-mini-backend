@@ -19,6 +19,11 @@ export class SellerDashboardService {
 		return seller
 	}
 
+	async getSellerProducts(seller: Seller) {
+		const products = await this.prisma.product.findMany({ where: { seller: { id: seller.id } } })
+		return products
+	}
+
 	addSellerProduct() {
 		return 'product'
 	}

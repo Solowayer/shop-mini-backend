@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common'
-import { CreateOrderDto } from './dto'
+import { CreateOrderDto } from './order.dto'
 import { OrderService } from './order.service'
 import { JwtUserGuard } from 'src/common/guards'
 import { User } from '@prisma/client'

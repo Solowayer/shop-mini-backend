@@ -1,14 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common'
 import { ProductService } from './product.service'
-import { CreateProductDto, UpdateProductDto } from './dto'
+import { CreateProductDto, UpdateProductDto } from './product.dto'
+import { Seller } from '@prisma/client'
+import { GetUser } from 'src/common/decorators'
+import { JwtSellerGuard, JwtUserGuard } from 'src/common/guards'
 
 @Controller('products')
 export class ProductController {
 	constructor(private readonly productService: ProductService) {}
 
+	@UseGuards(JwtSellerGuard || JwtUserGuard)
 	@Post()
-	createProduct(@Body() createProductDto: CreateProductDto) {
-		return this.productService.createProduct(createProductDto)
+	createProduct(@GetUser() seller: Seller, @Body() createProductDto: CreateProductDto) {
+		return this.productService.createProduct(createProductDto, seller.id)
 	}
 
 	@Get()

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { CreateProductDto, UpdateProductDto } from './dto'
+import { CreateProductDto, UpdateProductDto } from './product.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Category, Product } from '@prisma/client'
 
@@ -7,7 +7,7 @@ import { Category, Product } from '@prisma/client'
 export class ProductService {
 	constructor(private prisma: PrismaService) {}
 
-	async createProduct(createProductDto: CreateProductDto): Promise<Product> {
+	async createProduct(createProductDto: CreateProductDto, sellerId?: number): Promise<Product> {
 		const { categoryId, ...productData } = createProductDto
 
 		const category: Category = categoryId ? await this.prisma.category.findUnique({ where: { id: categoryId } }) : null
@@ -20,7 +20,8 @@ export class ProductService {
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
-				category: category ? { connect: { id: category.id } } : undefined
+				category: category && { connect: { id: category.id } },
+				seller: sellerId && { connect: { id: sellerId } }
 			}
 		})
 
