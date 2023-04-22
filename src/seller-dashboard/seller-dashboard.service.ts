@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import { UpdateSellerDto } from './seller-dashboard.dto'
-import { Seller } from '@prisma/client'
 import { PrismaService } from 'prisma/prisma.service'
+import { Seller } from '@prisma/client'
 
 @Injectable()
 export class SellerDashboardService {
 	constructor(private prisma: PrismaService) {}
 
-	getInfo(seller: Seller) {
-		const { name } = seller
+	getSellerInfo(seller: Seller) {
 		return seller
 	}
 
-	async update(userId: number, updateSellerDto: UpdateSellerDto) {
+	async update(sellerId: number, updateSellerDto: UpdateSellerDto) {
 		const seller = await this.prisma.seller.update({
-			where: { id: userId },
+			where: { id: sellerId },
 			data: updateSellerDto
 		})
 		return seller

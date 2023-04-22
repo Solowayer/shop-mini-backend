@@ -5,18 +5,18 @@ import { ConfigService } from '@nestjs/config'
 import { PrismaService } from 'prisma/prisma.service'
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-seller') {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
 	constructor(private prisma: PrismaService, config: ConfigService) {
 		super({
 			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 			ignoreExpiration: false,
-			secretOrKey: config.get('JWT_ACCESS_TOKEN_SECRET')
+			secretOrKey: config.get('JWT_ACCESS_USER_TOKEN_SECRET')
 		})
 	}
 
 	async validate(payload: { sub: number; email: string }) {
-		const seller = await this.prisma.seller.findUnique({ where: { id: payload.sub } })
-		delete seller.passwordHash
-		return seller
+		const user = await this.prisma.user.findUnique({ where: { id: payload.sub } })
+		delete user.passwordHash
+		return user
 	}
 }

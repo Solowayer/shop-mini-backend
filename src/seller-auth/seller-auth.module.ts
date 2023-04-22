@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common'
 import { SellerAuthService } from './seller-auth.service'
 import { SellerAuthController } from './seller-auth.controller'
 import { JwtModule } from '@nestjs/jwt'
-import { JwtStrategy } from './seller-auth.strategy'
+import { JwtStrategy } from '../common/strategies/seller-auth.strategy'
 
 @Module({
 	imports: [JwtModule.register({})],

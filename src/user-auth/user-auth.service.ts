@@ -44,12 +44,10 @@ export class UserAuthService {
 			email
 		}
 
-		const secret = this.config.get('JWT_ACCESS_TOKEN_SECRET')
+		const secret = this.config.get('JWT_ACCESS_USER_TOKEN_SECRET')
 
 		const accessToken = await this.jwt.signAsync(payload, { secret, expiresIn: '1h' })
 
-		return {
-			access_token: accessToken
-		}
+		return { access_token: accessToken }
 	}
 }

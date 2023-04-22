@@ -7,12 +7,12 @@ export class UserAuthController {
 	constructor(private readonly userAuthService: UserAuthService) {}
 
 	@Post('signup')
-	signup(@Body() signupDto: SignupUserDto) {
-		return this.userAuthService.signupUser(signupDto)
+	signup(@Body() signupUserDto: SignupUserDto) {
+		return this.userAuthService.signupUser(signupUserDto)
 	}
 
 	@Post('signin')
-	login(@Body() signinDto: SigninUserDto) {
-		return this.userAuthService.signinUser(signinDto)
+	login(@Body() signinUserDto: SigninUserDto) {
+		return this.userAuthService.signinUser(signinUserDto)
 	}
 }

@@ -9,24 +9,24 @@ import { SellerModule } from './seller/seller.module'
 import { ProductModule } from './product/product.module'
 import { CategoryModule } from './category/category.module'
 import { OrderModule } from './order/order.module'
-import { SellerDashboardModule } from './seller-dashboard/seller-dashboard.module';
+import { SellerDashboardModule } from './seller-dashboard/seller-dashboard.module'
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
 		PrismaModule,
 
-		UserModule,
 		UserAuthModule,
 		UserAccountModule,
+		UserModule,
 
-		SellerModule,
 		SellerAuthModule,
+		SellerDashboardModule,
+		SellerModule,
 
 		ProductModule,
 		CategoryModule,
-		OrderModule,
-		SellerDashboardModule
+		OrderModule
 	]
 })
 export class AppModule {}
