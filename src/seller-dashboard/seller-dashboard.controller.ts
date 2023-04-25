@@ -1,8 +1,8 @@
 import { Controller, Get, Body, Patch, UseGuards } from '@nestjs/common'
 import { SellerDashboardService } from './seller-dashboard.service'
 import { UpdateSellerDto } from './seller-dashboard.dto'
-import { JwtSellerGuard } from 'src/common/guards'
-import { GetUser } from 'src/common/decorators'
+import { JwtSellerGuard } from 'src/common/guards/jwt.guard'
+import { GetUser } from 'src/common/decorators/user.decorator'
 import { Seller } from '@prisma/client'
 
 @Controller('dashboard')

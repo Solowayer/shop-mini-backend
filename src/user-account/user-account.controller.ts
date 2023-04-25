@@ -2,8 +2,8 @@ import { Controller, Get, Body, Patch, UseGuards } from '@nestjs/common'
 import { UserAccountService } from './user-account.service'
 import { UpdateUserDto } from './user-account.dto'
 import { User } from '@prisma/client'
-import { JwtUserGuard } from 'src/common/guards'
-import { GetUser } from 'src/common/decorators'
+import { JwtUserGuard } from 'src/common/guards/jwt.guard'
+import { GetUser } from 'src/common/decorators/user.decorator'
 
 @Controller('account')
 export class UserAccountController {
