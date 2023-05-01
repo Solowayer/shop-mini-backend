@@ -5,7 +5,9 @@ import { PrismaService } from 'prisma/prisma.service'
 export class UserService {
 	constructor(private prisma: PrismaService) {}
 
-	findAll() {
-		return this.prisma.user.findMany()
+	async getAllUsers() {
+		const users = await this.prisma.user.findMany()
+		users.map(user => delete user.passwordHash)
+		return users
 	}
 }

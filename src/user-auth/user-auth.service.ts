@@ -17,11 +17,13 @@ export class UserAuthService {
 
 		const passwordHash = await argon.hash(password)
 
-		const newUser = await this.prisma.user.create({ data: { username, email, passwordHash, phoneNumber } })
+		const newUser = await this.prisma.user.create({
+			data: { username, email, passwordHash, phoneNumber, role: 'USER' }
+		})
 
-		const token = this.signToken(newUser.id, newUser.email)
+		const token = await this.signToken(newUser.id, newUser.email)
 
-		return token
+		return { newUser, token }
 	}
 
 	async signinUser(signinUserDto: SigninUserDto) {
@@ -33,12 +35,12 @@ export class UserAuthService {
 		const isMatch = await argon.verify(user.passwordHash, password)
 		if (!isMatch) throw new ForbiddenException('Невірні дані')
 
-		const token = this.signToken(user.id, user.email)
+		const token = await this.signToken(user.id, user.email)
 
-		return token
+		return { user, token }
 	}
 
-	private async signToken(userId: number, email: string): Promise<{ access_token: string }> {
+	private async signToken(userId: number, email: string): Promise<string> {
 		const payload = {
 			sub: userId,
 			email
@@ -46,8 +48,6 @@ export class UserAuthService {
 
 		const secret = this.config.get('JWT_ACCESS_USER_TOKEN_SECRET')
 
-		const accessToken = await this.jwt.signAsync(payload, { secret, expiresIn: '1h' })
-
-		return { access_token: accessToken }
+		return await this.jwt.signAsync(payload, { secret, expiresIn: '1h' })
 	}
 }
