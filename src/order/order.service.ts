@@ -10,6 +10,7 @@ export class OrderService {
 	async createOrder(authorizedUserId: number, createOrderDto: CreateOrderDto): Promise<Order> {
 		const { orderItems, ...orderData } = createOrderDto
 
+		// Витягуємо ціну з продукта по id, який пов'язаний з OrderItem
 		const orderItemsWithPrice = await Promise.all(
 			orderItems.map(async item => {
 				const { price } = await this.prisma.product.findUnique({
@@ -33,14 +34,12 @@ export class OrderService {
 				},
 				totalAmount,
 				orderItems: {
-					create: orderItems.map(item => {
-						return {
-							quantity: item.quantity,
-							product: {
-								connect: { id: item.productId }
-							}
+					create: orderItems.map(item => ({
+						quantity: item.quantity,
+						product: {
+							connect: { id: item.productId }
 						}
-					})
+					}))
 				}
 			},
 			include: {

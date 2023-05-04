@@ -118,6 +118,8 @@ model Cart {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  totalAmount Float @default(0)
+
   cartItems CartItem[]
 
   user   User @relation(fields: [userId], references: [id])
@@ -167,6 +169,7 @@ model OrderItem {
   id Int @id @default(autoincrement())
 
   quantity Int
+  price    Float
 
   order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId Int
