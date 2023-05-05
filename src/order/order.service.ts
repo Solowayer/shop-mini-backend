@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateOrderDto } from './order.dto'
 import { Order } from '@prisma/client'
 import { PrismaService } from 'prisma/prisma.service'
@@ -7,38 +7,25 @@ import { PrismaService } from 'prisma/prisma.service'
 export class OrderService {
 	constructor(private prisma: PrismaService) {}
 
-	async createOrder(authorizedUserId: number, createOrderDto: CreateOrderDto): Promise<Order> {
-		const { orderItems, ...orderData } = createOrderDto
+	async checkout(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
+		const { adress } = createOrderDto
 
-		// Витягуємо ціну з продукта по id, який пов'язаний з OrderItem
-		const orderItemsWithPrice = await Promise.all(
-			orderItems.map(async item => {
-				const { price } = await this.prisma.product.findUnique({
-					where: { id: item.productId }
-				})
+		const cart = await this.prisma.cart.findUnique({ where: { userId }, include: { cartItems: true } })
 
-				return {
-					...item,
-					price
-				}
-			})
-		)
+		if (!cart) throw new NotFoundException('Корзини не існує')
 
-		const totalAmount = orderItemsWithPrice.reduce((total, item) => total + item.price * item.quantity, 0)
+		const cartItems = cart.cartItems
 
 		const order = await this.prisma.order.create({
 			data: {
-				...orderData,
-				user: {
-					connect: { id: authorizedUserId }
-				},
-				totalAmount,
+				adress,
+				user: { connect: { id: userId } },
+				totalAmount: cart.totalAmount,
 				orderItems: {
-					create: orderItems.map(item => ({
+					create: cartItems.map(item => ({
+						product: { connect: { id: item.productId } },
 						quantity: item.quantity,
-						product: {
-							connect: { id: item.productId }
-						}
+						price: item.price * item.quantity
 					}))
 				}
 			},

@@ -11,8 +11,8 @@ export class OrderController {
 
 	@UseGuards(JwtUserGuard)
 	@Post()
-	createOrder(@GetUser() user: User, @Body() createOrderDto: CreateOrderDto) {
-		return this.orderService.createOrder(user.id, createOrderDto)
+	checkout(@GetUser() user: User, @Body() createOrderDto: CreateOrderDto) {
+		return this.orderService.checkout(user.id, createOrderDto)
 	}
 
 	@UseGuards(JwtUserGuard)
