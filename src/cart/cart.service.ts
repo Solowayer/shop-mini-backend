@@ -20,6 +20,10 @@ export class CartService {
 		})
 	}
 
+	async removeCart(userId: number): Promise<Cart> {
+		return await this.prisma.cart.delete({ where: { userId } })
+	}
+
 	async addCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
 		const { productId, quantity } = createCartItemDto
 

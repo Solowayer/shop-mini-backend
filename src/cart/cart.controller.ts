@@ -16,17 +16,23 @@ export class CartController {
 	}
 
 	@UseGuards(JwtUserGuard)
+	@Delete('')
+	removeCart(@GetUser() user: User) {
+		return this.cartService.removeCart(user.id)
+	}
+
+	@UseGuards(JwtUserGuard)
 	@Post('')
 	addCartItem(@GetUser() user: User, @Body() createCartItemDto: CreateCartItemDto) {
 		return this.cartService.addCartItem(user.id, createCartItemDto)
 	}
 
-	@Patch('')
+	@Patch(':cartItemId')
 	updateCartItem(@Param('cartItemId') cartItemId: number, @Body() updateCartItemDto: UpdateCartItemDto) {
 		return this.cartService.updateCartItem(cartItemId, updateCartItemDto)
 	}
 
-	@Delete('')
+	@Delete(':cartItemId')
 	deleteCartItem(@Param('cartItemId') cartItemId: number) {
 		return this.cartService.deleteCartItem(cartItemId)
 	}
