@@ -12,9 +12,3 @@ export class CreateCartItemDto {
 }
 
 export class UpdateCartItemDto extends PartialType(CreateCartItemDto) {}
-
-export class CreateCartDto {
-	cartItems: CreateCartItemDto[]
-}
-
-export class UpdateCartDto extends PartialType(CreateCartDto) {}

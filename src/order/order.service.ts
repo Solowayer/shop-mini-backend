@@ -8,7 +8,7 @@ export class OrderService {
 	constructor(private prisma: PrismaService) {}
 
 	async checkout(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
-		const { adress } = createOrderDto
+		const { adress, recipient } = createOrderDto
 
 		const cart = await this.prisma.cart.findUnique({ where: { userId }, include: { cartItems: true } })
 
@@ -18,6 +18,7 @@ export class OrderService {
 
 		const order = await this.prisma.order.create({
 			data: {
+				recipient,
 				adress,
 				user: { connect: { id: userId } },
 				totalAmount: cart.totalAmount,

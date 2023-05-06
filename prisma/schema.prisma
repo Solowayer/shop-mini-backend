@@ -137,7 +137,7 @@ model CartItem {
   product   Product @relation(fields: [productId], references: [id])
   productId Int
 
-  cart   Cart @relation(fields: [cartId], references: [id])
+  cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
   cartId Int
 }
 
@@ -145,6 +145,7 @@ model Order {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
 
+  recipient   String
   adress      String
   totalAmount Float       @default(0)
   status      OrderStatus @default(PENDING)

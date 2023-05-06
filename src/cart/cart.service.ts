@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { CreateCartDto, CreateCartItemDto, UpdateCartItemDto } from './cart.dto'
+import { CreateCartItemDto, UpdateCartItemDto } from './cart.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Cart, CartItem } from '@prisma/client'
 
@@ -7,20 +7,41 @@ import { Cart, CartItem } from '@prisma/client'
 export class CartService {
 	constructor(private prisma: PrismaService) {}
 
-	async getCartByUserId(userId: number): Promise<Cart> {
+	async getCart(userId: number): Promise<Cart> {
 		const cart = await this.prisma.cart.findUnique({ where: { userId } })
-		if (!cart) {
-			return await this.createCart(userId)
-		}
-		return cart
+		if (!cart) throw new NotFoundException('Корзина пуста')
+
+		const totalAmount = await this.calculateTotalAmount(cart.id)
+
+		return await this.prisma.cart.update({
+			where: { id: cart.id },
+			data: { totalAmount },
+			include: { cartItems: true }
+		})
 	}
 
 	async addCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
 		const { productId, quantity } = createCartItemDto
-		const cart = await this.getCartByUserId(userId)
-		const product = await this.prisma.product.findUnique({ where: { id: productId } })
 
+		const cart = await this.createCart(userId)
+
+		const product = await this.prisma.product.findUnique({ where: { id: productId } })
 		if (!product) throw new NotFoundException('Такого товару не існує')
+
+		const existingCartItem = await this.prisma.cartItem.findFirst({ where: { productId, cartId: cart.id } })
+
+		if (existingCartItem) {
+			const newQuantity = existingCartItem.quantity + quantity
+			const newPrice = product.price * newQuantity
+
+			return await this.prisma.cartItem.update({
+				where: { id: existingCartItem.id },
+				data: {
+					quantity: newQuantity,
+					price: newPrice
+				}
+			})
+		}
 
 		const cartItem = await this.prisma.cartItem.create({
 			data: {
@@ -35,9 +56,7 @@ export class CartService {
 			}
 		})
 
-		const totalAmount = await this.calculateTotalAmount(cart.id)
-
-		await this.prisma.cart.update({ where: { id: cart.id }, data: { totalAmount } })
+		await this.getCart(userId)
 
 		return cartItem
 	}
@@ -50,24 +69,32 @@ export class CartService {
 	}
 
 	async deleteCartItem(cartItemId: number): Promise<CartItem> {
+		const cartItem = await this.prisma.cartItem.findUnique({
+			where: { id: cartItemId }
+		})
+		if (!cartItem) throw new NotFoundException('Такого товару в корзині не знайдено')
+
 		return await this.prisma.cartItem.delete({
 			where: { id: cartItemId }
 		})
 	}
 
 	private async createCart(userId: number): Promise<Cart> {
-		const cart = await this.prisma.cart.create({
-			data: {
-				userId
-			}
-		})
+		const cart = await this.prisma.cart.findUnique({ where: { userId } })
+
+		if (!cart)
+			return await this.prisma.cart.create({
+				data: {
+					userId
+				}
+			})
 
 		return cart
 	}
 
 	private async calculateTotalAmount(cartId: number): Promise<number> {
 		const cartItems = await this.prisma.cartItem.findMany({ where: { cartId } })
-		const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+		const totalAmount = cartItems.reduce((total, item) => total + item.price, 0)
 		return totalAmount
 	}
 }

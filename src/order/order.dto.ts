@@ -17,6 +17,10 @@ export class OrderItemDto {
 export class CreateOrderDto {
 	@IsString()
 	@IsNotEmpty()
+	recipient: string
+
+	@IsString()
+	@IsNotEmpty()
 	adress: string
 
 	@IsNotEmpty()
