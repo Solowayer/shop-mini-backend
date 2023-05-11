@@ -33,11 +33,23 @@ export class ProductService {
 	}
 
 	findProductById(id: number) {
-		return this.prisma.product.findUnique({ where: { id } })
+		const product = this.prisma.product.findUnique({ where: { id } })
+
+		if (!product) {
+			throw new NotFoundException(`Product with id "${id}" not found`)
+		}
+
+		return product
 	}
 
-	findProductBySlug(slug: string) {
-		return this.prisma.product.findUnique({ where: { slug } })
+	findProductBySlug(slug: string): Promise<Product> {
+		const product = this.prisma.product.findUnique({ where: { slug } })
+
+		if (!product) {
+			throw new NotFoundException(`Product with slug "${slug}" not found`)
+		}
+
+		return product
 	}
 
 	updateProduct(id: number, updateProductDto: UpdateProductDto) {

@@ -27,9 +27,12 @@ export class UserAuthService {
 	}
 
 	async signinUser(signinUserDto: SigninUserDto) {
-		const { email, password, phoneNumber } = signinUserDto
+		const { emailOrPhoneNumber, password } = signinUserDto
 
-		const user = await this.prisma.user.findFirst({ where: { OR: [{ email }, { phoneNumber }] } })
+		const user = await this.prisma.user.findFirst({
+			where: { OR: [{ email: emailOrPhoneNumber }, { phoneNumber: emailOrPhoneNumber }] }
+		})
+
 		if (!user) throw new ForbiddenException('Невірні дані')
 
 		const isMatch = await argon.verify(user.passwordHash, password)

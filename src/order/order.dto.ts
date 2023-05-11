@@ -23,8 +23,8 @@ export class CreateOrderDto {
 	@IsNotEmpty()
 	adress: string
 
-	@IsNotEmpty()
-	orderItems: OrderItemDto[]
+	// @IsNotEmpty()
+	// orderItems: OrderItemDto[]
 
 	// @IsOptional()
 	// sellerId?: number

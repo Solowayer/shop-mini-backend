@@ -6,7 +6,7 @@ import {
 	IsMobilePhone,
 	MinLength,
 	MaxLength,
-	ValidateIf
+	Matches
 } from 'class-validator'
 
 export class SignupUserDto {
@@ -28,13 +28,10 @@ export class SignupUserDto {
 }
 
 export class SigninUserDto {
-	@ValidateIf(o => o.phoneNumber === undefined)
-	@IsEmail()
-	email: string
-
-	@ValidateIf(o => o.email === undefined)
-	@IsMobilePhone('uk-UA')
-	phoneNumber: string
+	@Matches(/^(380\d{9}|[\w.%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,3})$/, {
+		message: 'Invalid email or phone number format'
+	})
+	emailOrPhoneNumber: string
 
 	@IsString()
 	@MinLength(6, { message: 'The password must contain at least 6 characters' })

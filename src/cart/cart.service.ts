@@ -50,7 +50,7 @@ export class CartService {
 		const cartItem = await this.prisma.cartItem.create({
 			data: {
 				quantity,
-				price: product.price,
+				price: product.price * quantity,
 				product: {
 					connect: { id: product.id }
 				},

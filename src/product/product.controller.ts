@@ -20,7 +20,7 @@ export class ProductController {
 		return this.productService.findAllProducts()
 	}
 
-	@Get(':id')
+	@Get('p:id')
 	findById(@Param('id') id: string) {
 		return this.productService.findProductById(+id)
 	}
@@ -30,12 +30,12 @@ export class ProductController {
 		return this.productService.findProductBySlug(slug)
 	}
 
-	@Patch(':id')
+	@Patch('p:id')
 	update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
 		return this.productService.updateProduct(+id, updateProductDto)
 	}
 
-	@Delete(':id')
+	@Delete('p:id')
 	remove(@Param('id') id: string) {
 		return this.productService.removeProduct(+id)
 	}

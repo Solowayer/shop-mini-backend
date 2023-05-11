@@ -11,7 +11,6 @@ export class OrderService {
 		const { adress, recipient } = createOrderDto
 
 		const cart = await this.prisma.cart.findUnique({ where: { userId }, include: { cartItems: true } })
-
 		if (!cart) throw new NotFoundException('Корзини не існує')
 
 		const cartItems = cart.cartItems
@@ -26,7 +25,7 @@ export class OrderService {
 					create: cartItems.map(item => ({
 						product: { connect: { id: item.productId } },
 						quantity: item.quantity,
-						price: item.price * item.quantity
+						price: item.price
 					}))
 				}
 			},
@@ -38,6 +37,8 @@ export class OrderService {
 				}
 			}
 		})
+
+		await this.prisma.cart.delete({ where: { userId } })
 
 		return order
 	}
