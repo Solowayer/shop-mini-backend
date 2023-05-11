@@ -12,8 +12,12 @@ export class SellerAuthService {
 	async signupSeller(signupSellerDto: SignupSellerDto) {
 		const { name, adress, description, email, phoneNumber, password, pib } = signupSellerDto
 
-		const existingSeller = await this.prisma.seller.findUnique({ where: { email } })
-		if (existingSeller) throw new BadRequestException('Селлер з таким email вже існує')
+		const existingSeller = await this.prisma.seller.findFirst({
+			where: {
+				OR: [{ email }, { phoneNumber }]
+			}
+		})
+		if (existingSeller) throw new BadRequestException('Селлер з таким email або phoneNumber вже існує')
 
 		const passwordHash = await argon.hash(password)
 
@@ -27,9 +31,9 @@ export class SellerAuthService {
 	}
 
 	async signinSeller(signinSellerDto: SigninSellerDto) {
-		const { email, phoneNumber, password } = signinSellerDto
+		const { email, password } = signinSellerDto
 
-		const seller = await this.prisma.seller.findFirst({ where: { OR: [{ email }, { phoneNumber }] } })
+		const seller = await this.prisma.seller.findUnique({ where: { email } })
 		if (!seller) throw new ForbiddenException('Невірні дані')
 
 		const isMatch = await argon.verify(seller.passwordHash, password)
@@ -40,7 +44,7 @@ export class SellerAuthService {
 		return token
 	}
 
-	private async signToken(sellerId: number, email: string): Promise<{ access_token: string }> {
+	private async signToken(sellerId: number, email: string): Promise<{ accessToken: string }> {
 		const payload = {
 			sub: sellerId,
 			email
@@ -50,6 +54,6 @@ export class SellerAuthService {
 
 		const accessToken = await this.jwt.signAsync(payload, { secret, expiresIn: '1h' })
 
-		return { access_token: accessToken }
+		return { accessToken }
 	}
 }

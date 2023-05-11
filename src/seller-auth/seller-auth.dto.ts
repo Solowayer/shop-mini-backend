@@ -41,13 +41,8 @@ export class SignupSellerDto {
 }
 
 export class SigninSellerDto {
-	@ValidateIf(o => o.phoneNumber === undefined)
 	@IsEmail()
 	email: string
-
-	@ValidateIf(o => o.email === undefined)
-	@IsMobilePhone('uk-UA')
-	phoneNumber: string
 
 	@IsString()
 	@MinLength(6, { message: 'The password must contain at least 6 characters' })
