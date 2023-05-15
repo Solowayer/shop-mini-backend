@@ -18,7 +18,9 @@ export class UserAuthService {
 				OR: [{ email }, { phoneNumber }]
 			}
 		})
-		if (existingUser) throw new BadRequestException('Користувач з таким email або phoneNumber вже існує')
+
+		if (existingUser && phoneNumber !== null)
+			throw new BadRequestException('Користувач з таким email або phoneNumber вже існує')
 
 		const passwordHash = await argon.hash(password)
 
@@ -26,14 +28,22 @@ export class UserAuthService {
 			data: { username, email, passwordHash, phoneNumber, role: 'USER' }
 		})
 
-		const token = await this.signToken(user.id, user.email)
+		const tokens = await this.signTokens(user.id, user.email)
 
-		if (!token) {
+		if (!tokens) {
 			throw new ForbiddenException('No token here')
 		}
 
-		res.cookie('token', token)
-		res.send({ user, token })
+		const { accessToken, refreshToken } = tokens
+
+		await this.updateRtHash(user.id, refreshToken)
+
+		res.cookie('rt-token', refreshToken, {
+			maxAge: 60 * 60 * 24 * 7 * 1000,
+			httpOnly: true,
+			sameSite: 'strict'
+		})
+		res.send({ user, accessToken, refreshToken })
 	}
 
 	async signinUser(signinUserDto: SigninUserDto, res: Response) {
@@ -48,20 +58,77 @@ export class UserAuthService {
 		const isMatch = await argon.verify(user.passwordHash, password)
 		if (!isMatch) throw new ForbiddenException('Невірні дані')
 
-		const token = await this.signToken(user.id, user.email)
+		const tokens = await this.signTokens(user.id, user.email)
 
-		res.cookie('token', token)
-		res.send({ user, token })
+		if (!tokens) {
+			throw new ForbiddenException('No token here')
+		}
+
+		const { accessToken, refreshToken } = tokens
+
+		await this.updateRtHash(user.id, refreshToken)
+
+		res.cookie('rt-token', refreshToken, {
+			maxAge: 60 * 60 * 1000,
+			httpOnly: true,
+			sameSite: 'strict'
+		})
+		res.send({ user, accessToken, refreshToken })
 	}
 
-	private async signToken(userId: number, email: string): Promise<string> {
+	async signoutUser(userId: number, res: Response) {
+		await this.prisma.user.updateMany({
+			where: {
+				id: userId,
+				hashedRt: { not: null }
+			},
+			data: {
+				hashedRt: null
+			}
+		})
+
+		res.clearCookie('rt-token')
+		return res.send({ message: 'Signout successfully' })
+	}
+
+	async refreshTokens(userId: number, rt: string) {
+		const user = await this.prisma.user.findUnique({
+			where: { id: userId }
+		})
+
+		if (!user) {
+			throw new ForbiddenException('Access denied')
+		}
+
+		const rtMatches = argon.verify(user.hashedRt, rt)
+		if (!rtMatches) throw new ForbiddenException('Access denied')
+
+		const tokens = await this.signTokens(user.id, user.email)
+
+		await this.updateRtHash(user.id, tokens.refreshToken)
+
+		return tokens
+	}
+
+	async updateRtHash(userId: number, rt: string) {
+		const hash = await argon.hash(rt)
+		await this.prisma.user.update({ where: { id: userId }, data: { hashedRt: hash } })
+	}
+
+	private async signTokens(userId: number, email: string) {
 		const payload = {
 			sub: userId,
 			email
 		}
 
-		const secret = this.config.get('JWT_ACCESS_USER_TOKEN_SECRET')
+		const secretAt = this.config.get('JWT_ACCESS_USER_TOKEN_SECRET')
+		const secretRt = this.config.get('REFRESH_TOKEN')
 
-		return await this.jwt.signAsync(payload, { secret, expiresIn: '1h' })
+		const [at, rt] = await Promise.all([
+			this.jwt.signAsync(payload, { secret: secretAt, expiresIn: 60 * 15 }),
+			this.jwt.signAsync(payload, { secret: secretRt, expiresIn: 60 * 60 * 24 * 7 })
+		])
+
+		return { accessToken: at, refreshToken: rt }
 	}
 }

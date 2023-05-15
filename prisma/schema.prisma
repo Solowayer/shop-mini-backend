@@ -18,6 +18,8 @@ model User {
 
   passwordHash String
 
+  hashedRt String?
+
   role Role @default(USER)
 
   orders  Order[]
