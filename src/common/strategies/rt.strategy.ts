@@ -26,3 +26,4 @@ export class RtStrategy extends PassportStrategy(Strategy, 'refresh') {
 		return { ...payload, refreshToken }
 	}
 }
+

@@ -34,7 +34,7 @@ export class UserAuthController {
 	@UseGuards(RtGuard)
 	@Post('refresh')
 	@HttpCode(HttpStatus.OK)
-	refreshTokens(@GetUser() rtData: RtPayload) {
-		return this.userAuthService.refreshTokens(rtData.sub, rtData.refreshToken)
+	refreshTokens(@GetUser() rtData: RtPayload, @Res() res: Response) {
+		return this.userAuthService.refreshTokens(rtData.sub, rtData.refreshToken, res)
 	}
 }

@@ -91,12 +91,12 @@ export class UserAuthService {
 		return res.send({ message: 'Signout successfully' })
 	}
 
-	async refreshTokens(userId: number, rt: string) {
+	async refreshTokens(userId: number, rt: string, res: Response) {
 		const user = await this.prisma.user.findUnique({
 			where: { id: userId }
 		})
 
-		if (!user) {
+		if (!user || !user.hashedRt) {
 			throw new ForbiddenException('Access denied')
 		}
 
@@ -105,9 +105,17 @@ export class UserAuthService {
 
 		const tokens = await this.signTokens(user.id, user.email)
 
+		const { refreshToken } = tokens
+
 		await this.updateRtHash(user.id, tokens.refreshToken)
 
-		return tokens
+		res.cookie('rt-token', refreshToken, {
+			maxAge: 60 * 60 * 1000,
+			httpOnly: true,
+			sameSite: 'strict'
+		})
+
+		res.send(tokens)
 	}
 
 	async updateRtHash(userId: number, rt: string) {
