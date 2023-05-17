@@ -3,13 +3,12 @@ import { ProductService } from './product.service'
 import { CreateProductDto, UpdateProductDto } from './product.dto'
 import { Seller } from '@prisma/client'
 import { GetUser } from 'src/common/decorators/user.decorator'
-import { JwtSellerGuard } from 'src/common/guards/jwt.guard'
 
 @Controller('products')
 export class ProductController {
 	constructor(private readonly productService: ProductService) {}
 
-	@UseGuards(JwtSellerGuard)
+	@UseGuards()
 	@Post()
 	createProduct(@GetUser() seller: Seller, @Body() createProductDto: CreateProductDto) {
 		return this.productService.createProduct(createProductDto, seller.id)

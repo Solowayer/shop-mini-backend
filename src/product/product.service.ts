@@ -10,9 +10,10 @@ export class ProductService {
 	async createProduct(createProductDto: CreateProductDto, sellerId?: number): Promise<Product> {
 		const { categoryId, ...productData } = createProductDto
 
-		const category: Category = categoryId ? await this.prisma.category.findUnique({ where: { id: categoryId } }) : null
-
-		if (categoryId && !category) throw new NotFoundException('Такої категорії не існує')
+		const categoryExist: Category = categoryId
+			? await this.prisma.category.findUnique({ where: { id: categoryId } })
+			: null
+		if (!categoryExist) throw new NotFoundException('Такої категорії не існує')
 
 		const existingProduct = await this.prisma.product.findUnique({ where: { slug: createProductDto.slug } })
 		if (existingProduct) throw new BadRequestException('Такий товар вже існує')
@@ -20,7 +21,7 @@ export class ProductService {
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
-				category: category && { connect: { id: category.id } },
+				category: categoryExist && { connect: { id: categoryExist.id } },
 				seller: sellerId && { connect: { id: sellerId } }
 			}
 		})

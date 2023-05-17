@@ -7,6 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Session {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessionId String @unique
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -18,13 +29,12 @@ model User {
 
   passwordHash String
 
-  hashedRt String?
-
   role Role @default(USER)
 
   orders  Order[]
   reviews Review[]
   cart    Cart?
+  session Session[]
 }
 
 enum Role {

@@ -1,7 +1,6 @@
 import { Controller, Get, Body, Patch, UseGuards } from '@nestjs/common'
 import { SellerDashboardService } from './seller-dashboard.service'
 import { UpdateSellerDto } from './seller-dashboard.dto'
-import { JwtSellerGuard } from 'src/common/guards/jwt.guard'
 import { GetUser } from 'src/common/decorators/user.decorator'
 import { Seller } from '@prisma/client'
 
@@ -9,19 +8,19 @@ import { Seller } from '@prisma/client'
 export class SellerDashboardController {
 	constructor(private readonly sellerDashboardService: SellerDashboardService) {}
 
-	@UseGuards(JwtSellerGuard)
+	@UseGuards()
 	@Get('info')
 	getSellerInfo(@GetUser() seller: Seller) {
 		return this.sellerDashboardService.getSellerInfo(seller)
 	}
 
-	@UseGuards(JwtSellerGuard)
+	@UseGuards()
 	@Patch('edit')
 	update(@GetUser() seller: Seller, @Body() updateSellerDto: UpdateSellerDto) {
 		return this.sellerDashboardService.update(seller.id, updateSellerDto)
 	}
 
-	@UseGuards(JwtSellerGuard)
+	@UseGuards()
 	@Get('products')
 	getSellerProducts(@GetUser() seller: Seller) {
 		return this.sellerDashboardService.getSellerProducts(seller)

@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common'
 import { CreateOrderDto } from './order.dto'
 import { OrderService } from './order.service'
-import { JwtUserGuard } from 'src/common/guards/jwt.guard'
 import { User } from '@prisma/client'
 import { GetUser } from 'src/common/decorators/user.decorator'
 
@@ -9,19 +8,19 @@ import { GetUser } from 'src/common/decorators/user.decorator'
 export class OrderController {
 	constructor(private readonly orderService: OrderService) {}
 
-	@UseGuards(JwtUserGuard)
+	@UseGuards()
 	@Post()
 	checkout(@GetUser() user: User, @Body() createOrderDto: CreateOrderDto) {
 		return this.orderService.checkout(user.id, createOrderDto)
 	}
 
-	@UseGuards(JwtUserGuard)
+	@UseGuards()
 	@Get()
 	findAllOrders() {
 		return this.orderService.findAllOrders()
 	}
 
-	@UseGuards(JwtUserGuard)
+	@UseGuards()
 	@Get(':id')
 	FindOrderById(@Param('id') id: string) {
 		return this.orderService.findOrderById(+id)
