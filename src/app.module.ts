@@ -10,7 +10,7 @@ import { ProductModule } from './product/product.module'
 import { CategoryModule } from './category/category.module'
 import { OrderModule } from './order/order.module'
 import { SellerDashboardModule } from './seller-dashboard/seller-dashboard.module'
-import { CartModule } from './cart/cart.module';
+import { CartModule } from './cart/cart.module'
 
 @Module({
 	imports: [

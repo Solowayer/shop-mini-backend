@@ -3,7 +3,7 @@ import { PrismaService } from 'prisma/prisma.service'
 import { SignupUserDto, SigninUserDto } from './user-auth.dto'
 import { ConfigService } from '@nestjs/config'
 import * as argon from 'argon2'
-import { Response } from 'express'
+import { Request, Response } from 'express'
 
 @Injectable()
 export class UserAuthService {
@@ -26,6 +26,11 @@ export class UserAuthService {
 		const user = await this.prisma.user.create({
 			data: { username, email, passwordHash, phoneNumber, role: 'USER' }
 		})
+
+		const session = await this.prisma.session.create({ data: { user: { connect: { id: user.id } } } })
+
+		res.cookie('session', session.sessionId, { httpOnly: true })
+		res.send({ message: 'Успішно зареєстровано', user, session })
 	}
 
 	async signinUser(signinUserDto: SigninUserDto, res: Response) {
@@ -39,5 +44,10 @@ export class UserAuthService {
 
 		const isMatch = await argon.verify(user.passwordHash, password)
 		if (!isMatch) throw new ForbiddenException('Невірні дані')
+
+		const session = await this.prisma.session.create({ data: { user: { connect: { id: user.id } } } })
+
+		res.cookie('session', session.sessionId, { httpOnly: true })
+		res.send({ message: 'Успішно зареєстровано', user, session })
 	}
 }

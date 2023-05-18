@@ -4,6 +4,7 @@ import { PrismaService } from 'prisma/prisma.service'
 import { ValidationPipe } from '@nestjs/common'
 import * as session from 'express-session'
 import { ConfigService } from '@nestjs/config'
+import * as cookieParser from 'cookie-parser'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
@@ -13,9 +14,14 @@ async function bootstrap() {
 		session({
 			secret: configService.get('SESSION_SECRET'),
 			resave: false,
-			saveUninitialized: false
+			saveUninitialized: false,
+			cookie: {
+				maxAge: 60 * 60 * 24 * 30 * 1000
+			}
 		})
 	)
+
+	app.use(cookieParser())
 
 	app.useGlobalPipes(new ValidationPipe({ whitelist: true }))
 
