@@ -1,7 +1,7 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res } from '@nestjs/common'
 import { UserAuthService } from './user-auth.service'
 import { SigninUserDto, SignupUserDto } from './user-auth.dto'
-import { Request, Response } from 'express'
+import { Request } from 'express'
 
 @Controller('user-auth')
 export class UserAuthController {
@@ -9,13 +9,13 @@ export class UserAuthController {
 
 	@Post('signup')
 	@HttpCode(HttpStatus.CREATED)
-	signup(@Body() signupUserDto: SignupUserDto, @Res() res: Response) {
-		return this.userAuthService.signupUser(signupUserDto, res)
+	signup(@Body() signupUserDto: SignupUserDto, @Req() req: Request) {
+		return this.userAuthService.signupUser(signupUserDto, req)
 	}
 
 	@Post('signin')
 	@HttpCode(HttpStatus.OK)
-	signin(@Body() signinUserDto: SigninUserDto, @Res() res: Response) {
-		return this.userAuthService.signinUser(signinUserDto, res)
+	signin(@Body() signinUserDto: SigninUserDto, @Req() req: Request) {
+		return this.userAuthService.signinUser(signinUserDto, req)
 	}
 }

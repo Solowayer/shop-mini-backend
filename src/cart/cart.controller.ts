@@ -3,24 +3,25 @@ import { CartService } from './cart.service'
 import { CreateCartItemDto, UpdateCartItemDto } from './cart.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
 import { User } from '@prisma/client'
+import { LocalAuthGuard } from 'src/common/guards/auth.guard'
 
 @Controller('cart')
 export class CartController {
 	constructor(private readonly cartService: CartService) {}
 
-	@UseGuards()
+	@UseGuards(LocalAuthGuard)
 	@Get('')
 	getCart(@GetUser() user: User) {
 		return this.cartService.getCart(user.id)
 	}
 
-	@UseGuards()
+	@UseGuards(LocalAuthGuard)
 	@Delete('')
 	removeCart(@GetUser() user: User) {
 		return this.cartService.removeCart(user.id)
 	}
 
-	@UseGuards()
+	@UseGuards(LocalAuthGuard)
 	@Post('')
 	addCartItem(@GetUser() user: User, @Body() createCartItemDto: CreateCartItemDto) {
 		return this.cartService.addCartItem(user.id, createCartItemDto)

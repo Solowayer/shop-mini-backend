@@ -5,10 +5,13 @@ import { ValidationPipe } from '@nestjs/common'
 import * as session from 'express-session'
 import { ConfigService } from '@nestjs/config'
 import * as cookieParser from 'cookie-parser'
+import * as passport from 'passport'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
 	const configService = app.get(ConfigService)
+
+	app.use(cookieParser())
 
 	app.use(
 		session({
@@ -21,7 +24,8 @@ async function bootstrap() {
 		})
 	)
 
-	app.use(cookieParser())
+	app.use(passport.initialize())
+	app.use(passport.session())
 
 	app.useGlobalPipes(new ValidationPipe({ whitelist: true }))
 
