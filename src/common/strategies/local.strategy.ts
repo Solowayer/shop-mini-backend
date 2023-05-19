@@ -8,15 +8,24 @@ import * as argon from 'argon2'
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 	constructor(private prisma: PrismaService) {
-		super()
+		super({
+			usernameField: 'emailOrPhoneNumber'
+		})
 	}
 
-	async validate(email: string, password: string): Promise<User> {
-		const user = await this.prisma.user.findUnique({ where: { email } })
+	async validate(emailOrPhoneNumber: string, password: string): Promise<User> {
+		console.log(`Strategy: ${emailOrPhoneNumber} ${password}`)
+
+		const user = await this.prisma.user.findFirst({
+			where: { OR: [{ email: emailOrPhoneNumber }, { phoneNumber: emailOrPhoneNumber }] }
+		})
+
 		if (!user) throw new NotFoundException('User not found')
 
 		const isMatch = await argon.verify(user.passwordHash, password)
 		if (!isMatch) throw new UnauthorizedException('Get out from here, boi')
+
+		delete user.passwordHash
 
 		return user
 	}
