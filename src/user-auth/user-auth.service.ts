@@ -26,10 +26,6 @@ export class UserAuthService {
 			data: { username, email, passwordHash, phoneNumber, role: 'USER' }
 		})
 
-		// const sessionId = req.sessionID
-
-		// const session = await this.prisma.session.create({ data: { sessionId, user: { connect: { id: user.id } } } })
-
 		delete user.passwordHash
 
 		return user

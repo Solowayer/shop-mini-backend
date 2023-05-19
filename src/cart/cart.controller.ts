@@ -3,7 +3,7 @@ import { CartService } from './cart.service'
 import { CreateCartItemDto, UpdateCartItemDto } from './cart.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
 import { User } from '@prisma/client'
-import { AuthenticatedGuard } from 'src/common/guards/authenticated.guard'
+import { AuthenticatedGuard } from 'src/common/guards/local.guard'
 
 @Controller('cart')
 export class CartController {

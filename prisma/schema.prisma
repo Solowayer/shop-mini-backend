@@ -8,14 +8,11 @@ datasource db {
 }
 
 model Session {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  sid String @id @default(cuid())
 
-  sessionId String @unique
+  expire DateTime
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
+  sess Json
 }
 
 model User {
@@ -34,7 +31,6 @@ model User {
   orders  Order[]
   reviews Review[]
   cart    Cart?
-  session Session[]
 }
 
 enum Role {

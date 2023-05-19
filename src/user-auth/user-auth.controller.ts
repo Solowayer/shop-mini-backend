@@ -1,8 +1,8 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, Session, Get, UseGuards } from '@nestjs/common'
 import { UserAuthService } from './user-auth.service'
-import { SigninUserDto, SignupUserDto } from './user-auth.dto'
+import { SignupUserDto } from './user-auth.dto'
 import { Request } from 'express'
-import { LocalGuard } from 'src/common/guards/local.guard'
+import { LocalGuard, AuthenticatedGuard } from 'src/common/guards/local.guard'
 import { GetUser } from 'src/common/decorators/user.decorator'
 import { User } from '@prisma/client'
 
@@ -30,6 +30,7 @@ export class UserAuthController {
 		return session
 	}
 
+	@UseGuards(AuthenticatedGuard)
 	@Get('status')
 	async getAuthStatus(@Req() req: Request) {
 		return req.user
