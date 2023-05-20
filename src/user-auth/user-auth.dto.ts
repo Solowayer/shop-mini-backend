@@ -9,7 +9,7 @@ import {
 	Matches
 } from 'class-validator'
 
-export class SignupUserDto {
+export class RegisterUserDto {
 	@IsString()
 	@IsNotEmpty()
 	username: string
@@ -27,7 +27,7 @@ export class SignupUserDto {
 	password: string
 }
 
-export class SigninUserDto {
+export class LoginUserDto {
 	@Matches(/^(380\d{9}|[\w.%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,3})$/, {
 		message: 'Invalid email or phone number format'
 	})

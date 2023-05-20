@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
-import { SignupUserDto, SigninUserDto } from './user-auth.dto'
+import { RegisterUserDto } from './user-auth.dto'
 import * as argon from 'argon2'
 import { Request } from 'express'
 
@@ -8,7 +8,7 @@ import { Request } from 'express'
 export class UserAuthService {
 	constructor(private prisma: PrismaService) {}
 
-	async registerUser(signupUserDto: SignupUserDto, req: Request) {
+	async registerUser(signupUserDto: RegisterUserDto, req: Request) {
 		const { username, email, password, phoneNumber } = signupUserDto
 
 		const existingUser = await this.prisma.user.findFirst({
