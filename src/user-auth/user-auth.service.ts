@@ -1,15 +1,16 @@
+/* eslint-disable no-console */
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
-import { RegisterUserDto } from './user-auth.dto'
+import { LoginUserDto, RegisterUserDto } from './user-auth.dto'
 import * as argon from 'argon2'
-import { Request } from 'express'
+import { Request, Response } from 'express'
 
 @Injectable()
 export class UserAuthService {
 	constructor(private prisma: PrismaService) {}
 
-	async registerUser(signupUserDto: RegisterUserDto, req: Request) {
-		const { username, email, password, phoneNumber } = signupUserDto
+	async registerUser(registerUserDto: RegisterUserDto) {
+		const { username, email, password, phoneNumber } = registerUserDto
 
 		const existingUser = await this.prisma.user.findFirst({
 			where: {
@@ -29,5 +30,44 @@ export class UserAuthService {
 		delete user.passwordHash
 
 		return user
+	}
+
+	async loginUser(loginUserDto: LoginUserDto) {
+		const { emailOrPhoneNumber, password } = loginUserDto
+
+		const user = await this.prisma.user.findFirst({
+			where: { OR: [{ email: emailOrPhoneNumber }, { phoneNumber: emailOrPhoneNumber }] }
+		})
+
+		if (!user) throw new NotFoundException('Такого юзера не існує')
+
+		const isMatch = await argon.verify(user.passwordHash, password)
+		if (!isMatch) throw new ForbiddenException('Невірні дані')
+
+		delete user.passwordHash
+
+		return user
+	}
+
+	logout(req: Request, res: Response) {
+		console.log(req.session)
+		req.logout(function (err) {
+			if (err) {
+				throw new BadRequestException('Помилка при виході із сесії')
+			}
+			res.send({ message: 'Вихід з авторизації успішно виконаний' })
+		})
+		console.log(req.session)
+	}
+
+	destroy(req: Request, res: Response) {
+		console.log(req.session)
+		req.session.destroy(err => {
+			if (err) {
+				throw new BadRequestException('Помилка при знищенні сесії')
+			}
+			res.send({ message: 'Сесія знищена' })
+		})
+		console.log(req.session)
 	}
 }

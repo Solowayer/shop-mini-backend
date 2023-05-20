@@ -28,6 +28,7 @@ export class RegisterUserDto {
 }
 
 export class LoginUserDto {
+	@IsNotEmpty({ message: 'Is required' })
 	@Matches(/^(380\d{9}|[\w.%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,3})$/, {
 		message: 'Invalid email or phone number format'
 	})

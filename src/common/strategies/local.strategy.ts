@@ -5,8 +5,6 @@ import { PrismaService } from 'prisma/prisma.service'
 import { User } from '@prisma/client'
 import * as argon from 'argon2'
 
-import { LoginUserDto } from 'src/user-auth/user-auth.dto'
-
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 	constructor(private prisma: PrismaService) {
@@ -15,7 +13,8 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 		})
 	}
 
-	async validate({ emailOrPhoneNumber, password }: LoginUserDto): Promise<User> {
+	async validate(emailOrPhoneNumber: string, password: string): Promise<User> {
+		// eslint-disable-next-line no-console
 		console.log(`Strategy: ${emailOrPhoneNumber}, ${password}`)
 
 		const user = await this.prisma.user.findFirst({
