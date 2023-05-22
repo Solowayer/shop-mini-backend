@@ -21,10 +21,15 @@ export class CartService {
 	}
 
 	async removeCart(userId: number): Promise<Cart> {
+		const existingCart = await this.prisma.cart.findUnique({ where: { userId } })
+		if (!existingCart) throw new NotFoundException('Корзини не існує')
+
 		return await this.prisma.cart.delete({ where: { userId } })
 	}
 
 	async addCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
+		console.log(userId)
+
 		const { productId, quantity } = createCartItemDto
 
 		const cart = await this.createCart(userId)
@@ -100,5 +105,14 @@ export class CartService {
 		const cartItems = await this.prisma.cartItem.findMany({ where: { cartId } })
 		const totalAmount = cartItems.reduce((total, item) => total + item.price, 0)
 		return totalAmount
+	}
+
+	private async updateCartTotalAmount(cartId: number): Promise<void> {
+		const totalAmount = await this.calculateTotalAmount(cartId)
+
+		await this.prisma.cart.update({
+			where: { id: cartId },
+			data: { totalAmount }
+		})
 	}
 }

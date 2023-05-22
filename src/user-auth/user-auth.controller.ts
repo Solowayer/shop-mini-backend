@@ -4,8 +4,6 @@ import { UserAuthService } from './user-auth.service'
 import { LoginUserDto, RegisterUserDto } from './user-auth.dto'
 import { Request, Response } from 'express'
 import { LocalGuard, AuthenticatedGuard } from 'src/common/guards/local.guard'
-// import { GetUser } from 'src/common/decorators/user.decorator'
-// import { User } from '@prisma/client'
 
 @Controller('user-auth')
 export class UserAuthController {
@@ -16,12 +14,6 @@ export class UserAuthController {
 	registerUser(@Body() signupUserDto: RegisterUserDto) {
 		return this.userAuthService.registerUser(signupUserDto)
 	}
-
-	// @UseGuards(LocalGuard)
-	// @Post('login')
-	// login(@GetUser() user: User) {
-	// 	return user
-	// }
 
 	@UseGuards(LocalGuard)
 	@Post('login')

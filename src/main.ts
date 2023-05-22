@@ -12,6 +12,8 @@ async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
 	const config = app.get(ConfigService)
 
+	app.setGlobalPrefix('api')
+
 	const pgStore = pgSession(session)
 	const pgSessionStore = new pgStore({
 		conString: config.get('DATABASE_URL'),

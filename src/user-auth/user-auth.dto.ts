@@ -1,13 +1,4 @@
-import {
-	IsString,
-	IsNotEmpty,
-	IsEmail,
-	IsOptional,
-	IsMobilePhone,
-	MinLength,
-	MaxLength,
-	Matches
-} from 'class-validator'
+import { IsString, IsNotEmpty, IsEmail, IsOptional, IsMobilePhone, MinLength, MaxLength } from 'class-validator'
 
 export class RegisterUserDto {
 	@IsString()
@@ -15,6 +6,7 @@ export class RegisterUserDto {
 	username: string
 
 	@IsEmail()
+	@IsNotEmpty()
 	email: string
 
 	@IsOptional()
@@ -28,11 +20,9 @@ export class RegisterUserDto {
 }
 
 export class LoginUserDto {
-	@IsNotEmpty({ message: 'Is required' })
-	@Matches(/^(380\d{9}|[\w.%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,3})$/, {
-		message: 'Invalid email or phone number format'
-	})
-	emailOrPhoneNumber: string
+	@IsEmail()
+	@IsNotEmpty()
+	email: string
 
 	@IsString()
 	@MinLength(6, { message: 'The password must contain at least 6 characters' })

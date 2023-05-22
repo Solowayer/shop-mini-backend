@@ -12,14 +12,11 @@ export class UserAuthService {
 	async registerUser(registerUserDto: RegisterUserDto) {
 		const { username, email, password, phoneNumber } = registerUserDto
 
-		const existingUser = await this.prisma.user.findFirst({
-			where: {
-				OR: [{ email }, { phoneNumber }]
-			}
+		const existingUser = await this.prisma.user.findUnique({
+			where: { email }
 		})
 
-		if (existingUser && phoneNumber !== null)
-			throw new BadRequestException('Користувач з таким email або phoneNumber вже існує')
+		if (existingUser) throw new BadRequestException('Користувач з таким email вже існує')
 
 		const passwordHash = await argon.hash(password)
 
@@ -33,10 +30,10 @@ export class UserAuthService {
 	}
 
 	async loginUser(loginUserDto: LoginUserDto) {
-		const { emailOrPhoneNumber, password } = loginUserDto
+		const { email, password } = loginUserDto
 
-		const user = await this.prisma.user.findFirst({
-			where: { OR: [{ email: emailOrPhoneNumber }, { phoneNumber: emailOrPhoneNumber }] }
+		const user = await this.prisma.user.findUnique({
+			where: { email }
 		})
 
 		if (!user) throw new NotFoundException('Такого юзера не існує')
