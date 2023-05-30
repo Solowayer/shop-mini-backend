@@ -30,7 +30,7 @@ async function bootstrap() {
 			saveUninitialized: false,
 			cookie: {
 				// maxAge: 60 * 60 * 24 * 1 * 1000
-				maxAge: 60 * 15 * 1000
+				maxAge: 60 * 60 * 24 * 1000
 			},
 			store: pgSessionStore
 		})
