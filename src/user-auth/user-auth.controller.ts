@@ -34,10 +34,15 @@ export class UserAuthController {
 		return this.userAuthService.destroy(req, res)
 	}
 
+	@Get('check-auth')
+	checkAuth(@Req() req: Request) {
+		return req.isAuthenticated()
+	}
+
 	@Get('test')
 	getAuthSession(@Session() session: Record<string, any>) {
 		console.log(session)
-		console.log(session)
+		// console.log(session.isAuthenticated())
 		return session
 	}
 }
