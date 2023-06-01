@@ -122,7 +122,7 @@ model Review {
 }
 
 model Cart {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -147,8 +147,8 @@ model CartItem {
   product   Product @relation(fields: [productId], references: [id])
   productId Int
 
-  cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  cartId Int
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId String
 }
 
 model Order {

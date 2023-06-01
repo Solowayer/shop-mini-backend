@@ -27,13 +27,15 @@ export class CartController {
 		return this.cartService.addCartItem(user.id, createCartItemDto)
 	}
 
+	@UseGuards(AuthenticatedGuard)
 	@Patch(':cartItemId')
 	updateCartItem(@Param('cartItemId') cartItemId: number, @Body() updateCartItemDto: UpdateCartItemDto) {
 		return this.cartService.updateCartItem(cartItemId, updateCartItemDto)
 	}
 
+	@UseGuards(AuthenticatedGuard)
 	@Delete(':cartItemId')
 	deleteCartItem(@Param('cartItemId') cartItemId: number) {
-		return this.cartService.deleteCartItem(cartItemId)
+		return this.cartService.deleteCartItem(+cartItemId)
 	}
 }

@@ -9,7 +9,7 @@ export class ProductController {
 	constructor(private readonly productService: ProductService) {}
 
 	@UseGuards()
-	@Post()
+	@Post('')
 	createProduct(@GetUser() seller: Seller, @Body() createProductDto: CreateProductDto) {
 		return this.productService.createProduct(createProductDto, seller.id)
 	}

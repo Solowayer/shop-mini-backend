@@ -8,12 +8,11 @@ export class CartService {
 	constructor(private prisma: PrismaService) {}
 
 	async getCart(userId: number): Promise<Cart> {
-		const cart = await this.prisma.cart.findUnique({ where: { userId } })
-		if (!cart) {
-			return null 
-		}
+		const cart = await this.prisma.cart.findUnique({ where: { userId }, include: { cartItems: true } })
+		if (!cart) return null
 
-		const totalAmount = await this.calculateTotalAmount(cart.id)
+		const cartItems = cart.cartItems
+		const totalAmount = cartItems.reduce((total, item) => total + item.price, 0)
 
 		return await this.prisma.cart.update({
 			where: { id: cart.id },
@@ -22,17 +21,11 @@ export class CartService {
 		})
 	}
 
-	async removeCart(userId: number): Promise<Cart> {
-		const existingCart = await this.prisma.cart.findUnique({ where: { userId } })
-		if (!existingCart) throw new NotFoundException('Корзини не існує')
-
-		return await this.prisma.cart.delete({ where: { userId } })
-	}
-
 	async addCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
 		const { productId, quantity } = createCartItemDto
 
-		const cart = await this.createCart(userId)
+		let cart = await this.prisma.cart.findUnique({ where: { userId } })
+		if (!cart) cart = await this.prisma.cart.create({ data: { userId } })
 
 		const product = await this.prisma.product.findUnique({ where: { id: productId } })
 		if (!product) throw new NotFoundException('Такого товару не існує')
@@ -67,9 +60,14 @@ export class CartService {
 			}
 		})
 
-		await this.getCart(userId)
-
 		return cartItem
+	}
+
+	async removeCart(userId: number): Promise<Cart> {
+		const existingCart = await this.prisma.cart.findUnique({ where: { userId } })
+		if (!existingCart) throw new NotFoundException('Корзини не існує')
+
+		return await this.prisma.cart.delete({ where: { userId } })
 	}
 
 	async updateCartItem(cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
@@ -89,32 +87,4 @@ export class CartService {
 			where: { id: cartItemId }
 		})
 	}
-
-	private async createCart(userId: number): Promise<Cart> {
-		const cart = await this.prisma.cart.findUnique({ where: { userId } })
-
-		if (!cart)
-			return await this.prisma.cart.create({
-				data: {
-					userId
-				}
-			})
-
-		return cart
-	}
-
-	private async calculateTotalAmount(cartId: number): Promise<number> {
-		const cartItems = await this.prisma.cartItem.findMany({ where: { cartId } })
-		const totalAmount = cartItems.reduce((total, item) => total + item.price, 0)
-		return totalAmount
-	}
-
-	// private async updateCartTotalAmount(cartId: number): Promise<void> {
-	// 	const totalAmount = await this.calculateTotalAmount(cartId)
-
-	// 	await this.prisma.cart.update({
-	// 		where: { id: cartId },
-	// 		data: { totalAmount }
-	// 	})
-	// }
 }
