@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { CreateProductDto, UpdateProductDto } from './product.dto'
+import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Category, Product } from '@prisma/client'
 
@@ -29,8 +29,32 @@ export class ProductService {
 		return product
 	}
 
-	findAllProducts() {
-		return this.prisma.product.findMany()
+	async findAllProducts(minPrice: number, maxPrice: number, productSortDto: ProductsSortDto): Promise<Product[]> {
+		const { sort } = productSortDto
+
+		let products = await this.prisma.product.findMany({
+			where: {
+				published: true
+			}
+		})
+
+		if (sort === 'price_asc') products = await this.prisma.product.findMany({ orderBy: { price: 'asc' } })
+		if (sort === 'price_desc') products = await this.prisma.product.findMany({ orderBy: { price: 'desc' } })
+
+		if (minPrice && maxPrice)
+			products = await this.prisma.product.findMany({
+				where: {
+					price: {
+						gte: minPrice,
+						lte: maxPrice
+					}
+				}
+			})
+
+		if (maxPrice) products = await this.prisma.product.findMany({ where: { price: { lte: maxPrice } } })
+		if (minPrice) products = await this.prisma.product.findMany({ where: { price: { gte: minPrice } } })
+
+		return products
 	}
 
 	findProductById(id: number) {

@@ -60,6 +60,8 @@ export class CartService {
 			}
 		})
 
+		await this.getCart(userId)
+
 		return cartItem
 	}
 
@@ -83,8 +85,21 @@ export class CartService {
 		})
 		if (!cartItem) throw new NotFoundException('Такого товару в корзині не знайдено')
 
-		return await this.prisma.cartItem.delete({
+		const deletedCartItem = await this.prisma.cartItem.delete({
 			where: { id: cartItemId }
 		})
+
+		const remainingCartItems = await this.prisma.cartItem.findMany({
+			where: { cartId: cartItem.cartId }
+		})
+
+		if (remainingCartItems.length === 0) {
+			await this.prisma.cart.delete({ where: { id: cartItem.cartId } })
+		}
+
+		const cart = await this.prisma.cart.findUnique({ where: { id: cartItem.cartId } })
+		await this.getCart(cart.userId)
+
+		return deletedCartItem
 	}
 }

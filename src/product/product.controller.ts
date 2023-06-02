@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common'
 import { ProductService } from './product.service'
-import { CreateProductDto, UpdateProductDto } from './product.dto'
+import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
 import { Seller } from '@prisma/client'
 import { GetUser } from 'src/common/decorators/user.decorator'
 
@@ -15,8 +15,12 @@ export class ProductController {
 	}
 
 	@Get()
-	findAllProducts() {
-		return this.productService.findAllProducts()
+	async findAllProducts(
+		@Query() productsSortDto: ProductsSortDto,
+		@Query('minPrice') minPrice: number,
+		@Query('maxPrice') maxPrice: number
+	) {
+		return await this.productService.findAllProducts(+minPrice, +maxPrice, productsSortDto)
 	}
 
 	@Get('p:id')

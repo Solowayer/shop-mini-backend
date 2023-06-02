@@ -35,3 +35,19 @@ export class CreateProductDto {
 }
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {}
+
+export class ProductsFilterDto {
+	@IsOptional()
+	@IsNumber()
+	minPrice: number
+
+	@IsOptional()
+	@IsNumber()
+	maxPrice: number
+}
+
+export class ProductsSortDto {
+	@IsOptional()
+	@IsString()
+	sort: 'price_asc' | 'price_desc'
+}

@@ -16,13 +16,13 @@ export class CartController {
 	}
 
 	@UseGuards(AuthenticatedGuard)
-	@Delete('')
+	@Delete('delete')
 	removeCart(@GetUser() user: User) {
 		return this.cartService.removeCart(user.id)
 	}
 
 	@UseGuards(AuthenticatedGuard)
-	@Post('')
+	@Post('add')
 	addCartItem(@GetUser() user: User, @Body() createCartItemDto: CreateCartItemDto) {
 		return this.cartService.addCartItem(user.id, createCartItemDto)
 	}
