@@ -78,8 +78,7 @@ model Product {
   description String?
   price       Float
 
-  category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId Int?
+  categories CategoriesOnProducts[]
 
   seller   Seller? @relation(fields: [sellerId], references: [id])
   sellerId Int?
@@ -94,7 +93,8 @@ model Product {
 }
 
 model Category {
-  id Int @id @default(autoincrement())
+  id   Int    @id @default(autoincrement())
+  slug String
 
   name String @unique
 
@@ -103,14 +103,17 @@ model Category {
 
   subCategories Category[] @relation("SubCategories")
 
-  products Product[]
+  products CategoriesOnProducts[]
 }
 
-// model CategoriesOnProducts {
-//   product Product @relation(fields: [productId], references: [id])
-//   productId Int
-//   category Category @relation(fields: [categoryId], references: [id])
-// }
+model CategoriesOnProducts {
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  @@id([productId, categoryId])
+}
 
 model Review {
   id        Int      @id @default(autoincrement())

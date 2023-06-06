@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { CreateCategoryDto } from './dto/create-category.dto'
-import { UpdateCategoryDto } from './dto/update-category.dto'
+import { CreateCategoryDto, UpdateCategoryDto } from './category.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Category } from '@prisma/client'
 
@@ -20,7 +19,7 @@ export class CategoryService {
 	}
 
 	async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
-		const { name, parentId, subCategories } = createCategoryDto
+		const { name, slug, parentId, subCategories } = createCategoryDto
 
 		const existingCategory = await this.prisma.category.findUnique({ where: { name } })
 		if (existingCategory) throw new BadRequestException('Категорія з такою назвою вже існує')
@@ -28,6 +27,7 @@ export class CategoryService {
 		const category = await this.prisma.category.create({
 			data: {
 				name,
+				slug,
 				parent: parentId ? { connect: { id: parentId } } : undefined
 			}
 		})
@@ -41,10 +41,11 @@ export class CategoryService {
 
 	private async createSubcategories(subCategories: CreateCategoryDto[], parentId: number) {
 		for (const subCategoryDto of subCategories) {
-			const { name, subCategories } = subCategoryDto
+			const { name, slug, subCategories } = subCategoryDto
 			const subCategory = await this.prisma.category.create({
 				data: {
 					name,
+					slug,
 					parent: { connect: { id: parentId } }
 				}
 			})
