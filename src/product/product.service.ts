@@ -7,7 +7,65 @@ import { Category, Product } from '@prisma/client'
 export class ProductService {
 	constructor(private prisma: PrismaService) {}
 
-	async createProduct(createProductDto: CreateProductDto, sellerId?: number): Promise<Product> {
+	async getAllProducts(productSortDto: ProductsSortDto, productsFilterDto: ProductsFilterDto): Promise<Product[]> {
+		const { sort } = productSortDto
+		const { min_price, max_price, search } = productsFilterDto
+
+		const products = await this.prisma.product.findMany({
+			where: {
+				published: true,
+				price: { gte: min_price, lte: max_price },
+				name: { contains: search }
+			},
+			orderBy: {
+				price: sort === 'price_asc' ? 'asc' : sort === 'price_desc' ? 'desc' : undefined,
+				rating: sort === 'rating' ? 'desc' : undefined
+			}
+		})
+
+		if (!products) throw new NotFoundException('Немає товарів')
+
+		return products
+	}
+
+	getProductById(id: number) {
+		const product = this.prisma.product.findUnique({ where: { id } })
+
+		if (!product) {
+			throw new NotFoundException(`Product with id "${id}" not found`)
+		}
+
+		return product
+	}
+
+	getProductBySlug(slug: string): Promise<Product> {
+		const product = this.prisma.product.findUnique({ where: { slug } })
+
+		if (!product) {
+			throw new NotFoundException(`Product with slug "${slug}" not found`)
+		}
+
+		return product
+	}
+
+	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
+		const products = await this.prisma.product.findMany({ where: { categoryId } })
+		return products
+	}
+
+	async getMaxPrice(): Promise<{ productsMaxPrice: number }> {
+		const productWithMaxPrice = await this.prisma.product.findFirst({
+			orderBy: {
+				price: 'desc'
+			}
+		})
+
+		if (!productWithMaxPrice) throw new NotFoundException('Немає товарів')
+
+		return { productsMaxPrice: productWithMaxPrice.price }
+	}
+
+	async createProduct(createProductDto: CreateProductDto): Promise<Product> {
 		const { categoryId, ...productData } = createProductDto
 
 		const categoryExist: Category = categoryId
@@ -21,58 +79,10 @@ export class ProductService {
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
-				category: categoryExist && { connect: { id: categoryExist.id } },
-				seller: sellerId && { connect: { id: sellerId } }
+				category: categoryExist && { connect: { id: categoryExist.id } }
+				// seller: sellerId && { connect: { id: sellerId } }
 			}
 		})
-
-		return product
-	}
-
-	async findAllProducts(minPrice: number, maxPrice: number, productSortDto: ProductsSortDto): Promise<Product[]> {
-		const { sort } = productSortDto
-
-		let products = await this.prisma.product.findMany({
-			where: {
-				published: true
-			}
-		})
-
-		if (sort === 'price_asc') products = await this.prisma.product.findMany({ orderBy: { price: 'asc' } })
-		if (sort === 'price_desc') products = await this.prisma.product.findMany({ orderBy: { price: 'desc' } })
-
-		if (minPrice && maxPrice)
-			products = await this.prisma.product.findMany({
-				where: {
-					price: {
-						gte: minPrice,
-						lte: maxPrice
-					}
-				}
-			})
-
-		if (maxPrice) products = await this.prisma.product.findMany({ where: { price: { lte: maxPrice } } })
-		if (minPrice) products = await this.prisma.product.findMany({ where: { price: { gte: minPrice } } })
-
-		return products
-	}
-
-	findProductById(id: number) {
-		const product = this.prisma.product.findUnique({ where: { id } })
-
-		if (!product) {
-			throw new NotFoundException(`Product with id "${id}" not found`)
-		}
-
-		return product
-	}
-
-	findProductBySlug(slug: string): Promise<Product> {
-		const product = this.prisma.product.findUnique({ where: { slug } })
-
-		if (!product) {
-			throw new NotFoundException(`Product with slug "${slug}" not found`)
-		}
 
 		return product
 	}

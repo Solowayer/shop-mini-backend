@@ -8,6 +8,17 @@ import { Category } from '@prisma/client'
 export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
+	async getParentCategories() {
+		return await this.prisma.category.findMany({ where: { parentId: null } })
+	}
+
+	async getCategoryById(id: number) {
+		return await this.prisma.category.findUnique({
+			where: { id },
+			include: { subCategories: true }
+		})
+	}
+
 	async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
 		const { name, parentId, subCategories } = createCategoryDto
 
@@ -42,14 +53,6 @@ export class CategoryService {
 				await this.createSubcategories(subCategoryDto.subCategories, subCategory.id)
 			}
 		}
-	}
-
-	async findAllCategories() {
-		return await this.prisma.category.findMany()
-	}
-
-	async findCategoryById(id: number) {
-		return await this.prisma.category.findUnique({ where: { id }, include: { subCategories: true } })
 	}
 
 	async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto) {

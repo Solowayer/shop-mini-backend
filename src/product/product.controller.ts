@@ -1,36 +1,42 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
-import { Seller } from '@prisma/client'
-import { GetUser } from 'src/common/decorators/user.decorator'
+// import { Seller } from '@prisma/client'
+// import { GetUser } from 'src/common/decorators/user.decorator'
 
 @Controller('products')
 export class ProductController {
 	constructor(private readonly productService: ProductService) {}
 
-	@UseGuards()
-	@Post('')
-	createProduct(@GetUser() seller: Seller, @Body() createProductDto: CreateProductDto) {
-		return this.productService.createProduct(createProductDto, seller.id)
+	@Get()
+	async getAllProducts(@Query() productsSortDto: ProductsSortDto, @Query() productsFilterDto: ProductsFilterDto) {
+		return await this.productService.getAllProducts(productsSortDto, productsFilterDto)
 	}
 
-	@Get()
-	async findAllProducts(
-		@Query() productsSortDto: ProductsSortDto,
-		@Query('minPrice') minPrice: number,
-		@Query('maxPrice') maxPrice: number
-	) {
-		return await this.productService.findAllProducts(+minPrice, +maxPrice, productsSortDto)
+	@Get('max-price')
+	async getMaxPrice() {
+		return await this.productService.getMaxPrice()
+	}
+
+	@UseGuards()
+	@Post('')
+	createProduct(@Body() createProductDto: CreateProductDto) {
+		return this.productService.createProduct(createProductDto)
+	}
+
+	@Get('c:categoryId')
+	getByCategoryId(@Param('categoryId') categoryId: string) {
+		return this.productService.getProductsByCategoryId(+categoryId)
 	}
 
 	@Get('p:id')
-	findById(@Param('id') id: string) {
-		return this.productService.findProductById(+id)
+	getById(@Param('id') id: string) {
+		return this.productService.getProductById(+id)
 	}
 
 	@Get(':slug')
-	findBySlug(@Param('slug') slug: string) {
-		return this.productService.findProductBySlug(slug)
+	getBySlug(@Param('slug') slug: string) {
+		return this.productService.getProductBySlug(slug)
 	}
 
 	@Patch('p:id')

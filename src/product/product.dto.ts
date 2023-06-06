@@ -1,4 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types'
+import { Type } from 'class-transformer'
 import { IsString, IsOptional, MaxLength, IsNumber, IsNotEmpty, IsArray, IsBoolean } from 'class-validator'
 
 export class CreateProductDto {
@@ -39,15 +40,21 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {}
 export class ProductsFilterDto {
 	@IsOptional()
 	@IsNumber()
-	minPrice: number
+	@Type(() => Number)
+	min_price?: number
 
 	@IsOptional()
 	@IsNumber()
-	maxPrice: number
+	@Type(() => Number)
+	max_price?: number
+
+	@IsOptional()
+	@IsString()
+	search?: string
 }
 
 export class ProductsSortDto {
 	@IsOptional()
 	@IsString()
-	sort: 'price_asc' | 'price_desc'
+	sort?: 'price_asc' | 'price_desc' | 'rating'
 }

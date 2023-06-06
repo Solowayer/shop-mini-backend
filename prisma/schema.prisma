@@ -106,6 +106,12 @@ model Category {
   products Product[]
 }
 
+// model CategoriesOnProducts {
+//   product Product @relation(fields: [productId], references: [id])
+//   productId Int
+//   category Category @relation(fields: [categoryId], references: [id])
+// }
+
 model Review {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
