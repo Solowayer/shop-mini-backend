@@ -100,12 +100,12 @@ model Category {
 
   isMain Boolean @default(false)
 
-  parent   Category? @relation("SubCategories", fields: [parentId], references: [id])
-  parentId Int?
-
-  subCategories Category[] @relation("SubCategories")
+  parents   Category[] @relation("ParentChildren")
+  childrens Category[] @relation("ParentChildren")
 
   products CategoriesOnProducts[]
+
+  @@unique([id, slug])
 }
 
 model CategoriesOnProducts {

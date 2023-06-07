@@ -20,7 +20,8 @@ export class ProductService {
 			orderBy: {
 				price: sort === 'price_asc' ? 'asc' : sort === 'price_desc' ? 'desc' : undefined,
 				rating: sort === 'rating' ? 'desc' : undefined
-			}
+			},
+			include: { categories: true }
 		})
 
 		if (!products) throw new NotFoundException('Немає товарів')
@@ -70,22 +71,22 @@ export class ProductService {
 	async createProduct(createProductDto: CreateProductDto): Promise<Product> {
 		const { categoryId, ...productData } = createProductDto
 
-		const categoryExist: Category = categoryId
-			? await this.prisma.category.findUnique({ where: { id: categoryId } })
-			: null
+		const categoryExist = await this.prisma.category.findUnique({
+			where: { id: categoryId }
+		})
 		if (!categoryExist) throw new NotFoundException('Такої категорії не існує')
 
 		const existingProduct = await this.prisma.product.findUnique({ where: { slug: createProductDto.slug } })
 		if (existingProduct) throw new BadRequestException('Такий товар вже існує')
 
-		const categories: Category[] = []
-		categories.push(categoryExist)
-		await this.addParentCategories(categoryExist, categories)
+		const allParentCategories = await this.addParentCategories(categoryExist)
 
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
-				categories: { create: categories.map(category => ({ category: { connect: { id: category.id } } })) }
+				categories: {
+					create: categoryId ? allParentCategories.map(category => ({ categoryId: category.id })) : null
+				}
 				// seller: sellerId && { connect: { id: sellerId } }
 			},
 			include: {
@@ -96,21 +97,23 @@ export class ProductService {
 		return product
 	}
 
-	private async addParentCategories(category: Category, categories: Category[]): Promise<void> {
-		if (category.parentId) {
-			const parentCategory = await this.prisma.category.findUnique({ where: { id: category.parentId } })
-			if (parentCategory) {
-				categories.push(parentCategory)
-				await this.addParentCategories(parentCategory, categories)
-			}
-		}
-	}
-
 	updateProduct(id: number, updateProductDto: UpdateProductDto) {
 		return this.prisma.product.update({ where: { id }, data: updateProductDto })
 	}
 
 	removeProduct(id: number) {
 		return this.prisma.product.delete({ where: { id } })
+	}
+
+	private async addParentCategories(category: Category, allCategories: Category[] = []): Promise<Category[]> {
+		allCategories.push(category)
+
+		const currentCategory = await this.prisma.category.findUnique({
+			where: { id: category.id },
+			include: { parents: true }
+		})
+
+		currentCategory.parents.forEach(parent => this.addParentCategories(parent, allCategories))
+		return allCategories
 	}
 }
