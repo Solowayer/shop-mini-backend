@@ -7,8 +7,8 @@ import { Category } from '@prisma/client'
 export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
-	async getParentCategories() {
-		return await this.prisma.category.findMany({ where: { parentId: null } })
+	async getMainCategories() {
+		return await this.prisma.category.findMany({ where: { isMain: true }, orderBy: { name: 'asc' } })
 	}
 
 	async getCategoryById(id: number) {
@@ -19,48 +19,32 @@ export class CategoryService {
 	}
 
 	async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
-		const { name, slug, parentId, subCategories } = createCategoryDto
+		const { name, slug, isMain, parentId } = createCategoryDto
 
-		const existingCategory = await this.prisma.category.findUnique({ where: { name } })
-		if (existingCategory) throw new BadRequestException('Категорія з такою назвою вже існує')
+		const existingCategory = await this.prisma.category.findFirst({
+			where: {
+				OR: [{ slug: slug }, { name: name }]
+			}
+		})
+		if (existingCategory) throw new BadRequestException('This category is already exist')
 
 		const category = await this.prisma.category.create({
 			data: {
 				name,
+				isMain,
 				slug,
 				parent: parentId ? { connect: { id: parentId } } : undefined
 			}
 		})
 
-		if (subCategories && subCategories.length > 0) {
-			await this.createSubcategories(subCategories, category.id)
-		}
-
 		return category
-	}
-
-	private async createSubcategories(subCategories: CreateCategoryDto[], parentId: number) {
-		for (const subCategoryDto of subCategories) {
-			const { name, slug, subCategories } = subCategoryDto
-			const subCategory = await this.prisma.category.create({
-				data: {
-					name,
-					slug,
-					parent: { connect: { id: parentId } }
-				}
-			})
-
-			if (subCategories && subCategories.length > 0) {
-				await this.createSubcategories(subCategoryDto.subCategories, subCategory.id)
-			}
-		}
 	}
 
 	async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto) {
 		const { name } = updateCategoryDto
 
 		const category = await this.prisma.category.findUnique({ where: { id } })
-		if (!category) throw new NotFoundException('Категорія не знайдена')
+		if (!category) throw new NotFoundException('Category not found')
 
 		const updatedCategory = await this.prisma.category.update({ where: { id }, data: { name } })
 

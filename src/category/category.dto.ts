@@ -1,14 +1,18 @@
 import { PartialType } from '@nestjs/mapped-types'
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class CreateCategoryDto {
 	@IsNotEmpty()
 	@IsString()
-	name: string
+	slug: string
 
 	@IsNotEmpty()
 	@IsString()
-	slug: string
+	name: string
+
+	@IsBoolean()
+	@IsOptional()
+	isMain?: boolean
 
 	@IsOptional()
 	parentId?: number

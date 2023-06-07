@@ -7,8 +7,8 @@ export class CategoryController {
 	constructor(private readonly categoryService: CategoryService) {}
 
 	@Get()
-	getParentCategories() {
-		return this.categoryService.getParentCategories()
+	getMainCategories() {
+		return this.categoryService.getMainCategories()
 	}
 
 	@Get(':id')

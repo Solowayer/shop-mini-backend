@@ -94,9 +94,11 @@ model Product {
 
 model Category {
   id   Int    @id @default(autoincrement())
-  slug String
+  slug String @unique
 
   name String @unique
+
+  isMain Boolean @default(false)
 
   parent   Category? @relation("SubCategories", fields: [parentId], references: [id])
   parentId Int?
@@ -107,9 +109,9 @@ model Category {
 }
 
 model CategoriesOnProducts {
-  product    Product  @relation(fields: [productId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId  Int
-  category   Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId Int
 
   @@id([productId, categoryId])

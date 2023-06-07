@@ -78,15 +78,32 @@ export class ProductService {
 		const existingProduct = await this.prisma.product.findUnique({ where: { slug: createProductDto.slug } })
 		if (existingProduct) throw new BadRequestException('Такий товар вже існує')
 
+		const categories: Category[] = []
+		categories.push(categoryExist)
+		await this.addParentCategories(categoryExist, categories)
+
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
-				categories: { create: { category: { connect: { id: categoryExist.id } } } }
+				categories: { create: categories.map(category => ({ category: { connect: { id: category.id } } })) }
 				// seller: sellerId && { connect: { id: sellerId } }
+			},
+			include: {
+				categories: true
 			}
 		})
 
 		return product
+	}
+
+	private async addParentCategories(category: Category, categories: Category[]): Promise<void> {
+		if (category.parentId) {
+			const parentCategory = await this.prisma.category.findUnique({ where: { id: category.parentId } })
+			if (parentCategory) {
+				categories.push(parentCategory)
+				await this.addParentCategories(parentCategory, categories)
+			}
+		}
 	}
 
 	updateProduct(id: number, updateProductDto: UpdateProductDto) {
