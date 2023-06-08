@@ -16,6 +16,11 @@ export class CategoryController {
 		return this.categoryService.getCategoryById(+id)
 	}
 
+	@Get(':slug')
+	getCategoryBySlug(@Param('slug') slug: string) {
+		return this.categoryService.getCategoryBySlug(slug)
+	}
+
 	@Post()
 	createCategory(@Body() createCategoryDto: CreateCategoryDto) {
 		return this.categoryService.createCategory(createCategoryDto)

@@ -14,7 +14,14 @@ export class CategoryService {
 	async getCategoryById(id: number) {
 		return await this.prisma.category.findUnique({
 			where: { id },
-			include: { parents: true }
+			include: { parents: true, childrens: true }
+		})
+	}
+
+	async getCategoryBySlug(slug: string) {
+		return await this.prisma.category.findUnique({
+			where: { slug },
+			include: { parents: true, childrens: true }
 		})
 	}
 
@@ -27,6 +34,10 @@ export class CategoryService {
 			}
 		})
 		if (existingCategory) throw new BadRequestException('This category is already exist')
+
+		if (parentIds && parentIds.length > 0 && childrenIds && childrenIds.length > 0) {
+			throw new BadRequestException('The same category cannot be as parent and children')
+		}
 
 		const parents = parentIds ? parentIds.map(parentId => ({ id: parentId })) : []
 		const childrens = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []

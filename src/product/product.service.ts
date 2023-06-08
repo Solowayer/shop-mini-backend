@@ -24,7 +24,7 @@ export class ProductService {
 			include: { categories: true }
 		})
 
-		if (!products) throw new NotFoundException('Немає товарів')
+		if (!products) throw new NotFoundException('Products doesn`t exist')
 
 		return products
 	}
@@ -71,21 +71,23 @@ export class ProductService {
 	async createProduct(createProductDto: CreateProductDto): Promise<Product> {
 		const { categoryId, ...productData } = createProductDto
 
-		const categoryExist = await this.prisma.category.findUnique({
-			where: { id: categoryId }
-		})
-		if (!categoryExist) throw new NotFoundException('Такої категорії не існує')
+		const categoryExist = categoryId
+			? await this.prisma.category.findUnique({
+					where: { id: categoryId }
+			  })
+			: null
+		if (categoryId && !categoryExist) throw new NotFoundException('Такої категорії не існує')
 
 		const existingProduct = await this.prisma.product.findUnique({ where: { slug: createProductDto.slug } })
 		if (existingProduct) throw new BadRequestException('Такий товар вже існує')
 
-		const allParentCategories = await this.addParentCategories(categoryExist)
+		const allParentCategories = categoryId && (await this.addParentCategories(categoryExist))
 
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
 				categories: {
-					create: categoryId ? allParentCategories.map(category => ({ categoryId: category.id })) : null
+					create: categoryId && allParentCategories.map(category => ({ categoryId: category.id }))
 				}
 				// seller: sellerId && { connect: { id: sellerId } }
 			},
@@ -106,14 +108,25 @@ export class ProductService {
 	}
 
 	private async addParentCategories(category: Category, allCategories: Category[] = []): Promise<Category[]> {
-		allCategories.push(category)
+		const categoryIds = allCategories.map(cat => cat.id) // Масив ідентифікаторів наявних категорій
 
-		const currentCategory = await this.prisma.category.findUnique({
-			where: { id: category.id },
-			include: { parents: true }
-		})
+		if (!categoryIds.includes(category.id)) {
+			allCategories.push(category)
 
-		currentCategory.parents.forEach(parent => this.addParentCategories(parent, allCategories))
+			const currentCategory = await this.prisma.category.findUnique({
+				where: { id: category.id },
+				include: { parents: true }
+			})
+
+			for (const parent of currentCategory.parents) {
+				const parentCategory = await this.prisma.category.findUnique({
+					where: { id: parent.id }
+				})
+
+				await this.addParentCategories(parentCategory, allCategories)
+			}
+		}
+
 		return allCategories
 	}
 }
