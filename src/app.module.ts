@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { PrismaModule } from '../prisma/prisma.module'
-import { UserAuthModule } from './user-auth/user-auth.module'
+import { UserAuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module'
 import { UserAccountModule } from './user-account/user-account.module'
 import { SellerAuthModule } from './seller-auth/seller-auth.module'

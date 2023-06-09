@@ -14,19 +14,19 @@ export class CategoryService {
 	async getCategoryById(id: number) {
 		return await this.prisma.category.findUnique({
 			where: { id },
-			include: { parents: true, childrens: true }
+			include: { childrens: true }
 		})
 	}
 
 	async getCategoryBySlug(slug: string) {
 		return await this.prisma.category.findUnique({
 			where: { slug },
-			include: { parents: true, childrens: true }
+			include: { childrens: true }
 		})
 	}
 
 	async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
-		const { name, slug, isMain, parentIds, childrenIds } = createCategoryDto
+		const { name, slug, isMain, parentId, childrenIds } = createCategoryDto
 
 		const existingCategory = await this.prisma.category.findFirst({
 			where: {
@@ -35,11 +35,10 @@ export class CategoryService {
 		})
 		if (existingCategory) throw new BadRequestException('This category is already exist')
 
-		if (parentIds && parentIds.length > 0 && childrenIds && childrenIds.length > 0) {
+		if (parentId && childrenIds && childrenIds.length > 0) {
 			throw new BadRequestException('The same category cannot be as parent and children')
 		}
 
-		const parents = parentIds ? parentIds.map(parentId => ({ id: parentId })) : []
 		const childrens = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
 
 		const category = await this.prisma.category.create({
@@ -47,11 +46,10 @@ export class CategoryService {
 				name,
 				isMain,
 				slug,
-				parents: { connect: parents },
+				parent: { connect: { id: parentId } },
 				childrens: { connect: childrens }
 			},
 			include: {
-				parents: true,
 				childrens: true
 			}
 		})

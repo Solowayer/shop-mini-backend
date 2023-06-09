@@ -28,14 +28,11 @@ model User {
 
   role Role @default(USER)
 
+  seller Seller?
+
   orders  Order[]
   reviews Review[]
   cart    Cart?
-}
-
-enum Role {
-  USER
-  ADMIN
 }
 
 model Seller {
@@ -56,6 +53,15 @@ model Seller {
 
   products Product[]
   orders   Order[]
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+}
+
+enum Role {
+  USER
+  ADMIN
+  SELLER
 }
 
 // model Address {
@@ -100,8 +106,9 @@ model Category {
 
   isMain Boolean @default(false)
 
-  parents   Category[] @relation("ParentChildren")
-  childrens Category[] @relation("ParentChildren")
+  parent    Category?  @relation("ParentChildrens", fields: [parentId], references: [id])
+  parentId  Int?
+  childrens Category[] @relation("ParentChildrens")
 
   products CategoriesOnProducts[]
 

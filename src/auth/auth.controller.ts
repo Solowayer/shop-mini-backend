@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, Session, Get, UseGuards } from '@nestjs/common'
-import { UserAuthService } from './user-auth.service'
-import { LoginUserDto, RegisterUserDto } from './user-auth.dto'
+import { UserAuthService } from './auth.service'
+import { LoginUserDto, RegisterUserDto } from './auth.dto'
 import { Request, Response } from 'express'
 import { LocalGuard, AuthenticatedGuard } from 'src/common/guards/local.guard'
 
-@Controller('user-auth')
+@Controller('auth')
 export class UserAuthController {
 	constructor(private readonly userAuthService: UserAuthService) {}
 

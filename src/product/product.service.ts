@@ -107,26 +107,15 @@ export class ProductService {
 		return this.prisma.product.delete({ where: { id } })
 	}
 
-	private async addParentCategories(category: Category, allCategories: Category[] = []): Promise<Category[]> {
-		const categoryIds = allCategories.map(cat => cat.id) // Масив ідентифікаторів наявних категорій
-
-		if (!categoryIds.includes(category.id)) {
-			allCategories.push(category)
-
-			const currentCategory = await this.prisma.category.findUnique({
-				where: { id: category.id },
-				include: { parents: true }
-			})
-
-			for (const parent of currentCategory.parents) {
-				const parentCategory = await this.prisma.category.findUnique({
-					where: { id: parent.id }
-				})
-
-				await this.addParentCategories(parentCategory, allCategories)
+	private async addParentCategories(category: Category, categories: Category[] = []): Promise<Category[]> {
+		categories.push(category)
+		if (category.parentId) {
+			const parentCategory = await this.prisma.category.findUnique({ where: { id: category.parentId } })
+			if (parentCategory) {
+				categories.push(parentCategory)
+				await this.addParentCategories(parentCategory, categories)
 			}
 		}
-
-		return allCategories
+		return categories
 	}
 }

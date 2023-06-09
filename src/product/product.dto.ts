@@ -17,7 +17,7 @@ export class CreateProductDto {
 
 	@IsString()
 	@IsOptional()
-	@MaxLength(300)
+	@MaxLength(1000)
 	description: string
 
 	@IsNumber()
