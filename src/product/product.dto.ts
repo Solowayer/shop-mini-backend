@@ -20,6 +20,7 @@ export class CreateProductDto {
 	@MaxLength(1000)
 	description: string
 
+	@IsNotEmpty()
 	@IsNumber()
 	price: number
 
@@ -27,9 +28,9 @@ export class CreateProductDto {
 	@IsNumber()
 	categoryId?: number
 
-	// @IsOptional()
-	// @IsNumber()
-	// sellerId?: number
+	@IsOptional()
+	@IsNumber()
+	sellerId?: number
 
 	@IsBoolean()
 	published: boolean

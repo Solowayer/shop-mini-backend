@@ -47,8 +47,6 @@ model Seller {
   email       String @unique
   phoneNumber String @unique
 
-  passwordHash String
-
   pib String
 
   products Product[]
