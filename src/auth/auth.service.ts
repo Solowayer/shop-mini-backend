@@ -13,10 +13,11 @@ export class UserAuthService {
 		const { username, email, password, phoneNumber } = registerUserDto
 
 		const existingUser = await this.prisma.user.findUnique({
-			where: { email }
+			where: { email },
+			include: { seller: true }
 		})
 
-		if (existingUser) throw new BadRequestException('Користувач з таким email вже існує')
+		if (existingUser) throw new BadRequestException('This email is already in use')
 
 		const passwordHash = await argon.hash(password)
 
@@ -33,10 +34,11 @@ export class UserAuthService {
 		const { email, password } = loginUserDto
 
 		const user = await this.prisma.user.findUnique({
-			where: { email }
+			where: { email },
+			include: { seller: true }
 		})
 
-		if (!user) throw new NotFoundException('Такого юзера не існує')
+		if (!user) throw new NotFoundException('This user doesn`t exist')
 
 		const isMatch = await argon.verify(user.passwordHash, password)
 		if (!isMatch) throw new ForbiddenException('Невірні дані')
@@ -44,6 +46,14 @@ export class UserAuthService {
 		delete user.passwordHash
 
 		return user
+	}
+
+	async checkSeller(userId: number): Promise<boolean> {
+		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
+
+		if (user.seller) return true
+
+		return false
 	}
 
 	logout(req: Request, res: Response) {
