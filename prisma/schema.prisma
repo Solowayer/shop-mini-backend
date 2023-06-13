@@ -154,7 +154,7 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   name     String
-  image    String
+  image    String?
   quantity Int
   price    Float
 

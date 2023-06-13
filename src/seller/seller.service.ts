@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
 import { CreateSellerDto, UpdateSellerDto } from './seller.dto'
+import { Product } from '@prisma/client'
 
 @Injectable()
 export class SellerService {
@@ -48,5 +49,13 @@ export class SellerService {
 		if (user.seller) return true
 
 		return false
+	}
+
+	async getSellerProducts(userId: number): Promise<Product[]> {
+		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
+
+		const products = await this.prisma.product.findMany({ where: { sellerId: user.seller.id } })
+
+		return products
 	}
 }

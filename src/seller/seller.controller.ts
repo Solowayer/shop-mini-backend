@@ -31,4 +31,10 @@ export class SellerController {
 	checkSeller(@GetUser() user: User) {
 		return this.sellerService.checkSeller(user.id)
 	}
+
+	@UseGuards(AuthenticatedGuard)
+	@Get('products')
+	getSellerProducts(@GetUser() user: User) {
+		return this.sellerService.getSellerProducts(user.id)
+	}
 }

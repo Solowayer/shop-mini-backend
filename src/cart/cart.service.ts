@@ -48,7 +48,7 @@ export class CartService {
 		const cartItem = await this.prisma.cartItem.create({
 			data: {
 				name: product.name,
-				image: product.images[0],
+				image: product.images.length > 0 ? product.images[0] : null,
 				quantity,
 				price: product.price * quantity,
 				product: {
@@ -98,7 +98,7 @@ export class CartService {
 		}
 
 		const cart = await this.prisma.cart.findUnique({ where: { id: cartItem.cartId } })
-		await this.getCart(cart.userId)
+		if (cart) await this.getCart(cart.userId)
 
 		return deletedCartItem
 	}

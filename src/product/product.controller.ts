@@ -3,8 +3,6 @@ import { ProductService } from './product.service'
 import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
 import { User } from '@prisma/client'
-// import { Seller } from '@prisma/client'
-// import { GetUser } from 'src/common/decorators/user.decorator'
 
 @Controller('products')
 export class ProductController {
@@ -21,7 +19,7 @@ export class ProductController {
 	}
 
 	@UseGuards()
-	@Post('')
+	@Post('create')
 	createProduct(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
 		return this.productService.createProduct(createProductDto, user.id)
 	}

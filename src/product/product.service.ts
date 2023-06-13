@@ -92,7 +92,8 @@ export class ProductService {
 			data: {
 				...productData,
 				categories: {
-					create: [...allParentCategories].map(category => ({ category: { connect: { id: category.id } } }))
+					create:
+						categoryId && [...allParentCategories].map(category => ({ category: { connect: { id: category.id } } }))
 				},
 				// categories: { create: { category: { connect: { id } } } },
 				seller: userId && { connect: { id: seller.id } }

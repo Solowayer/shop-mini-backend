@@ -9,7 +9,7 @@ export class CreateProductDto {
 
 	@IsArray()
 	@IsOptional()
-	images: string[]
+	images?: string[]
 
 	@IsString()
 	@IsNotEmpty()
@@ -18,7 +18,7 @@ export class CreateProductDto {
 	@IsString()
 	@IsOptional()
 	@MaxLength(1000)
-	description: string
+	description?: string
 
 	@IsNotEmpty()
 	@IsNumber()
@@ -27,10 +27,6 @@ export class CreateProductDto {
 	@IsOptional()
 	@IsNumber()
 	categoryId?: number
-
-	// @IsOptional()
-	// @IsNumber()
-	// sellerId?: number
 
 	@IsBoolean()
 	published: boolean
