@@ -5,7 +5,7 @@ import { GetUser } from 'src/common/decorators/user.decorator'
 import { User } from '@prisma/client'
 import { AuthenticatedGuard } from 'src/common/guards/local.guard'
 
-@Controller('sellers')
+@Controller('seller')
 export class SellerController {
 	constructor(private readonly sellerService: SellerService) {}
 
@@ -15,7 +15,7 @@ export class SellerController {
 	}
 
 	@UseGuards(AuthenticatedGuard)
-	@Post('')
+	@Post('register')
 	createSeller(@Body() createSellerDto: CreateSellerDto, @GetUser() user: User) {
 		return this.sellerService.createSeller(createSellerDto, user.id)
 	}
@@ -24,5 +24,11 @@ export class SellerController {
 	@Patch(':sellerId')
 	updateSeller(@Param('sellerId') sellerId: number, @Body() updateSellerDto: UpdateSellerDto) {
 		return this.sellerService.updateSeller(sellerId, updateSellerDto)
+	}
+
+	@UseGuards(AuthenticatedGuard)
+	@Get('check-seller')
+	checkSeller(@GetUser() user: User) {
+		return this.sellerService.checkSeller(user.id)
 	}
 }

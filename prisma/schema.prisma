@@ -109,8 +109,6 @@ model Category {
   childrens Category[] @relation("ParentChildrens")
 
   products CategoriesOnProducts[]
-
-  @@unique([id, slug])
 }
 
 model CategoriesOnProducts {

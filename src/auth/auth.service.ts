@@ -6,7 +6,7 @@ import * as argon from 'argon2'
 import { Request, Response } from 'express'
 
 @Injectable()
-export class UserAuthService {
+export class AuthService {
 	constructor(private prisma: PrismaService) {}
 
 	async registerUser(registerUserDto: RegisterUserDto) {
@@ -46,14 +46,6 @@ export class UserAuthService {
 		delete user.passwordHash
 
 		return user
-	}
-
-	async checkSeller(userId: number): Promise<boolean> {
-		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
-
-		if (user.seller) return true
-
-		return false
 	}
 
 	logout(req: Request, res: Response) {

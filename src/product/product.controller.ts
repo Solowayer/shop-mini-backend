@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
+import { GetUser } from 'src/common/decorators/user.decorator'
+import { User } from '@prisma/client'
 // import { Seller } from '@prisma/client'
 // import { GetUser } from 'src/common/decorators/user.decorator'
 
@@ -20,8 +22,8 @@ export class ProductController {
 
 	@UseGuards()
 	@Post('')
-	createProduct(@Body() createProductDto: CreateProductDto) {
-		return this.productService.createProduct(createProductDto)
+	createProduct(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
+		return this.productService.createProduct(createProductDto, user.id)
 	}
 
 	@Get('c:categoryId')

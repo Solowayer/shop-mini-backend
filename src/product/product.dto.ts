@@ -28,9 +28,9 @@ export class CreateProductDto {
 	@IsNumber()
 	categoryId?: number
 
-	@IsOptional()
-	@IsNumber()
-	sellerId?: number
+	// @IsOptional()
+	// @IsNumber()
+	// sellerId?: number
 
 	@IsBoolean()
 	published: boolean

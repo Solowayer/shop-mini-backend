@@ -68,8 +68,13 @@ export class ProductService {
 		return { productsMaxPrice: productWithMaxPrice.price }
 	}
 
-	async createProduct(createProductDto: CreateProductDto): Promise<Product> {
+	async createProduct(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
 		const { categoryId, ...productData } = createProductDto
+
+		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
+		if (userId && !user) throw new BadRequestException('Такого юзера не існує')
+
+		const seller = user.seller
 
 		const categoryExist = categoryId
 			? await this.prisma.category.findUnique({
@@ -87,9 +92,10 @@ export class ProductService {
 			data: {
 				...productData,
 				categories: {
-					create: categoryId && allParentCategories.map(category => ({ categoryId: category.id }))
-				}
-				// seller: sellerId && { connect: { id: sellerId } }
+					create: [...allParentCategories].map(category => ({ category: { connect: { id: category.id } } }))
+				},
+				// categories: { create: { category: { connect: { id } } } },
+				seller: userId && { connect: { id: seller.id } }
 			},
 			include: {
 				categories: true
@@ -107,15 +113,17 @@ export class ProductService {
 		return this.prisma.product.delete({ where: { id } })
 	}
 
-	private async addParentCategories(category: Category, categories: Category[] = []): Promise<Category[]> {
-		categories.push(category)
+	private async addParentCategories(category: Category, categories: Set<Category> = new Set()): Promise<Set<Category>> {
+		categories.add(category)
+
 		if (category.parentId) {
 			const parentCategory = await this.prisma.category.findUnique({ where: { id: category.parentId } })
 			if (parentCategory) {
-				categories.push(parentCategory)
+				categories.add(parentCategory)
 				await this.addParentCategories(parentCategory, categories)
 			}
 		}
+
 		return categories
 	}
 }

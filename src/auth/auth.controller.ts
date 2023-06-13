@@ -1,15 +1,13 @@
 /* eslint-disable no-console */
 import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, Session, Get, UseGuards } from '@nestjs/common'
-import { UserAuthService } from './auth.service'
+import { AuthService } from './auth.service'
 import { LoginUserDto, RegisterUserDto } from './auth.dto'
 import { Request, Response } from 'express'
 import { LocalGuard, AuthenticatedGuard } from 'src/common/guards/local.guard'
-import { GetUser } from 'src/common/decorators/user.decorator'
-import { User } from '@prisma/client'
 
 @Controller('auth')
-export class UserAuthController {
-	constructor(private readonly userAuthService: UserAuthService) {}
+export class AuthController {
+	constructor(private readonly userAuthService: AuthService) {}
 
 	@Post('register')
 	@HttpCode(HttpStatus.CREATED)
@@ -22,12 +20,6 @@ export class UserAuthController {
 	@HttpCode(HttpStatus.OK)
 	loginUser(@Body() loginUserDto: LoginUserDto) {
 		return this.userAuthService.loginUser(loginUserDto)
-	}
-
-	@UseGuards(AuthenticatedGuard)
-	@Post('check-seller')
-	checkSeller(@GetUser() user: User) {
-		return this.userAuthService.checkSeller(user.id)
 	}
 
 	@UseGuards(AuthenticatedGuard)

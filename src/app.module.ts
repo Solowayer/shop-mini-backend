@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { PrismaModule } from '../prisma/prisma.module'
-import { UserAuthModule } from './auth/auth.module'
+import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module'
 import { UserAccountModule } from './user-account/user-account.module'
 import { SellerModule } from './seller/seller.module'
@@ -15,7 +15,7 @@ import { CartModule } from './cart/cart.module'
 		ConfigModule.forRoot({ isGlobal: true }),
 		PrismaModule,
 
-		UserAuthModule,
+		AuthModule,
 		UserAccountModule,
 		UserModule,
 
