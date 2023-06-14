@@ -51,7 +51,8 @@ export class ProductService {
 
 	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
 		const products = await this.prisma.product.findMany({
-			where: { categories: { some: { category: { id: categoryId } } } }
+			where: { categories: { some: { category: { id: categoryId } } } },
+			include: { categories: true }
 		})
 		return products
 	}
@@ -76,26 +77,21 @@ export class ProductService {
 
 		const seller = user.seller
 
-		const categoryExist = categoryId
-			? await this.prisma.category.findUnique({
-					where: { id: categoryId }
-			  })
-			: null
-		if (categoryId && !categoryExist) throw new NotFoundException('Такої категорії не існує')
+		const categoryExist = await this.prisma.category.findUnique({ where: { id: categoryId } })
+
+		if (!categoryExist) throw new NotFoundException('Такої категорії не існує')
 
 		const existingProduct = await this.prisma.product.findUnique({ where: { slug: createProductDto.slug } })
 		if (existingProduct) throw new BadRequestException('Такий товар вже існує')
 
-		const allParentCategories = categoryId && (await this.addParentCategories(categoryExist))
+		const allParentCategories = await this.addParentCategories(categoryExist)
 
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
 				categories: {
-					create:
-						categoryId && [...allParentCategories].map(category => ({ category: { connect: { id: category.id } } }))
+					create: [...allParentCategories].map(category => ({ category: { connect: { id: category.id } } }))
 				},
-				// categories: { create: { category: { connect: { id } } } },
 				seller: userId && { connect: { id: seller.id } }
 			},
 			include: {

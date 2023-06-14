@@ -7,6 +7,10 @@ import { Category } from '@prisma/client'
 export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
+	async getAllCategories() {
+		return await this.prisma.category.findMany()
+	}
+
 	async getMainCategories() {
 		return await this.prisma.category.findMany({ where: { isMain: true }, orderBy: { name: 'asc' } })
 	}

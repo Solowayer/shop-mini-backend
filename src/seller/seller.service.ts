@@ -54,7 +54,10 @@ export class SellerService {
 	async getSellerProducts(userId: number): Promise<Product[]> {
 		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
 
-		const products = await this.prisma.product.findMany({ where: { sellerId: user.seller.id } })
+		const products = await this.prisma.product.findMany({
+			where: { sellerId: user.seller.id },
+			include: { categories: true }
+		})
 
 		return products
 	}

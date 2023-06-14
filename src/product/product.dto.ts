@@ -24,9 +24,9 @@ export class CreateProductDto {
 	@IsNumber()
 	price: number
 
-	@IsOptional()
 	@IsNumber()
-	categoryId?: number
+	@IsNotEmpty()
+	categoryId: number
 
 	@IsBoolean()
 	published: boolean

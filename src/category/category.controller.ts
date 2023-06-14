@@ -6,7 +6,12 @@ import { CreateCategoryDto, UpdateCategoryDto } from './category.dto'
 export class CategoryController {
 	constructor(private readonly categoryService: CategoryService) {}
 
-	@Get()
+	@Get('')
+	getAllCategories() {
+		return this.categoryService.getAllCategories()
+	}
+
+	@Get('main')
 	getMainCategories() {
 		return this.categoryService.getMainCategories()
 	}
