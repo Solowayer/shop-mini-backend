@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { Category, Product } from '@prisma/client'
+import { Product } from '@prisma/client'
 
 @Injectable()
 export class ProductService {
@@ -20,8 +20,7 @@ export class ProductService {
 			orderBy: {
 				price: sort === 'price_asc' ? 'asc' : sort === 'price_desc' ? 'desc' : undefined,
 				rating: sort === 'rating' ? 'desc' : undefined
-			},
-			include: { categories: true }
+			}
 		})
 
 		if (!products) throw new NotFoundException('Products doesn`t exist')
@@ -50,10 +49,20 @@ export class ProductService {
 	}
 
 	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
+		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, include: { parents: true } })
+
+		if (!category) {
+			throw new NotFoundException('Category not found')
+		}
+
+		const categoryIds = [categoryId, ...category.parents.map(parent => parent.id)]
+
 		const products = await this.prisma.product.findMany({
-			where: { categories: { some: { category: { id: categoryId } } } },
-			include: { categories: true }
+			where: {
+				OR: categoryIds.map(categoryId => ({ categoryId }))
+			}
 		})
+
 		return products
 	}
 
@@ -84,18 +93,11 @@ export class ProductService {
 		const existingProduct = await this.prisma.product.findUnique({ where: { slug: createProductDto.slug } })
 		if (existingProduct) throw new BadRequestException('Такий товар вже існує')
 
-		const allParentCategories = await this.addParentCategories(categoryExist)
-
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
-				categories: {
-					create: [...allParentCategories].map(category => ({ category: { connect: { id: category.id } } }))
-				},
+				category: categoryExist && { connect: { id: categoryExist.id } },
 				seller: userId && { connect: { id: seller.id } }
-			},
-			include: {
-				categories: true
 			}
 		})
 
@@ -108,19 +110,5 @@ export class ProductService {
 
 	removeProduct(id: number) {
 		return this.prisma.product.delete({ where: { id } })
-	}
-
-	private async addParentCategories(category: Category, categories: Set<Category> = new Set()): Promise<Set<Category>> {
-		categories.add(category)
-
-		if (category.parentId) {
-			const parentCategory = await this.prisma.category.findUnique({ where: { id: category.parentId } })
-			if (parentCategory) {
-				categories.add(parentCategory)
-				await this.addParentCategories(parentCategory, categories)
-			}
-		}
-
-		return categories
 	}
 }

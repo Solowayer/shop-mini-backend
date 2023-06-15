@@ -55,8 +55,7 @@ export class SellerService {
 		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
 
 		const products = await this.prisma.product.findMany({
-			where: { sellerId: user.seller.id },
-			include: { categories: true }
+			where: { sellerId: user.seller.id }
 		})
 
 		return products

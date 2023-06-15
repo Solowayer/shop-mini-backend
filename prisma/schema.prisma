@@ -82,7 +82,8 @@ model Product {
   description String?
   price       Float
 
-  categories CategoriesOnProducts[]
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId Int?
 
   seller   Seller? @relation(fields: [sellerId], references: [id])
   sellerId Int?
@@ -104,20 +105,12 @@ model Category {
 
   isMain Boolean @default(false)
 
-  parent    Category?  @relation("ParentChildrens", fields: [parentId], references: [id])
-  parentId  Int?
-  childrens Category[] @relation("ParentChildrens")
+  parentId Int?
 
-  products CategoriesOnProducts[]
-}
+  childrens Category[] @relation("ChildrensParents")
+  parents   Category[] @relation("ChildrensParents")
 
-model CategoriesOnProducts {
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId  Int
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId Int
-
-  @@id([productId, categoryId])
+  product Product[]
 }
 
 model Review {
