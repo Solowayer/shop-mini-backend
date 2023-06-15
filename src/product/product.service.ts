@@ -49,13 +49,13 @@ export class ProductService {
 	}
 
 	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
-		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, include: { parents: true } })
+		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, include: { childrens: true } })
 
 		if (!category) {
 			throw new NotFoundException('Category not found')
 		}
 
-		const categoryIds = [categoryId, ...category.parents.map(parent => parent.id)]
+		const categoryIds = [categoryId, ...category.childrens.map(parent => parent.id)]
 
 		const products = await this.prisma.product.findMany({
 			where: {
