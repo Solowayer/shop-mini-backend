@@ -9,6 +9,7 @@ import { ProductModule } from './product/product.module'
 import { CategoryModule } from './category/category.module'
 import { OrderModule } from './order/order.module'
 import { CartModule } from './cart/cart.module'
+import { UploadModule } from './upload/upload.module';
 
 @Module({
 	imports: [
@@ -24,7 +25,8 @@ import { CartModule } from './cart/cart.module'
 		ProductModule,
 		CategoryModule,
 		OrderModule,
-		CartModule
+		CartModule,
+		UploadModule
 	]
 })
 export class AppModule {}

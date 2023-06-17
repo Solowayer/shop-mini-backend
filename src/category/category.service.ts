@@ -15,11 +15,13 @@ export class CategoryService {
 		return await this.prisma.category.findMany({ where: { isMain: true }, orderBy: { name: 'asc' } })
 	}
 
-	async getCategoryById(id: number) {
-		return await this.prisma.category.findUnique({
+	async getCategoryById(id: number): Promise<Category> {
+		const category = await this.prisma.category.findUnique({
 			where: { id },
 			include: { childrens: true }
 		})
+
+		return category
 	}
 
 	async getCategoryBySlug(slug: string) {
