@@ -7,6 +7,8 @@ import * as session from 'express-session'
 import * as cookieParser from 'cookie-parser'
 import * as passport from 'passport'
 import * as pgSession from 'connect-pg-simple'
+import * as express from 'express'
+import { join } from 'path'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
@@ -45,6 +47,8 @@ async function bootstrap() {
 		origin: 'http://localhost:3000',
 		credentials: true
 	})
+
+	app.use('/uploads/images', express.static('uploads/images'))
 
 	const prismaService = app.get(PrismaService)
 	await prismaService.enableShutdownHooks(app)

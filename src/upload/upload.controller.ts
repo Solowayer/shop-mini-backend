@@ -2,6 +2,7 @@
 import { Controller, Post, UseInterceptors, UploadedFile, UploadedFiles, BadRequestException } from '@nestjs/common'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
+import { extname, join } from 'path'
 
 @Controller('upload')
 export class UploadController {
@@ -25,12 +26,13 @@ export class UploadController {
 
 	@Post('image')
 	@UseInterceptors(
-		FilesInterceptor('images', 10, {
+		FilesInterceptor('image', 10, {
 			storage: diskStorage({
 				destination: './uploads/images',
 				filename: (req, file, callback) => {
+					const ext = extname(file.originalname)
 					const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
-					const filename = `${file.fieldname}-${uniqueSuffix}`
+					const filename = `${file.fieldname}-${uniqueSuffix}${ext}`
 					callback(null, filename)
 				}
 			}),
@@ -47,7 +49,18 @@ export class UploadController {
 		})
 	)
 	uploadImages(@UploadedFiles() files: Express.Multer.File[]) {
-		console.log(files)
-		return { message: 'Завантажено успішно' }
+		// Формування масиву посилань на завантажені зображення
+		const imageUrls = files.map(file => {
+			// Шлях до папки з зображеннями
+			const uploadFolder = 'uploads/images'
+			// Повний шлях до зображення
+			const imagePath = join(uploadFolder, file.filename)
+			// Replace backslashes with forward slashes in the path
+			const imageUrl = imagePath.replace(/\\/g, '/')
+			// Повернення посилання на зображення
+			return `http://localhost:4200/${imageUrl}`
+		})
+		// console.log(files)
+		return { message: 'Завантажено успішно', imageUrls }
 	}
 }
