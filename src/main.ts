@@ -8,7 +8,6 @@ import * as cookieParser from 'cookie-parser'
 import * as passport from 'passport'
 import * as pgSession from 'connect-pg-simple'
 import * as express from 'express'
-import { join } from 'path'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
