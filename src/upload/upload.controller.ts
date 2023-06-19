@@ -1,8 +1,18 @@
 /* eslint-disable no-console */
-import { Controller, Post, UseInterceptors, UploadedFile, UploadedFiles, BadRequestException } from '@nestjs/common'
+import {
+	Controller,
+	Post,
+	UseInterceptors,
+	UploadedFile,
+	UploadedFiles,
+	BadRequestException,
+	Delete,
+	Param
+} from '@nestjs/common'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { extname, join } from 'path'
+import * as fs from 'fs'
 
 @Controller('upload')
 export class UploadController {
@@ -62,5 +72,18 @@ export class UploadController {
 		})
 		// console.log(files)
 		return { message: 'Завантажено успішно', imageUrls }
+	}
+
+	@Delete(':imageName')
+	deleteImage(@Param('imageName') imageName: string) {
+		const imagePath = `uploads/images/${imageName}`
+
+		fs.unlink(imagePath, err => {
+			if (err) {
+				console.log('Помилка при видаленні зображення', err)
+				throw new Error('Помилка при видаленні зображення')
+			}
+			console.log('Зображення успішно видалено')
+		})
 	}
 }

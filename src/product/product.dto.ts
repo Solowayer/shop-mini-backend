@@ -1,6 +1,15 @@
 import { PartialType } from '@nestjs/mapped-types'
 import { Type } from 'class-transformer'
-import { IsString, IsOptional, MaxLength, IsNumber, IsNotEmpty, IsArray, IsBoolean } from 'class-validator'
+import {
+	IsString,
+	IsOptional,
+	MaxLength,
+	IsNumber,
+	IsNotEmpty,
+	IsArray,
+	IsBoolean,
+	ArrayMaxSize
+} from 'class-validator'
 
 export class CreateProductDto {
 	@IsNotEmpty()
@@ -9,6 +18,7 @@ export class CreateProductDto {
 
 	@IsArray()
 	@IsOptional()
+	@ArrayMaxSize(10)
 	images?: string[]
 
 	@IsString()
