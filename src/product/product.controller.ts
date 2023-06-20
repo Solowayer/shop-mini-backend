@@ -24,12 +24,12 @@ export class ProductController {
 		return this.productService.createProduct(createProductDto, user.id)
 	}
 
-	@Get('c:categoryId')
+	@Get('c/:categoryId')
 	getByCategoryId(@Param('categoryId') categoryId: string) {
 		return this.productService.getProductsByCategoryId(+categoryId)
 	}
 
-	@Get('p:id')
+	@Get('p/:id')
 	getById(@Param('id') id: string) {
 		return this.productService.getProductById(+id)
 	}
@@ -39,12 +39,12 @@ export class ProductController {
 		return this.productService.getProductBySlug(slug)
 	}
 
-	@Patch('p:id')
+	@Patch('p/:id')
 	update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
 		return this.productService.updateProduct(+id, updateProductDto)
 	}
 
-	@Delete('p:id')
+	@Delete('p/:id')
 	remove(@Param('id') id: string) {
 		return this.productService.removeProduct(+id)
 	}

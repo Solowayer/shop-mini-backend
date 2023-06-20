@@ -74,16 +74,16 @@ export class UploadController {
 		return { message: 'Завантажено успішно', imageUrls }
 	}
 
-	@Delete(':imageName')
-	deleteImage(@Param('imageName') imageName: string) {
+	@Delete('image/:imageName')
+	async deleteImage(@Param('imageName') imageName: string) {
 		const imagePath = `uploads/images/${imageName}`
 
-		fs.unlink(imagePath, err => {
-			if (err) {
-				console.log('Помилка при видаленні зображення', err)
-				throw new Error('Помилка при видаленні зображення')
-			}
-			console.log('Зображення успішно видалено')
-		})
+		try {
+			await fs.promises.unlink(imagePath)
+			return { message: 'Завантажено успішно', imageName }
+		} catch (err) {
+			console.log('Помилка при видаленні зображення', err)
+			throw new Error('Помилка при видаленні зображення')
+		}
 	}
 }

@@ -16,7 +16,7 @@ export class CategoryController {
 		return this.categoryService.getMainCategories()
 	}
 
-	@Get(':id')
+	@Get('c/:id')
 	getCategoryById(@Param('id') id: string) {
 		return this.categoryService.getCategoryById(+id)
 	}
@@ -31,12 +31,12 @@ export class CategoryController {
 		return this.categoryService.createCategory(createCategoryDto)
 	}
 
-	@Patch(':id')
+	@Patch('c/:id')
 	updateCategory(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
 		return this.categoryService.updateCategory(+id, updateCategoryDto)
 	}
 
-	@Delete(':id')
+	@Delete('c/:id')
 	removeCategory(@Param('id') id: string) {
 		return this.categoryService.removeCategory(+id)
 	}

@@ -49,6 +49,8 @@ export class ProductService {
 	}
 
 	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
+		console.log('CategoryId:', categoryId)
+
 		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, include: { childrens: true } })
 
 		if (!category) {
