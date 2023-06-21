@@ -80,7 +80,7 @@ export class UploadController {
 
 		try {
 			await fs.promises.unlink(imagePath)
-			return { message: 'Завантажено успішно', imageName }
+			return { message: 'Видалено успішно', imageName }
 		} catch (err) {
 			console.log('Помилка при видаленні зображення', err)
 			throw new Error('Помилка при видаленні зображення')

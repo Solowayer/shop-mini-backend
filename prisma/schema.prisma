@@ -133,7 +133,8 @@ model Cart {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  totalAmount Float @default(0)
+  totalAmount   Float @default(0)
+  totalQuantity Float @default(0)
 
   cartItems CartItem[]
 

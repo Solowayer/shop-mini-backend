@@ -13,10 +13,11 @@ export class CartService {
 
 		const cartItems = cart.cartItems
 		const totalAmount = cartItems.reduce((total, item) => total + item.price, 0)
+		const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0)
 
 		return await this.prisma.cart.update({
 			where: { id: cart.id },
-			data: { totalAmount },
+			data: { totalAmount, totalQuantity },
 			include: { cartItems: true }
 		})
 	}
