@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Product } from '@prisma/client'
+import * as fs from 'fs'
 
 @Injectable()
 export class ProductService {
@@ -28,8 +29,8 @@ export class ProductService {
 		return products
 	}
 
-	getProductById(id: number) {
-		const product = this.prisma.product.findUnique({ where: { id } })
+	async getProductById(id: number) {
+		const product = await this.prisma.product.findUnique({ where: { id } })
 
 		if (!product) {
 			throw new NotFoundException(`Product with id "${id}" not found`)
@@ -38,8 +39,8 @@ export class ProductService {
 		return product
 	}
 
-	getProductBySlug(slug: string): Promise<Product> {
-		const product = this.prisma.product.findUnique({ where: { slug } })
+	async getProductBySlug(slug: string): Promise<Product> {
+		const product = await this.prisma.product.findUnique({ where: { slug } })
 
 		if (!product) {
 			throw new NotFoundException(`Product with slug "${slug}" not found`)
@@ -106,11 +107,29 @@ export class ProductService {
 		return product
 	}
 
-	updateProduct(id: number, updateProductDto: UpdateProductDto) {
-		return this.prisma.product.update({ where: { id }, data: updateProductDto })
+	async updateProduct(id: number, updateProductDto: UpdateProductDto) {
+		return await this.prisma.product.update({ where: { id }, data: updateProductDto })
 	}
 
-	removeProduct(id: number) {
+	async removeProduct(id: number) {
+		const product = await this.prisma.product.findUnique({ where: { id } })
+
+		const productImages = product.images
+
+		if (productImages) {
+			for (const imageUrl of productImages) {
+				const imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
+
+				const imagePath = `uploads/images/${imageName}`
+				try {
+					await fs.promises.unlink(imagePath)
+					console.log(`Видалено файл: ${imageUrl}`)
+				} catch (error) {
+					console.log(`Помилка при видаленні файлу: ${imageUrl}`, error)
+				}
+			}
+		}
+
 		return this.prisma.product.delete({ where: { id } })
 	}
 }

@@ -47,7 +47,7 @@ export class UploadController {
 				}
 			}),
 			fileFilter: (req, file, callback) => {
-				if (file.mimetype.match(/\/(jpeg|png|gif)$/)) {
+				if (file.mimetype.match(/\/(jpeg|png|gif|webp)$/)) {
 					callback(null, true)
 				} else {
 					callback(new BadRequestException('Invalid file type'), false)
