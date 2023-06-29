@@ -7,18 +7,18 @@ import { Category } from '@prisma/client'
 export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
-	async getAllCategories() {
-		return await this.prisma.category.findMany({ include: { childrens: true, parents: true } })
+	async getAllCategories(): Promise<Category[]> {
+		return await this.prisma.category.findMany({ include: { children: true, parents: true } })
 	}
 
-	async getMainCategories() {
+	async getMainCategories(): Promise<Category[]> {
 		return await this.prisma.category.findMany({ where: { isMain: true }, orderBy: { name: 'asc' } })
 	}
 
 	async getCategoryById(id: number): Promise<Category> {
 		const category = await this.prisma.category.findUnique({
 			where: { id },
-			include: { childrens: true }
+			include: { children: true }
 		})
 
 		return category
@@ -27,7 +27,7 @@ export class CategoryService {
 	async getCategoryBySlug(slug: string) {
 		return await this.prisma.category.findUnique({
 			where: { slug },
-			include: { childrens: true }
+			include: { children: true }
 		})
 	}
 
@@ -67,10 +67,10 @@ export class CategoryService {
 				slug,
 				parentId,
 				parents: { connect: parents.map(parent => ({ id: parent.id })) },
-				childrens: { connect: childrens }
+				children: { connect: childrens }
 			},
 			include: {
-				childrens: true,
+				children: true,
 				parents: true
 			}
 		})

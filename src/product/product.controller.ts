@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common'
 import { ProductService } from './product.service'
-import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
+import { CreateProductDto, GetAllProductsDto, UpdateProductDto } from './product.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
 import { User } from '@prisma/client'
 
@@ -9,8 +9,8 @@ export class ProductController {
 	constructor(private readonly productService: ProductService) {}
 
 	@Get()
-	async getAllProducts(@Query() productsSortDto: ProductsSortDto, @Query() productsFilterDto: ProductsFilterDto) {
-		return await this.productService.getAllProducts(productsSortDto, productsFilterDto)
+	async getAllProducts(@Query() getAllProductsDto: GetAllProductsDto) {
+		return await this.productService.getAllProducts(getAllProductsDto)
 	}
 
 	@Get('max-price')

@@ -107,8 +107,8 @@ model Category {
 
   parentId Int?
 
-  childrens Category[] @relation("ChildrensParents")
-  parents   Category[] @relation("ChildrensParents")
+  children Category[] @relation("ChildrensParents")
+  parents  Category[] @relation("ChildrensParents")
 
   product Product[]
 }

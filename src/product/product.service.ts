@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { CreateProductDto, ProductsFilterDto, ProductsSortDto, UpdateProductDto } from './product.dto'
+import { CreateProductDto, GetAllProductsDto, ProductsSort, UpdateProductDto } from './product.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Product } from '@prisma/client'
 import * as fs from 'fs'
@@ -8,19 +8,21 @@ import * as fs from 'fs'
 export class ProductService {
 	constructor(private prisma: PrismaService) {}
 
-	async getAllProducts(productSortDto: ProductsSortDto, productsFilterDto: ProductsFilterDto): Promise<Product[]> {
-		const { sort } = productSortDto
-		const { min_price, max_price, search } = productsFilterDto
+	async getAllProducts(getAllProductsDto: GetAllProductsDto): Promise<Product[]> {
+		const { sort, min_price, max_price, searchTerm } = getAllProductsDto
 
 		const products = await this.prisma.product.findMany({
 			where: {
 				published: true,
 				price: { gte: min_price, lte: max_price },
-				name: { contains: search }
+				OR: [
+					{ category: { name: { contains: searchTerm, mode: 'insensitive' } } },
+					{ name: { contains: searchTerm, mode: 'insensitive' } }
+				]
 			},
 			orderBy: {
-				price: sort === 'price_asc' ? 'asc' : sort === 'price_desc' ? 'desc' : undefined,
-				rating: sort === 'rating' ? 'desc' : undefined
+				price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined,
+				rating: sort === ProductsSort.RATING ? 'desc' : undefined
 			}
 		})
 
@@ -52,13 +54,13 @@ export class ProductService {
 	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
 		console.log('CategoryId:', categoryId)
 
-		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, include: { childrens: true } })
+		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, select: { children: true } })
 
 		if (!category) {
 			throw new NotFoundException('Category not found')
 		}
 
-		const categoryIds = [categoryId, ...category.childrens.map(parent => parent.id)]
+		const categoryIds = [categoryId, ...category.children.map(parent => parent.id)]
 
 		const products = await this.prisma.product.findMany({
 			where: {
@@ -69,7 +71,7 @@ export class ProductService {
 		return products
 	}
 
-	async getMaxPrice(): Promise<{ productsMaxPrice: number }> {
+	async getMaxPrice(): Promise<{ maxPrice: number }> {
 		const productWithMaxPrice = await this.prisma.product.findFirst({
 			orderBy: {
 				price: 'desc'
@@ -78,11 +80,15 @@ export class ProductService {
 
 		if (!productWithMaxPrice) throw new NotFoundException('Немає товарів')
 
-		return { productsMaxPrice: productWithMaxPrice.price }
+		return { maxPrice: productWithMaxPrice.price }
 	}
 
 	async createProduct(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
-		const { categoryId, ...productData } = createProductDto
+		const { categoryId, images, ...productData } = createProductDto
+
+		if (images && images.length > 10) {
+			throw new BadRequestException('Перевищено допустиму кількість зображень (максимум 10).')
+		}
 
 		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
 		if (userId && !user) throw new BadRequestException('Такого юзера не існує')
@@ -100,7 +106,8 @@ export class ProductService {
 			data: {
 				...productData,
 				category: categoryExist && { connect: { id: categoryExist.id } },
-				seller: userId && { connect: { id: seller.id } }
+				seller: userId && { connect: { id: seller.id } },
+				images: images || []
 			}
 		})
 

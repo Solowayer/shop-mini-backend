@@ -8,7 +8,8 @@ import {
 	IsNotEmpty,
 	IsArray,
 	IsBoolean,
-	ArrayMaxSize
+	ArrayMaxSize,
+	IsEnum
 } from 'class-validator'
 
 export class CreateProductDto {
@@ -44,7 +45,19 @@ export class CreateProductDto {
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {}
 
-export class ProductsFilterDto {
+export enum ProductsSort {
+	HIGH_PRICE = 'high-price',
+	LOW_PRICE = 'low-price',
+	NEWEST = 'nesest',
+	OLDEST = 'oldest',
+	RATING = 'rating'
+}
+
+export class GetAllProductsDto {
+	@IsOptional()
+	@IsEnum(ProductsSort)
+	sort?: ProductsSort
+
 	@IsOptional()
 	@IsNumber()
 	@Type(() => Number)
@@ -57,11 +70,5 @@ export class ProductsFilterDto {
 
 	@IsOptional()
 	@IsString()
-	search?: string
-}
-
-export class ProductsSortDto {
-	@IsOptional()
-	@IsString()
-	sort?: 'price_asc' | 'price_desc' | 'rating'
+	searchTerm?: string
 }

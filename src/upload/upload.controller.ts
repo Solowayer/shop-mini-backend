@@ -58,6 +58,7 @@ export class UploadController {
 			}
 		})
 	)
+	
 	uploadImages(@UploadedFiles() files: Express.Multer.File[]) {
 		// Формування масиву посилань на завантажені зображення
 		const imageUrls = files.map(file => {
