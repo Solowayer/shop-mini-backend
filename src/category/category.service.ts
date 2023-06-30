@@ -45,18 +45,7 @@ export class CategoryService {
 			throw new BadRequestException('The same category cannot be as parent and children')
 		}
 
-		const parents: Category[] = []
-
-		if (parentId) {
-			const parentCategory = await this.prisma.category.findUnique({
-				where: { id: parentId },
-				include: { parents: true }
-			})
-			if (parentCategory) {
-				parents.push(parentCategory)
-				parents.push(...parentCategory.parents)
-			}
-		}
+		const parents = await this.getParentCategories(parentId)
 
 		const childrens = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
 
@@ -78,35 +67,40 @@ export class CategoryService {
 		return category
 	}
 
-	async getAllParentCategories(categoryId: number): Promise<Category[]> {
-		const category = await this.prisma.category.findUnique({ where: { id: categoryId } })
-
-		if (!category) {
-			throw new NotFoundException('Category not found')
-		}
-
-		const parents: Category[] = []
-
-		if (category.parentId) {
-			const parentCategory = await this.getAllParentCategories(category.parentId)
-			parents.push(...parentCategory)
-		}
-
-		return parents
-	}
-
 	async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto) {
-		const { name } = updateCategoryDto
-
+		const { parentId } = updateCategoryDto
 		const category = await this.prisma.category.findUnique({ where: { id } })
 		if (!category) throw new NotFoundException('Category not found')
 
-		const updatedCategory = await this.prisma.category.update({ where: { id }, data: { name } })
+		const parents = await this.getParentCategories(parentId)
+
+		const updatedCategory = await this.prisma.category.update({
+			where: { id },
+			data: { parents: { connect: parents.map(parent => ({ id: parent.id })) }, ...updateCategoryDto },
+			include: { parents: true }
+		})
 
 		return updatedCategory
 	}
 
 	removeCategory(id: number) {
 		return this.prisma.category.delete({ where: { id } })
+	}
+
+	private async getParentCategories(parentId: number): Promise<Category[]> {
+		const parents: Category[] = []
+
+		if (parentId) {
+			const parentCategory = await this.prisma.category.findUnique({
+				where: { id: parentId },
+				include: { parents: true }
+			})
+			if (parentCategory) {
+				parents.push(parentCategory)
+				parents.push(...parentCategory.parents)
+			}
+		}
+
+		return parents
 	}
 }

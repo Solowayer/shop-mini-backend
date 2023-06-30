@@ -71,7 +71,7 @@ export class ProductService {
 	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
 		console.log('CategoryId:', categoryId)
 
-		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, select: { children: true } })
+		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, include: { children: true } })
 
 		if (!category) {
 			throw new NotFoundException('Category not found')
