@@ -11,6 +11,7 @@ import {
 	ArrayMaxSize,
 	IsEnum
 } from 'class-validator'
+import { PaginationDto } from 'src/pagination/pagination.dto'
 
 export class CreateProductDto {
 	@IsNotEmpty()
@@ -48,12 +49,12 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {}
 export enum ProductsSort {
 	HIGH_PRICE = 'high-price',
 	LOW_PRICE = 'low-price',
-	NEWEST = 'nesest',
+	NEWEST = 'newest',
 	OLDEST = 'oldest',
 	RATING = 'rating'
 }
 
-export class GetAllProductsDto {
+export class GetAllProductsDto extends PaginationDto {
 	@IsOptional()
 	@IsEnum(ProductsSort)
 	sort?: ProductsSort

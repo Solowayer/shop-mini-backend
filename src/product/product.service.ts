@@ -3,13 +3,16 @@ import { CreateProductDto, GetAllProductsDto, ProductsSort, UpdateProductDto } f
 import { PrismaService } from 'prisma/prisma.service'
 import { Product } from '@prisma/client'
 import * as fs from 'fs'
+import { PaginationService } from 'src/pagination/pagination.service'
 
 @Injectable()
 export class ProductService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, private paginationService: PaginationService) {}
 
-	async getAllProducts(getAllProductsDto: GetAllProductsDto): Promise<Product[]> {
-		const { sort, min_price, max_price, searchTerm } = getAllProductsDto
+	async getAllProducts(getAllProductsDto: GetAllProductsDto): Promise<{ products: Product[]; length: number }> {
+		const { sort, min_price, max_price, searchTerm, page, limit } = getAllProductsDto
+
+		const { perPage, skip } = this.paginationService.getPagination({ page, limit })
 
 		const products = await this.prisma.product.findMany({
 			where: {
@@ -22,13 +25,27 @@ export class ProductService {
 			},
 			orderBy: {
 				price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined,
-				rating: sort === ProductsSort.RATING ? 'desc' : undefined
-			}
+				rating: sort === ProductsSort.RATING ? 'desc' : undefined,
+				createdAt: sort === ProductsSort.NEWEST ? 'desc' : sort === ProductsSort.OLDEST ? 'asc' : undefined
+			},
+			skip,
+			take: perPage
 		})
 
 		if (!products) throw new NotFoundException('Products doesn`t exist')
 
-		return products
+		const length = await this.prisma.product.count({
+			where: {
+				published: true,
+				price: { gte: min_price, lte: max_price },
+				OR: [
+					{ category: { name: { contains: searchTerm, mode: 'insensitive' } } },
+					{ name: { contains: searchTerm, mode: 'insensitive' } }
+				]
+			}
+		})
+
+		return { products, length }
 	}
 
 	async getProductById(id: number) {

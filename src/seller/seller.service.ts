@@ -1,11 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
 import { CreateSellerDto, UpdateSellerDto } from './seller.dto'
-import { Product } from '@prisma/client'
+import { Prisma, Product } from '@prisma/client'
+import { UserService } from 'src/user/user.service'
 
 @Injectable()
 export class SellerService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, private userService: UserService) {}
+
+	async findSellerByid(sellerId: number, sellerSelect: Prisma.SellerSelect = {}) {
+		return await this.prisma.seller.findUnique({ where: { id: sellerId }, select: { ...sellerSelect } })
+	}
 
 	async findAllSellers() {
 		return await this.prisma.seller.findMany({ include: { products: true } })
@@ -39,12 +44,11 @@ export class SellerService {
 
 	async updateSeller(sellerId: number, updateSellerDto: UpdateSellerDto) {
 		const updatedSeller = await this.prisma.seller.update({ where: { id: sellerId }, data: updateSellerDto })
-
 		return updatedSeller
 	}
 
 	async checkSeller(userId: number): Promise<boolean> {
-		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
+		const user = await this.userService.getUserById(userId, { seller: true })
 
 		if (user.seller) return true
 
@@ -52,12 +56,10 @@ export class SellerService {
 	}
 
 	async getSellerProducts(userId: number): Promise<Product[]> {
-		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
+		const user = await this.userService.getUserById(userId, { seller: true })
 
-		const products = await this.prisma.product.findMany({
-			where: { sellerId: user.seller.id }
-		})
+		const seller = await this.findSellerByid(user.seller.id, { products: true })
 
-		return products
+		return seller.products
 	}
 }
