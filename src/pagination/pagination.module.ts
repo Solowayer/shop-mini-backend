@@ -4,7 +4,6 @@ import { PaginationController } from './pagination.controller'
 
 @Module({
 	controllers: [PaginationController],
-	providers: [PaginationService],
-	exports: [PaginationModule]
+	providers: [PaginationService]
 })
 export class PaginationModule {}
