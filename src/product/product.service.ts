@@ -1,13 +1,20 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateProductDto, GetAllProductsDto, ProductsSort, UpdateProductDto } from './product.dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { Product } from '@prisma/client'
+import { Category, Prisma, Product } from '@prisma/client'
 import * as fs from 'fs'
 import { PaginationService } from 'src/pagination/pagination.service'
+import { UserService } from 'src/user/user.service'
+import { CategoryService } from 'src/category/category.service'
 
 @Injectable()
 export class ProductService {
-	constructor(private prisma: PrismaService, private paginationService: PaginationService) {}
+	constructor(
+		private prisma: PrismaService,
+		private paginationService: PaginationService,
+		private userService: UserService,
+		private categoryService: CategoryService
+	) {}
 
 	async getAllProducts(getAllProductsDto: GetAllProductsDto): Promise<{ products: Product[]; length: number }> {
 		const { sort, min_price, max_price, searchTerm, page, limit } = getAllProductsDto
@@ -48,22 +55,8 @@ export class ProductService {
 		return { products, length }
 	}
 
-	async getProductById(id: number) {
-		const product = await this.prisma.product.findUnique({ where: { id } })
-
-		if (!product) {
-			throw new NotFoundException(`Product with id "${id}" not found`)
-		}
-
-		return product
-	}
-
-	async getProductBySlug(slug: string): Promise<Product> {
-		const product = await this.prisma.product.findUnique({ where: { slug } })
-
-		if (!product) {
-			throw new NotFoundException(`Product with slug "${slug}" not found`)
-		}
+	async getOneProduct(uniqueArgs: Prisma.ProductWhereUniqueInput): Promise<Product> {
+		const product = await this.prisma.product.findUnique({ where: uniqueArgs })
 
 		return product
 	}
@@ -71,11 +64,7 @@ export class ProductService {
 	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
 		console.log('CategoryId:', categoryId)
 
-		const category = await this.prisma.category.findUnique({ where: { id: categoryId }, include: { children: true } })
-
-		if (!category) {
-			throw new NotFoundException('Category not found')
-		}
+		const category = await this.categoryService.getOneCategory({ id: categoryId })
 
 		const categoryIds = [categoryId, ...category.children.map(parent => parent.id)]
 
@@ -104,20 +93,19 @@ export class ProductService {
 		const { categoryId, images, ...productData } = createProductDto
 
 		if (images && images.length > 10) {
-			throw new BadRequestException('Перевищено допустиму кількість зображень (максимум 10).')
+			throw new BadRequestException('Max 10 images')
 		}
 
 		const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { seller: true } })
-		if (userId && !user) throw new BadRequestException('Такого юзера не існує')
+		if (userId && !user) throw new BadRequestException('This user does not exist')
 
 		const seller = user.seller
 
-		const categoryExist = await this.prisma.category.findUnique({ where: { id: categoryId } })
+		const categoryExist = await this.categoryService.getOneCategory({ id: categoryId })
+		if (!categoryExist) throw new NotFoundException('Category not found')
 
-		if (!categoryExist) throw new NotFoundException('Такої категорії не існує')
-
-		const existingProduct = await this.prisma.product.findUnique({ where: { slug: createProductDto.slug } })
-		if (existingProduct) throw new BadRequestException('Такий товар вже існує')
+		const existingProduct = await this.getOneProduct({ slug: createProductDto.slug })
+		if (existingProduct) throw new BadRequestException(`Product with slug: ${productData.slug} already exist`)
 
 		const product = await this.prisma.product.create({
 			data: {
@@ -131,12 +119,16 @@ export class ProductService {
 		return product
 	}
 
-	async updateProduct(id: number, updateProductDto: UpdateProductDto) {
-		return await this.prisma.product.update({ where: { id }, data: updateProductDto })
+	async updateProduct(where: Prisma.ProductWhereUniqueInput, updateProductDto: UpdateProductDto) {
+		const isExist = await this.getOneProduct(where)
+		if (isExist) throw new NotFoundException('Product not found')
+
+		return await this.prisma.product.update({ where, data: updateProductDto })
 	}
 
-	async removeProduct(id: number) {
-		const product = await this.prisma.product.findUnique({ where: { id } })
+	async removeProduct(where: Prisma.ProductWhereUniqueInput) {
+		const product = await this.getOneProduct(where)
+		if (!product) throw new NotFoundException('Product not found')
 
 		const productImages = product.images
 
@@ -154,6 +146,6 @@ export class ProductService {
 			}
 		}
 
-		return this.prisma.product.delete({ where: { id } })
+		return this.prisma.product.delete({ where })
 	}
 }

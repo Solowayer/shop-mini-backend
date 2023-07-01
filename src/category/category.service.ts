@@ -1,34 +1,29 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateCategoryDto, UpdateCategoryDto } from './category.dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { Category } from '@prisma/client'
+import { Category, Prisma } from '@prisma/client'
+import { CategoryWithChildren } from './category.types'
 
 @Injectable()
 export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
 	async getAllCategories(): Promise<Category[]> {
-		return await this.prisma.category.findMany({ include: { children: true, parents: true } })
+		const categories = await this.prisma.category.findMany()
+		if (!categories) throw new NotFoundException('Categories not found')
+		return categories
 	}
 
 	async getMainCategories(): Promise<Category[]> {
-		return await this.prisma.category.findMany({ where: { isMain: true }, orderBy: { name: 'asc' } })
+		return await this.prisma.category.findMany({ where: { parentId: null } })
 	}
 
-	async getCategoryById(id: number): Promise<Category> {
-		const category = await this.prisma.category.findUnique({
-			where: { id },
-			include: { children: true }
-		})
+	async getOneCategory(uniqueArgs: Prisma.CategoryWhereUniqueInput): Promise<CategoryWithChildren> {
+		const category = await this.prisma.category.findUnique({ where: uniqueArgs, include: { children: true } })
+
+		console.log('oneCategory:', category)
 
 		return category
-	}
-
-	async getCategoryBySlug(slug: string) {
-		return await this.prisma.category.findUnique({
-			where: { slug },
-			include: { children: true }
-		})
 	}
 
 	async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
@@ -46,7 +41,6 @@ export class CategoryService {
 		}
 
 		const parents = await this.getParentCategories(parentId)
-
 		const childrens = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
 
 		const category = await this.prisma.category.create({
@@ -67,24 +61,36 @@ export class CategoryService {
 		return category
 	}
 
-	async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto) {
-		const { parentId } = updateCategoryDto
-		const category = await this.prisma.category.findUnique({ where: { id } })
+	async updateCategory(
+		where: Prisma.CategoryWhereUniqueInput,
+		updateCategoryDto: UpdateCategoryDto
+	): Promise<Category> {
+		const { parentId, childrenIds } = updateCategoryDto
+
+		const category = await this.getOneCategory(where)
 		if (!category) throw new NotFoundException('Category not found')
 
 		const parents = await this.getParentCategories(parentId)
+		const childrens = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
 
 		const updatedCategory = await this.prisma.category.update({
-			where: { id },
-			data: { parents: { connect: parents.map(parent => ({ id: parent.id })) }, ...updateCategoryDto },
+			where,
+			data: {
+				parents: { connect: parents.map(parent => ({ id: parent.id })) },
+				children: { connect: childrens },
+				...updateCategoryDto
+			},
 			include: { parents: true }
 		})
 
 		return updatedCategory
 	}
 
-	removeCategory(id: number) {
-		return this.prisma.category.delete({ where: { id } })
+	async removeCategory(where: Prisma.CategoryWhereUniqueInput) {
+		const category = await this.getOneCategory(where)
+		if (!category) throw new NotFoundException('Category not found')
+
+		return this.prisma.category.delete({ where })
 	}
 
 	private async getParentCategories(parentId: number): Promise<Category[]> {

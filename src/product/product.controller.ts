@@ -31,21 +31,21 @@ export class ProductController {
 
 	@Get('p/:id')
 	getById(@Param('id') id: string) {
-		return this.productService.getProductById(+id)
+		return this.productService.getOneProduct({ id: +id })
 	}
 
 	@Get(':slug')
 	getBySlug(@Param('slug') slug: string) {
-		return this.productService.getProductBySlug(slug)
+		return this.productService.getOneProduct({ slug })
 	}
 
 	@Patch('p/:id')
 	update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-		return this.productService.updateProduct(+id, updateProductDto)
+		return this.productService.updateProduct({ id: +id }, updateProductDto)
 	}
 
 	@Delete('p/:id')
 	remove(@Param('id') id: string) {
-		return this.productService.removeProduct(+id)
+		return this.productService.removeProduct({ id: +id })
 	}
 }

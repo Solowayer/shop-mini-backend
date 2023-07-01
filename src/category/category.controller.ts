@@ -18,12 +18,12 @@ export class CategoryController {
 
 	@Get('c/:id')
 	getCategoryById(@Param('id') id: string) {
-		return this.categoryService.getCategoryById(+id)
+		return this.categoryService.getOneCategory({ id: +id })
 	}
 
 	@Get(':slug')
 	getCategoryBySlug(@Param('slug') slug: string) {
-		return this.categoryService.getCategoryBySlug(slug)
+		return this.categoryService.getOneCategory({ slug })
 	}
 
 	@Post()
@@ -33,11 +33,11 @@ export class CategoryController {
 
 	@Patch('c/:id')
 	updateCategory(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-		return this.categoryService.updateCategory(+id, updateCategoryDto)
+		return this.categoryService.updateCategory({ id: +id }, updateCategoryDto)
 	}
 
 	@Delete('c/:id')
 	removeCategory(@Param('id') id: string) {
-		return this.categoryService.removeCategory(+id)
+		return this.categoryService.removeCategory({ id: +id })
 	}
 }
