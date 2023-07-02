@@ -10,8 +10,18 @@ export class SellerController {
 	constructor(private readonly sellerService: SellerService) {}
 
 	@Get()
-	findAllSellers() {
-		return this.sellerService.findAllSellers()
+	getAllSellers() {
+		return this.sellerService.getAllSellers()
+	}
+
+	@Get('s/:sellerId')
+	getSellerById(@Param('sellerId') sellerId: string) {
+		return this.sellerService.getSellerById(+sellerId)
+	}
+
+	@Get('my-seller')
+	getSellerByUser(@GetUser() user: User) {
+		return this.sellerService.getSellerByUser(user.id)
 	}
 
 	@UseGuards(AuthenticatedGuard)
@@ -23,7 +33,7 @@ export class SellerController {
 	@UseGuards(AuthenticatedGuard)
 	@Patch(':sellerId')
 	updateSeller(@Param('sellerId') sellerId: number, @Body() updateSellerDto: UpdateSellerDto) {
-		return this.sellerService.updateSeller(sellerId, updateSellerDto)
+		return this.sellerService.updateSeller({ id: sellerId }, updateSellerDto)
 	}
 
 	@UseGuards(AuthenticatedGuard)

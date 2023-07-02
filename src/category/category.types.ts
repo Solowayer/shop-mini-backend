@@ -7,5 +7,3 @@ export type CategoryWithChildren = Prisma.CategoryGetPayload<{
 export type CategoryWithParents = Prisma.CategoryGetPayload<{
 	include: { parents: true; children: true }
 }>
-
-export type CategorySelect = Prisma.CategorySelectScalar
