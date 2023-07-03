@@ -13,14 +13,9 @@ export class ProductController {
 		return await this.productService.getAllProducts(getAllProductsDto)
 	}
 
-	@Get('max-price')
-	async getMaxPrice() {
-		return await this.productService.getMaxPrice()
-	}
-
 	@UseGuards()
 	@Post('create')
-	createProduct(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
+	create(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
 		return this.productService.createProduct(createProductDto, user.id)
 	}
 
@@ -29,14 +24,19 @@ export class ProductController {
 		return this.productService.getProductsByCategoryId(+categoryId)
 	}
 
+	@Get('seller')
+	getBySeller(@GetUser() user: User) {
+		return this.productService.getProductsBySeller(user.id)
+	}
+
 	@Get('p/:id')
 	getById(@Param('id') id: string) {
-		return this.productService.getOneProduct({ id: +id })
+		return this.productService.getProductById(+id)
 	}
 
 	@Get(':slug')
 	getBySlug(@Param('slug') slug: string) {
-		return this.productService.getOneProduct({ slug })
+		return this.productService.getProductBySlug(slug)
 	}
 
 	@Patch('p/:id')

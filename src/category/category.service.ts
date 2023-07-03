@@ -2,7 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateCategoryDto, UpdateCategoryDto } from './category.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Category, Prisma } from '@prisma/client'
-import { CategoryWithChildren } from './category.types'
+import { CategoryFullType } from 'src/common/types/full-model.types'
+import { categoryObject } from 'src/common/return-objects'
 
 @Injectable()
 export class CategoryService {
@@ -18,10 +19,28 @@ export class CategoryService {
 		return await this.prisma.category.findMany({ where: { parentId: null } })
 	}
 
-	async getOneCategory(uniqueArgs: Prisma.CategoryWhereUniqueInput): Promise<CategoryWithChildren> {
-		const category = await this.prisma.category.findUnique({ where: uniqueArgs, include: { children: true } })
+	async getOneCategory(
+		uniqueArgs: Prisma.CategoryWhereUniqueInput,
+		selectCategory?: Prisma.CategorySelect
+	): Promise<CategoryFullType> {
+		const category = await this.prisma.category.findUnique({
+			where: uniqueArgs,
+			select: { ...categoryObject, ...selectCategory }
+		})
 
-		console.log('oneCategory:', category)
+		return category
+	}
+
+	async getCategoryById(id: number): Promise<CategoryFullType> {
+		const category = await this.getOneCategory({ id })
+		if (!category) throw new NotFoundException('Category not found')
+
+		return category
+	}
+
+	async getCategoryBySlug(slug: string): Promise<CategoryFullType> {
+		const category = await this.getOneCategory({ slug })
+		if (!category) throw new NotFoundException('Category not found')
 
 		return category
 	}

@@ -18,7 +18,7 @@ export class CategoryController {
 
 	@Get('c/:id')
 	getCategoryById(@Param('id') id: string) {
-		return this.categoryService.getOneCategory({ id: +id })
+		return this.categoryService.getCategoryById(+id)
 	}
 
 	@Get(':slug')

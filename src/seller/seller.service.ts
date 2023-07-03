@@ -1,9 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
 import { CreateSellerDto, UpdateSellerDto } from './seller.dto'
-import { Prisma, Product, Seller } from '@prisma/client'
-import { SellerFullType } from './seller.types'
-import { sellerObject } from './seller.object'
+import { Prisma, Seller } from '@prisma/client'
+import { SellerFullType } from 'src/common/types/full-model.types'
+import { sellerObject } from 'src/common/return-objects'
 
 @Injectable()
 export class SellerService {
@@ -23,11 +23,15 @@ export class SellerService {
 	async getSellerById(sellerId: number): Promise<SellerFullType> {
 		const seller = await this.getOneSeller({ id: sellerId })
 
+		if (!seller) throw new NotFoundException('Seller not found')
+
 		return seller
 	}
 
 	async getSellerByUser(userId: number): Promise<SellerFullType> {
-		return await this.getOneSeller({ userId }, { products: true })
+		const seller = await this.getOneSeller({ userId }, { products: true })
+		if (!seller) throw new NotFoundException('Seller not found')
+		return seller
 	}
 
 	async createSeller(createSellerDto: CreateSellerDto, userId: number): Promise<Seller> {
@@ -69,11 +73,5 @@ export class SellerService {
 		if (seller) return true
 
 		return false
-	}
-
-	async getSellerProducts(userId: number): Promise<Product[]> {
-		const seller = await this.getOneSeller({ userId })
-
-		return seller.products
 	}
 }
