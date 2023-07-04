@@ -104,6 +104,7 @@ export class ProductService {
 
 	async getProductsBySeller(userId: number): Promise<Product[]> {
 		const seller = await this.sellerService.getOneSeller({ userId }, { products: true })
+
 		if (!seller) throw new NotFoundException('Seller not found')
 
 		return seller.products

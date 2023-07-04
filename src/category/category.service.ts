@@ -32,7 +32,7 @@ export class CategoryService {
 	}
 
 	async getCategoryById(id: number): Promise<CategoryFullType> {
-		const category = await this.getOneCategory({ id })
+		const category = await this.getOneCategory({ id }, { children: true })
 		if (!category) throw new NotFoundException('Category not found')
 
 		return category
@@ -46,34 +46,24 @@ export class CategoryService {
 	}
 
 	async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
-		const { name, slug, isMain, parentId, childrenIds } = createCategoryDto
+		const { name, slug, parentId, childrenIds } = createCategoryDto
 
-		const existingCategory = await this.prisma.category.findFirst({
-			where: {
-				OR: [{ slug: slug }, { name: name }]
-			}
-		})
-		if (existingCategory) throw new BadRequestException('This category is already exist')
+		const existingSlug = await this.getOneCategory({ slug })
+		const existingName = await this.getOneCategory({ name })
+		if (existingSlug || existingName) throw new BadRequestException('This category already exists')
 
-		if (parentId && childrenIds && childrenIds.length > 0) {
-			throw new BadRequestException('The same category cannot be as parent and children')
-		}
-
-		const parents = await this.getParentCategories(parentId)
-		const childrens = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
+		const children = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
 
 		const category = await this.prisma.category.create({
 			data: {
 				name,
-				isMain,
 				slug,
 				parentId,
-				parents: { connect: parents.map(parent => ({ id: parent.id })) },
-				children: { connect: childrens }
+				children: { connect: children }
 			},
 			include: {
-				children: true,
-				parents: true
+				parent: true,
+				children: true
 			}
 		})
 
@@ -89,17 +79,16 @@ export class CategoryService {
 		const category = await this.getOneCategory(where)
 		if (!category) throw new NotFoundException('Category not found')
 
-		const parents = await this.getParentCategories(parentId)
 		const childrens = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
 
 		const updatedCategory = await this.prisma.category.update({
 			where,
 			data: {
-				parents: { connect: parents.map(parent => ({ id: parent.id })) },
+				parentId,
 				children: { connect: childrens },
 				...updateCategoryDto
 			},
-			include: { parents: true }
+			include: { parent: true, children: true }
 		})
 
 		return updatedCategory
@@ -110,22 +99,5 @@ export class CategoryService {
 		if (!category) throw new NotFoundException('Category not found')
 
 		return this.prisma.category.delete({ where })
-	}
-
-	private async getParentCategories(parentId: number): Promise<Category[]> {
-		const parents: Category[] = []
-
-		if (parentId) {
-			const parentCategory = await this.prisma.category.findUnique({
-				where: { id: parentId },
-				include: { parents: true }
-			})
-			if (parentCategory) {
-				parents.push(parentCategory)
-				parents.push(...parentCategory.parents)
-			}
-		}
-
-		return parents
 	}
 }

@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types'
-import { ArrayMinSize, IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
+import { ArrayMinSize, IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class CreateCategoryDto {
 	@IsNotEmpty()
@@ -9,10 +9,6 @@ export class CreateCategoryDto {
 	@IsNotEmpty()
 	@IsString()
 	name: string
-
-	@IsBoolean()
-	@IsOptional()
-	isMain?: boolean
 
 	@IsOptional()
 	@IsNumber()

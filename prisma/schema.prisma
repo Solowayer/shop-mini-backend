@@ -103,12 +103,10 @@ model Category {
 
   name String @unique
 
-  isMain Boolean @default(false)
-
   parentId Int?
 
+  parent   Category?  @relation("ChildrensParents", fields: [parentId], references: [id])
   children Category[] @relation("ChildrensParents")
-  parents  Category[] @relation("ChildrensParents")
 
   product Product[]
 }

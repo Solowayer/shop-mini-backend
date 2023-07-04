@@ -12,7 +12,6 @@ export const categoryObject: CategoryObjectType = {
 	id: true,
 	slug: true,
 	name: true,
-	isMain: true,
 	parentId: true
 }
 
@@ -32,14 +31,14 @@ export const productObject: ProductObjectType = {
 }
 
 export const sellerObject: SellerObjectType = {
-  id: true,
-  name: true,
-  createdAt: true,
-  updatedAt: true,
-  description: true,
-  adress: true,
-  email: true,
-  phoneNumber: true,
-  pib: true,
-  userId: true
+	id: true,
+	name: true,
+	createdAt: true,
+	updatedAt: true,
+	description: true,
+	adress: true,
+	email: true,
+	phoneNumber: true,
+	pib: true,
+	userId: true
 }
