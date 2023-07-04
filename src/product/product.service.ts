@@ -88,10 +88,25 @@ export class ProductService {
 	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
 		console.log('CategoryId:', categoryId)
 
-		const category = await this.categoryService.getOneCategory({ id: categoryId }, { children: true, _count: true })
+		const category = await this.categoryService.getOneCategory({ id: categoryId }, { children: true })
 		if (!category) throw new NotFoundException('Category not found')
 
 		const categoryIds = [categoryId, ...category.children.map(parent => parent.id)]
+
+		const products = await this.prisma.product.findMany({
+			where: {
+				OR: categoryIds.map(categoryId => ({ categoryId }))
+			}
+		})
+
+		return products
+	}
+
+	async getProductsByCategoryTree(categoryId: number): Promise<Product[]> {
+		const categoryTree = await this.categoryService.getCategoryTree(categoryId)
+		if (!categoryTree) throw new NotFoundException('Category not found')
+
+		const categoryIds = categoryTree.map(cat => cat.id)
 
 		const products = await this.prisma.product.findMany({
 			where: {

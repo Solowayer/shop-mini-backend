@@ -24,6 +24,11 @@ export class ProductController {
 		return this.productService.getProductsByCategoryId(+categoryId)
 	}
 
+	@Get('c/tree/:categoryId')
+	getByCategoryTree(@Param('categoryId') categoryId: string) {
+		return this.productService.getProductsByCategoryTree(+categoryId)
+	}
+
 	@Get('seller')
 	getBySeller(@GetUser() user: User) {
 		return this.productService.getProductsBySeller(user.id)

@@ -94,10 +94,42 @@ export class CategoryService {
 		return updatedCategory
 	}
 
-	async removeCategory(where: Prisma.CategoryWhereUniqueInput) {
+	async removeCategory(where: Prisma.CategoryWhereUniqueInput): Promise<Category> {
 		const category = await this.getOneCategory(where)
 		if (!category) throw new NotFoundException('Category not found')
 
 		return this.prisma.category.delete({ where })
+	}
+
+	async getCategoryTree(id: number): Promise<CategoryFullType[]> {
+		const category = await this.getOneCategory({ id })
+		if (!category) throw new NotFoundException('Category not found')
+
+		const children = await this.prisma.category.findMany({
+			where: { parentId: category.id },
+			include: { children: true }
+		})
+
+		const nestedCategories = await Promise.all(children.map(child => this.getCategoryTree(child.id)))
+		const flattenedCategories = nestedCategories.flat()
+
+		const categoryTree = [category, ...flattenedCategories]
+
+		return categoryTree
+	}
+
+	async getCategoryBreadcrumbs(id: number): Promise<CategoryFullType[]> {
+		const breadcrumbs: CategoryFullType[] = []
+
+		let categoryId = id
+		while (categoryId) {
+			const category = await this.getOneCategory({ id: categoryId })
+			if (!category) throw new NotFoundException('Category not found')
+
+			breadcrumbs.unshift(category)
+			categoryId = category.parentId
+		}
+
+		return breadcrumbs
 	}
 }

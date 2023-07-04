@@ -23,7 +23,12 @@ export class CategoryController {
 
 	@Get(':slug')
 	getCategoryBySlug(@Param('slug') slug: string) {
-		return this.categoryService.getOneCategory({ slug })
+		return this.categoryService.getCategoryBySlug(slug)
+	}
+
+	@Get('breadcrumbs/:id')
+	getBreadcrumbs(@Param('id') id: string) {
+		return this.categoryService.getCategoryBreadcrumbs(+id)
 	}
 
 	@Post()
