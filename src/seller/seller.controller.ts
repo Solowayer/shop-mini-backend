@@ -1,45 +1,44 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { SellerService } from './seller.service'
 import { CreateSellerDto, UpdateSellerDto } from './seller.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
-import { User } from '@prisma/client'
-import { AuthenticatedGuard } from 'src/common/guards/local.guard'
+import { Role, User } from '@prisma/client'
+import { Roles } from 'src/common/decorators/roles.decorator'
 
 @Controller('seller')
 export class SellerController {
 	constructor(private readonly sellerService: SellerService) {}
 
 	@Get()
-	getAllSellers() {
+	getAll() {
 		return this.sellerService.getAllSellers()
 	}
 
 	@Get('s/:sellerId')
-	getSellerById(@Param('sellerId') sellerId: string) {
+	getById(@Param('sellerId') sellerId: string) {
 		return this.sellerService.getSellerById(+sellerId)
 	}
 
-	@UseGuards(AuthenticatedGuard)
+	@Roles(Role.SELLER)
 	@Get('my-seller')
-	getSellerByUser(@GetUser() user: User) {
-		return this.sellerService.getSellerByUser(user.id)
+	getByUserId(@GetUser() user: User) {
+		return this.sellerService.getSellerByUserId(user.id)
 	}
 
-	@UseGuards(AuthenticatedGuard)
+	@Roles(Role.USER)
 	@Post('register')
-	createSeller(@Body() createSellerDto: CreateSellerDto, @GetUser() user: User) {
+	create(@Body() createSellerDto: CreateSellerDto, @GetUser() user: User) {
 		return this.sellerService.createSeller(createSellerDto, user.id)
 	}
 
-	@UseGuards(AuthenticatedGuard)
+	@Roles(Role.SELLER)
 	@Patch(':sellerId')
-	updateSeller(@Param('sellerId') sellerId: number, @Body() updateSellerDto: UpdateSellerDto) {
+	update(@Param('sellerId') sellerId: number, @Body() updateSellerDto: UpdateSellerDto) {
 		return this.sellerService.updateSeller({ id: sellerId }, updateSellerDto)
 	}
 
-	@UseGuards(AuthenticatedGuard)
 	@Get('check-seller')
-	checkSeller(@GetUser() user: User) {
+	check(@GetUser() user: User) {
 		return this.sellerService.checkSeller(user.id)
 	}
 }

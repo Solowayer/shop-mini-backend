@@ -66,7 +66,7 @@ export class CartService {
 		return cartItem
 	}
 
-	async removeCart(userId: number): Promise<Cart> {
+	async deleteCart(userId: number): Promise<Cart> {
 		const existingCart = await this.prisma.cart.findUnique({ where: { userId } })
 		if (!existingCart) throw new NotFoundException('Корзини не існує')
 

@@ -1,14 +1,18 @@
-import { Controller, Get, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common'
 import { UserService } from './user.service'
-import { AuthenticatedGuard } from 'src/common/guards/local.guard'
+import { UpdateUserDto } from './user.dto'
 
 @Controller('users')
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
-	@UseGuards(AuthenticatedGuard)
 	@Get('')
 	getAllUsers() {
 		return this.userService.getAllUsers()
+	}
+
+	@Patch(':id')
+	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+		return this.userService.updateUser({ id: +id }, updateUserDto)
 	}
 }

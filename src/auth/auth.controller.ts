@@ -1,24 +1,27 @@
 /* eslint-disable no-console */
-import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, Session, Get, UseGuards } from '@nestjs/common'
+import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, Get, UseGuards } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { LoginUserDto, RegisterUserDto } from './auth.dto'
 import { Request, Response } from 'express'
-import { LocalGuard, AuthenticatedGuard } from 'src/common/guards/local.guard'
+import { LocalGuard } from 'src/common/guards/local.guard'
+import { Public } from 'src/common/decorators/public.decorator'
+import { AuthenticatedGuard } from 'src/common/guards/authenticated.guard'
 
 @Controller('auth')
 export class AuthController {
 	constructor(private readonly userAuthService: AuthService) {}
 
+	@Public()
 	@Post('register')
 	@HttpCode(HttpStatus.CREATED)
-	registerUser(@Body() signupUserDto: RegisterUserDto) {
+	register(@Body() signupUserDto: RegisterUserDto) {
 		return this.userAuthService.registerUser(signupUserDto)
 	}
 
 	@UseGuards(LocalGuard)
 	@Post('login')
 	@HttpCode(HttpStatus.OK)
-	loginUser(@Body() loginUserDto: LoginUserDto) {
+	login(@Body() loginUserDto: LoginUserDto) {
 		return this.userAuthService.loginUser(loginUserDto)
 	}
 
@@ -37,12 +40,5 @@ export class AuthController {
 	@Get('check-auth')
 	checkAuth(@Req() req: Request) {
 		return req.isAuthenticated()
-	}
-
-	@Get('test')
-	getAuthSession(@Session() session: Record<string, any>) {
-		console.log(session)
-		// console.log(session.isAuthenticated())
-		return session
 	}
 }

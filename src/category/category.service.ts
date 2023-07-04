@@ -94,7 +94,7 @@ export class CategoryService {
 		return updatedCategory
 	}
 
-	async removeCategory(where: Prisma.CategoryWhereUniqueInput): Promise<Category> {
+	async deleteCategory(where: Prisma.CategoryWhereUniqueInput): Promise<Category> {
 		const category = await this.getOneCategory(where)
 		if (!category) throw new NotFoundException('Category not found')
 

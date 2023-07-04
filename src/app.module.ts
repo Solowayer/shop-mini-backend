@@ -9,7 +9,9 @@ import { CategoryModule } from './category/category.module'
 import { OrderModule } from './order/order.module'
 import { CartModule } from './cart/cart.module'
 import { UploadModule } from './upload/upload.module'
-import { PaginationModule } from './pagination/pagination.module';
+import { PaginationModule } from './pagination/pagination.module'
+import { APP_GUARD } from '@nestjs/core'
+import { RolesGuard } from './common/guards/roles.guard'
 
 @Module({
 	imports: [
@@ -27,6 +29,12 @@ import { PaginationModule } from './pagination/pagination.module';
 		CartModule,
 		UploadModule,
 		PaginationModule
+	],
+	providers: [
+		{
+			provide: APP_GUARD,
+			useClass: RolesGuard
+		}
 	]
 })
 export class AppModule {}

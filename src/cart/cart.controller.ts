@@ -1,24 +1,25 @@
-import { Controller, Post, Body, Patch, Param, Delete, UseGuards, Get } from '@nestjs/common'
+import { Controller, Post, Body, Patch, Param, Delete, Get, UseGuards } from '@nestjs/common'
 import { CartService } from './cart.service'
 import { CreateCartItemDto, UpdateCartItemDto } from './cart.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
+import { Public } from 'src/common/decorators/public.decorator'
 import { User } from '@prisma/client'
-import { AuthenticatedGuard } from 'src/common/guards/local.guard'
+import { AuthenticatedGuard } from 'src/common/guards/authenticated.guard'
 
 @Controller('cart')
 export class CartController {
 	constructor(private readonly cartService: CartService) {}
 
-	@UseGuards(AuthenticatedGuard)
+	@Public()
 	@Get('')
-	getCart(@GetUser() user: User) {
+	get(@GetUser() user: User) {
 		return this.cartService.getCart(user.id)
 	}
 
 	@UseGuards(AuthenticatedGuard)
 	@Delete('delete')
-	removeCart(@GetUser() user: User) {
-		return this.cartService.removeCart(user.id)
+	delete(@GetUser() user: User) {
+		return this.cartService.deleteCart(user.id)
 	}
 
 	@UseGuards(AuthenticatedGuard)

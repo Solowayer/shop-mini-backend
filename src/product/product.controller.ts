@@ -1,22 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { CreateProductDto, GetAllProductsDto, UpdateProductDto } from './product.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
-import { User } from '@prisma/client'
+import { Role, User } from '@prisma/client'
+import { Roles } from 'src/common/decorators/roles.decorator'
 
 @Controller('products')
 export class ProductController {
 	constructor(private readonly productService: ProductService) {}
 
 	@Get()
-	async getAllProducts(@Query() getAllProductsDto: GetAllProductsDto) {
+	async getAll(@Query() getAllProductsDto: GetAllProductsDto) {
 		return await this.productService.getAllProducts(getAllProductsDto)
-	}
-
-	@UseGuards()
-	@Post('create')
-	create(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
-		return this.productService.createProduct(createProductDto, user.id)
 	}
 
 	@Get('c/:categoryId')
@@ -29,6 +24,7 @@ export class ProductController {
 		return this.productService.getProductsByCategoryTree(+categoryId)
 	}
 
+	@Roles(Role.SELLER)
 	@Get('seller')
 	getBySeller(@GetUser() user: User) {
 		return this.productService.getProductsBySeller(user.id)
@@ -44,13 +40,21 @@ export class ProductController {
 		return this.productService.getProductBySlug(slug)
 	}
 
+	@Roles(Role.SELLER)
+	@Post('create')
+	create(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
+		return this.productService.createProduct(createProductDto, user.id)
+	}
+
+	@Roles(Role.SELLER)
 	@Patch('p/:id')
 	update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
 		return this.productService.updateProduct({ id: +id }, updateProductDto)
 	}
 
+	@Roles(Role.SELLER)
 	@Delete('p/:id')
-	remove(@Param('id') id: string) {
-		return this.productService.removeProduct({ id: +id })
+	delete(@Param('id') id: string) {
+		return this.productService.deleteProduct({ id: +id })
 	}
 }

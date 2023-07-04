@@ -132,7 +132,7 @@ export class ProductService {
 			throw new BadRequestException('Max 10 images')
 		}
 
-		const seller = await this.sellerService.getSellerByUser(userId)
+		const seller = await this.sellerService.getSellerByUserId(userId)
 
 		const categoryExist = await this.categoryService.getOneCategory({ id: categoryId })
 		if (!categoryExist) throw new NotFoundException('Category not found')
@@ -152,14 +152,14 @@ export class ProductService {
 		return product
 	}
 
-	async updateProduct(where: Prisma.ProductWhereUniqueInput, updateProductDto: UpdateProductDto) {
+	async updateProduct(where: Prisma.ProductWhereUniqueInput, updateProductDto: UpdateProductDto): Promise<Product> {
 		const product = await this.getOneProduct(where)
 		if (!product) throw new NotFoundException('Product not found')
 
 		return await this.prisma.product.update({ where, data: updateProductDto })
 	}
 
-	async removeProduct(where: Prisma.ProductWhereUniqueInput) {
+	async deleteProduct(where: Prisma.ProductWhereUniqueInput) {
 		const product = await this.getOneProduct(where)
 		if (!product) throw new NotFoundException('Product not found')
 

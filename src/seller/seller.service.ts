@@ -4,10 +4,11 @@ import { CreateSellerDto, UpdateSellerDto } from './seller.dto'
 import { Prisma, Seller } from '@prisma/client'
 import { SellerFullType } from 'src/common/types/full-model.types'
 import { sellerObject } from 'src/common/return-objects'
+import { UserService } from 'src/user/user.service'
 
 @Injectable()
 export class SellerService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, private userService: UserService) {}
 
 	async getAllSellers(): Promise<Seller[]> {
 		return await this.prisma.seller.findMany({ include: { products: true } })
@@ -28,14 +29,14 @@ export class SellerService {
 		return seller
 	}
 
-	async getSellerByUser(userId: number): Promise<SellerFullType> {
+	async getSellerByUserId(userId: number): Promise<SellerFullType> {
 		const seller = await this.getOneSeller({ userId }, { products: true })
 		if (!seller) throw new NotFoundException('Seller not found')
 		return seller
 	}
 
 	async createSeller(createSellerDto: CreateSellerDto, userId: number): Promise<Seller> {
-		if (!userId) throw new BadRequestException('Cant create a seller')
+		// if (!userId) throw new BadRequestException('Can/`t/ create a seller')
 
 		const { name, adress, description, email, phoneNumber, pib } = createSellerDto
 
@@ -47,6 +48,7 @@ export class SellerService {
 
 		if (existingSeller) throw new BadRequestException('This email or phone number is already exist')
 
+		await this.userService.updateUser({ id: userId }, { role: 'SELLER' })
 		const newSeller = await this.prisma.seller.create({
 			data: {
 				name,
@@ -68,10 +70,10 @@ export class SellerService {
 	}
 
 	async checkSeller(userId: number): Promise<boolean> {
-		const seller = await this.getSellerByUser(userId)
+		const seller = await this.getOneSeller({ userId })
 
-		if (seller) return true
+		if (!seller) return false
 
-		return false
+		return true
 	}
 }
