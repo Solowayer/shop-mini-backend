@@ -15,19 +15,20 @@ export class ProductController {
 	}
 
 	@Get('c/:categoryId')
-	getByCategoryId(@Param('categoryId') categoryId: string) {
-		return this.productService.getProductsByCategoryId(+categoryId)
+	getByCategoryId(@Param('categoryId') categoryId: string, @Query() getAllProductsDto: GetAllProductsDto) {
+		return this.productService.getProductsByCategoryId(+categoryId, getAllProductsDto)
 	}
 
 	@Get('c/tree/:categoryId')
-	getByCategoryTree(@Param('categoryId') categoryId: string) {
-		return this.productService.getProductsByCategoryTree(+categoryId)
+	getByCategoryTree(@Param('categoryId') categoryId: string, @Query() getAllProductsDto: GetAllProductsDto) {
+		return this.productService.getProductsByCategoryTree(+categoryId, getAllProductsDto)
 	}
 
+	// ?
 	@Roles(Role.SELLER)
 	@Get('seller')
-	getBySeller(@GetUser() user: User) {
-		return this.productService.getProductsBySeller(user.id)
+	getSellerProducts(@GetUser() user: User) {
+		return this.productService.getSellerProducts(user.id)
 	}
 
 	@Get('p/:id')

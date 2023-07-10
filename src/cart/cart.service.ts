@@ -29,7 +29,7 @@ export class CartService {
 		if (!cart) cart = await this.prisma.cart.create({ data: { userId } })
 
 		const product = await this.prisma.product.findUnique({ where: { id: productId } })
-		if (!product) throw new NotFoundException('Такого товару не існує')
+		if (!product) throw new NotFoundException('This product not found')
 
 		const existingCartItem = await this.prisma.cartItem.findFirst({ where: { productId, cartId: cart.id } })
 
@@ -68,7 +68,7 @@ export class CartService {
 
 	async deleteCart(userId: number): Promise<Cart> {
 		const existingCart = await this.prisma.cart.findUnique({ where: { userId } })
-		if (!existingCart) throw new NotFoundException('Корзини не існує')
+		if (!existingCart) throw new NotFoundException('Cart is not exist')
 
 		return await this.prisma.cart.delete({ where: { userId } })
 	}
@@ -84,7 +84,7 @@ export class CartService {
 		const cartItem = await this.prisma.cartItem.findUnique({
 			where: { id: cartItemId }
 		})
-		if (!cartItem) throw new NotFoundException('Такого товару в корзині не знайдено')
+		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
 		const deletedCartItem = await this.prisma.cartItem.delete({
 			where: { id: cartItemId }

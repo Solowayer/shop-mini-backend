@@ -41,7 +41,7 @@ export class AuthService {
 		if (!user) throw new NotFoundException('This user doesn`t exist')
 
 		const isMatch = await argon.verify(user.passwordHash, password)
-		if (!isMatch) throw new ForbiddenException('Невірні дані')
+		if (!isMatch) throw new ForbiddenException('Wrong data')
 
 		delete user.passwordHash
 
@@ -52,9 +52,9 @@ export class AuthService {
 		console.log(req.session)
 		req.logout(function (err) {
 			if (err) {
-				throw new BadRequestException('Помилка при виході із сесії')
+				throw new BadRequestException('Error at exit session')
 			}
-			res.send({ message: 'Вихід з авторизації успішно виконаний' })
+			res.send({ message: 'Logout complete' })
 		})
 		console.log(req.session)
 	}
@@ -63,7 +63,7 @@ export class AuthService {
 		console.log(req.session)
 		req.session.destroy(err => {
 			if (err) {
-				throw new BadRequestException('Помилка при знищенні сесії')
+				throw new BadRequestException('Error at destroy session')
 			}
 			res.send({ message: 'Сесія знищена' })
 		})

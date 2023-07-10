@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common'
 import { SellerService } from './seller.service'
 import { CreateSellerDto, UpdateSellerDto } from './seller.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
@@ -39,6 +39,7 @@ export class SellerController {
 
 	@Get('check-seller')
 	check(@GetUser() user: User) {
+		if (!user) throw new ForbiddenException('User is not authorized')
 		return this.sellerService.checkSeller(user.id)
 	}
 }

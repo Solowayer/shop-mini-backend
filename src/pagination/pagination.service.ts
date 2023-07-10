@@ -3,7 +3,7 @@ import { PaginationDto } from './pagination.dto'
 
 @Injectable()
 export class PaginationService {
-	getPagination(paginationDto: PaginationDto, defaultPerPage = 4): { perPage: number; skip: number } {
+	getPagination(paginationDto: PaginationDto, defaultPerPage = 8): { perPage: number; skip: number } {
 		const page = paginationDto.page ?? 1
 		const perPage = paginationDto.limit ?? defaultPerPage
 

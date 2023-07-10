@@ -1,5 +1,4 @@
 import { PartialType } from '@nestjs/mapped-types'
-import { Prisma } from '@prisma/client'
 import { Type } from 'class-transformer'
 import {
 	IsString,

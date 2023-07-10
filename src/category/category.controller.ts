@@ -28,13 +28,18 @@ export class CategoryController {
 		return this.categoryService.getCategoryBySlug(slug)
 	}
 
+	@Get('tree/:id')
+	getTree(@Param('id') id: string) {
+		return this.categoryService.getCategoryTree(+id)
+	}
+
 	@Get('breadcrumbs/:id')
 	getBreadcrumbs(@Param('id') id: string) {
 		return this.categoryService.getCategoryBreadcrumbs(+id)
 	}
 
 	@Roles(Role.ADMIN)
-	@Post()
+	@Post('create')
 	create(@Body() createCategoryDto: CreateCategoryDto) {
 		return this.categoryService.createCategory(createCategoryDto)
 	}

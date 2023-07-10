@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Delete, Get, UseGuards } from '@nestjs/common'
+import { Controller, Post, Body, Patch, Param, Delete, Get, UseGuards, ForbiddenException } from '@nestjs/common'
 import { CartService } from './cart.service'
 import { CreateCartItemDto, UpdateCartItemDto } from './cart.dto'
 import { GetUser } from 'src/common/decorators/user.decorator'
@@ -13,6 +13,7 @@ export class CartController {
 	@Public()
 	@Get('')
 	get(@GetUser() user: User) {
+		if (!user) throw new ForbiddenException('User is not authorized')
 		return this.cartService.getCart(user.id)
 	}
 

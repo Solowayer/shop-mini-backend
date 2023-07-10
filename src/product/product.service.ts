@@ -18,25 +18,34 @@ export class ProductService {
 		private sellerService: SellerService
 	) {}
 
-	async getAllProducts(getAllProductsDto: GetAllProductsDto): Promise<{ products: Product[]; length: number }> {
-		const { sort, min_price, max_price, searchTerm, page, limit } = getAllProductsDto
+	async getAllProducts(
+		getAllProductsDto: GetAllProductsDto,
+		where: Prisma.ProductWhereInput = {}
+	): Promise<{ products: Product[]; length: number }> {
+		const { sort, min_price, max_price, searchTerm } = getAllProductsDto
+		const { perPage, skip } = this.paginationService.getPagination(getAllProductsDto)
 
-		const { perPage, skip } = this.paginationService.getPagination({ page, limit })
+		const productSort: Prisma.ProductOrderByWithRelationInput = {
+			price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined,
+			rating: sort === ProductsSort.RATING ? 'desc' : undefined,
+			createdAt: sort === ProductsSort.NEWEST ? 'desc' : sort === ProductsSort.OLDEST ? 'asc' : undefined
+		}
+
+		const productFilter: Prisma.ProductWhereInput = {
+			OR: [
+				{ category: { name: { contains: searchTerm, mode: 'insensitive' } } },
+				{ name: { contains: searchTerm, mode: 'insensitive' } }
+			],
+			price: { gte: min_price, lte: max_price }
+		}
 
 		const products = await this.prisma.product.findMany({
 			where: {
+				...where,
 				published: true,
-				price: { gte: min_price, lte: max_price },
-				OR: [
-					{ category: { name: { contains: searchTerm, mode: 'insensitive' } } },
-					{ name: { contains: searchTerm, mode: 'insensitive' } }
-				]
+				...productFilter
 			},
-			orderBy: {
-				price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined,
-				rating: sort === ProductsSort.RATING ? 'desc' : undefined,
-				createdAt: sort === ProductsSort.NEWEST ? 'desc' : sort === ProductsSort.OLDEST ? 'asc' : undefined
-			},
+			orderBy: productSort,
 			skip,
 			take: perPage
 		})
@@ -44,17 +53,47 @@ export class ProductService {
 		if (!products) throw new NotFoundException('Products doesn`t exist')
 
 		const length = await this.prisma.product.count({
-			where: {
-				published: true,
-				price: { gte: min_price, lte: max_price },
-				OR: [
-					{ category: { name: { contains: searchTerm, mode: 'insensitive' } } },
-					{ name: { contains: searchTerm, mode: 'insensitive' } }
-				]
-			}
+			where: { ...where, published: true, ...productFilter }
 		})
 
 		return { products, length }
+	}
+
+	async getProductsByCategoryId(
+		categoryId: number,
+		getAllProductsDto: GetAllProductsDto
+	): Promise<{ products: Product[]; length: number }> {
+		console.log('CategoryId:', categoryId)
+
+		const where: Prisma.ProductWhereInput = {
+			categoryId
+		}
+
+		return await this.getAllProducts(getAllProductsDto, where)
+	}
+
+	async getProductsByCategoryTree(
+		categoryId: number,
+		getAllProductsDto: GetAllProductsDto
+	): Promise<{ products: Product[]; length: number }> {
+		const categoryTree = await this.categoryService.getCategoryTree(categoryId)
+		if (!categoryTree) throw new NotFoundException('Category not found')
+
+		const categoryIds = categoryTree.map(cat => cat.id)
+
+		const where: Prisma.ProductWhereInput = {
+			categoryId: { in: categoryIds }
+		}
+
+		return await this.getAllProducts(getAllProductsDto, where)
+	}
+
+	async getSellerProducts(userId: number): Promise<Product[]> {
+		const seller = await this.sellerService.getOneSeller({ userId }, { products: true })
+
+		if (!seller) throw new NotFoundException('Seller not found')
+
+		return seller.products
 	}
 
 	async getOneProduct(
@@ -83,46 +122,6 @@ export class ProductService {
 		if (!product) throw new NotFoundException('Product not found')
 
 		return product
-	}
-
-	async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
-		console.log('CategoryId:', categoryId)
-
-		const category = await this.categoryService.getOneCategory({ id: categoryId }, { children: true })
-		if (!category) throw new NotFoundException('Category not found')
-
-		const categoryIds = [categoryId, ...category.children.map(parent => parent.id)]
-
-		const products = await this.prisma.product.findMany({
-			where: {
-				OR: categoryIds.map(categoryId => ({ categoryId }))
-			}
-		})
-
-		return products
-	}
-
-	async getProductsByCategoryTree(categoryId: number): Promise<Product[]> {
-		const categoryTree = await this.categoryService.getCategoryTree(categoryId)
-		if (!categoryTree) throw new NotFoundException('Category not found')
-
-		const categoryIds = categoryTree.map(cat => cat.id)
-
-		const products = await this.prisma.product.findMany({
-			where: {
-				OR: categoryIds.map(categoryId => ({ categoryId }))
-			}
-		})
-
-		return products
-	}
-
-	async getProductsBySeller(userId: number): Promise<Product[]> {
-		const seller = await this.sellerService.getOneSeller({ userId }, { products: true })
-
-		if (!seller) throw new NotFoundException('Seller not found')
-
-		return seller.products
 	}
 
 	async createProduct(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
