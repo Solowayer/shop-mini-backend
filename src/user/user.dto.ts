@@ -1,4 +1,4 @@
-import { Gender } from '@prisma/client'
+import { Gender, Role } from '@prisma/client'
 import { IsEmail, IsEnum, IsMobilePhone, IsString, MaxLength, MinLength } from 'class-validator'
 
 export class UpdateUserDto {
@@ -12,6 +12,9 @@ export class UpdateUserDto {
 	@MinLength(6, { message: 'The password must contain at least 6 characters' })
 	@MaxLength(20, { message: 'Password shouldn`t have more than 20 symbols' })
 	password?: string
+
+	@IsEnum(Role)
+	role?: Role
 }
 
 export class UpdateProfileDto {

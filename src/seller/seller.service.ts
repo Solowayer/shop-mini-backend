@@ -48,7 +48,7 @@ export class SellerService {
 
 		if (existingSeller) throw new BadRequestException('This email or phone number is already exist')
 
-		await this.userService.updateUser({ id: userId }, { role: 'SELLER' })
+		await this.userService.updateUser(userId, { role: 'SELLER' })
 		const newSeller = await this.prisma.seller.create({
 			data: {
 				name,
