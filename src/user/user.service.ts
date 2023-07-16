@@ -26,6 +26,7 @@ export class UserService {
 	}
 
 	async getUserProfile(userId: number): Promise<Profile> {
+		
 		const profile = this.prisma.profile.findUnique({ where: { userId } })
 		return profile
 	}

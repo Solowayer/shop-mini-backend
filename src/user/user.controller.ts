@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common'
+import { Body, Controller, Get, NotFoundException, Param, Patch } from '@nestjs/common'
 import { UserService } from './user.service'
 import { UpdateProfileDto, UpdateUserDto } from './user.dto'
 import { User } from '@prisma/client'
@@ -18,27 +18,27 @@ export class UserController {
 		return this.userService.getUserById(user.id)
 	}
 
-	@Get(':userId')
-	get(@Param('userId') userId: number) {
-		return this.userService.getUserById(userId)
+	@Get('u/:userId')
+	get(@Param('userId') userId: string) {
+		return this.userService.getUserById(+userId)
 	}
 
 	@Get('profile')
-	getProfile(@GetUser() user: User) {
+	getProfile(@GetUser() user: User | undefined) {
 		return this.userService.getUserProfile(user.id)
 	}
 
-	@Patch('profile')
+	@Patch('profile/edit')
 	updateProfile(@GetUser() user: User, updateProfileDto: UpdateProfileDto) {
 		return this.userService.updateUserProfile(user.id, updateProfileDto)
 	}
 
-	@Patch('update')
+	@Patch('edit')
 	updateSelf(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto) {
 		return this.userService.updateUser(user.id, updateUserDto)
 	}
 
-	@Patch('update/:userId')
+	@Patch('edit/:userId')
 	update(@Param('userId') userId: number, @Body() updateUserDto: UpdateUserDto) {
 		return this.userService.updateUser(userId, updateUserDto)
 	}
