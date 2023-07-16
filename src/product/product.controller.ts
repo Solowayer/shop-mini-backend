@@ -27,8 +27,8 @@ export class ProductController {
 	// ?
 	@Roles(Role.SELLER)
 	@Get('seller')
-	getSellerProducts(@GetUser() user: User) {
-		return this.productService.getSellerProducts(user.id)
+	getSellerProducts(@GetUser() user: User, @Query() getAllProductsDto: GetAllProductsDto) {
+		return this.productService.getSellerProducts(user.id, getAllProductsDto)
 	}
 
 	@Get('p/:id')

@@ -38,7 +38,7 @@ export class CategoryController {
 		return this.categoryService.getCategoryBreadcrumbs(+id)
 	}
 
-	@Roles(Role.ADMIN)
+	// @Roles(Role.ADMIN)
 	@Post('create')
 	create(@Body() createCategoryDto: CreateCategoryDto) {
 		return this.categoryService.createCategory(createCategoryDto)

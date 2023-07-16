@@ -39,12 +39,14 @@ export class ProductService {
 			price: { gte: min_price, lte: max_price }
 		}
 
+		const finalWhere: Prisma.ProductWhereInput = {
+			...where,
+			published: true,
+			...productFilter
+		}
+
 		const products = await this.prisma.product.findMany({
-			where: {
-				...where,
-				published: true,
-				...productFilter
-			},
+			where: finalWhere,
 			orderBy: productSort,
 			skip,
 			take: perPage
@@ -53,7 +55,7 @@ export class ProductService {
 		if (!products) throw new NotFoundException('Products doesn`t exist')
 
 		const length = await this.prisma.product.count({
-			where: { ...where, published: true, ...productFilter }
+			where: finalWhere
 		})
 
 		return { products, length }
@@ -88,12 +90,18 @@ export class ProductService {
 		return await this.getAllProducts(getAllProductsDto, where)
 	}
 
-	async getSellerProducts(userId: number): Promise<Product[]> {
-		const seller = await this.sellerService.getOneSeller({ userId }, { products: true })
-
+	async getSellerProducts(
+		userId: number,
+		getAllProductsDto: GetAllProductsDto
+	): Promise<{ products: Product[]; length: number }> {
+		const seller = await this.sellerService.getOneSeller({ userId }, { id: true })
 		if (!seller) throw new NotFoundException('Seller not found')
 
-		return seller.products
+		const where: Prisma.ProductWhereInput = {
+			sellerId: seller.id
+		}
+
+		return await this.getAllProducts(getAllProductsDto, where)
 	}
 
 	async getOneProduct(
