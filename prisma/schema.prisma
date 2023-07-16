@@ -8,11 +8,9 @@ datasource db {
 }
 
 model Session {
-  sid String @id @default(cuid())
-
+  sid    String   @id @default(cuid())
   expire DateTime
-
-  sess Json
+  sess   Json
 }
 
 model User {
@@ -20,19 +18,119 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  username    String
-  email       String  @unique
-  phoneNumber String?
-
+  email        String  @unique
+  phoneNumber  String?
   passwordHash String
+  role         Role    @default(USER)
 
-  role Role @default(USER)
+  profile  Profile?
+  adresses DeliveryAddress[]
+  reviews  Review[]
+  orders   Order[]
 
   seller Seller?
+  cart   Cart?
+}
 
-  orders  Order[]
-  reviews Review[]
-  cart    Cart?
+model Profile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firstName String
+  lastName  String
+
+  gender Gender?
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @unique
+}
+
+enum Role {
+  USER
+  ADMIN
+  SELLER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model DeliveryAddress {
+  id     Int    @id @default(autoincrement())
+  city   String
+  region String
+  street String
+
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rating  Int
+  comment String?
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  recipient   String
+  adress      String
+  totalAmount Float       @default(0)
+  status      OrderStatus @default(PENDING)
+
+  orderItems OrderItem[]
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  seller   Seller? @relation(fields: [sellerId], references: [id])
+  sellerId Int?
+}
+
+// model OrderDetails {
+//   id         String   @id @default(uuid())
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+//   orderId    String
+//   address    String
+//   city       String
+//   state      String
+//   country    String
+//   postalCode String
+// }
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  quantity Int
+  price    Float
+
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
 }
 
 model Seller {
@@ -55,21 +153,6 @@ model Seller {
   user   User @relation(fields: [userId], references: [id])
   userId Int  @unique
 }
-
-enum Role {
-  USER
-  ADMIN
-  SELLER
-}
-
-// model Address {
-//   id     Int    @id @default(autoincrement())
-//   city   String
-//   region String
-//   street String
-
-//   Seller Seller[]
-// }
 
 model Product {
   id        Int      @id @default(autoincrement())
@@ -111,21 +194,6 @@ model Category {
   product Product[]
 }
 
-model Review {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  rating  Int
-  comment String?
-
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
-
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
-}
-
 model Cart {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -136,7 +204,7 @@ model Cart {
 
   cartItems CartItem[]
 
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @unique
 }
 
@@ -156,53 +224,3 @@ model CartItem {
   cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
   cartId String
 }
-
-model Order {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-
-  recipient   String
-  adress      String
-  totalAmount Float       @default(0)
-  status      OrderStatus @default(PENDING)
-
-  orderItems OrderItem[]
-
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
-
-  seller   Seller? @relation(fields: [sellerId], references: [id])
-  sellerId Int?
-}
-
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  DELIVERED
-  CANCELLED
-}
-
-model OrderItem {
-  id Int @id @default(autoincrement())
-
-  quantity Int
-  price    Float
-
-  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId Int
-
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
-}
-
-// model OrderDetails {
-//   id         String   @id @default(uuid())
-//   createdAt  DateTime @default(now())
-//   updatedAt  DateTime @updatedAt
-//   orderId    String
-//   address    String
-//   city       String
-//   state      String
-//   country    String
-//   postalCode String
-// }

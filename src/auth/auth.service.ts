@@ -4,25 +4,30 @@ import { PrismaService } from 'prisma/prisma.service'
 import { LoginUserDto, RegisterUserDto } from './auth.dto'
 import * as argon from 'argon2'
 import { Request, Response } from 'express'
+import { UserService } from 'src/user/user.service'
 
 @Injectable()
 export class AuthService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, private userService: UserService) {}
 
 	async registerUser(registerUserDto: RegisterUserDto) {
-		const { username, email, password, phoneNumber } = registerUserDto
+		const { firstName, lastName, email, password, phoneNumber } = registerUserDto
 
-		const existingUser = await this.prisma.user.findUnique({
-			where: { email },
-			include: { seller: true }
-		})
-
+		const existingUser = await this.userService.getOneUser({ email })
 		if (existingUser) throw new BadRequestException('This email is already in use')
 
 		const passwordHash = await argon.hash(password)
 
 		const user = await this.prisma.user.create({
-			data: { username, email, passwordHash, phoneNumber, role: 'USER' }
+			data: {
+				email,
+				passwordHash,
+				phoneNumber,
+				role: 'USER',
+				profile: {
+					create: { firstName, lastName }
+				}
+			}
 		})
 
 		delete user.passwordHash

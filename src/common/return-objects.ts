@@ -50,7 +50,6 @@ export const userObject: UserObjectType = {
 	updatedAt: true,
 	email: true,
 	phoneNumber: true,
-	username: true,
 	passwordHash: false,
 	role: false
 }

@@ -3,7 +3,11 @@ import { IsString, IsNotEmpty, IsEmail, IsOptional, IsMobilePhone, MinLength, Ma
 export class RegisterUserDto {
 	@IsString()
 	@IsNotEmpty()
-	username: string
+	firstName: string
+
+	@IsString()
+	@IsNotEmpty()
+	lastName: string
 
 	@IsEmail()
 	@IsNotEmpty()
