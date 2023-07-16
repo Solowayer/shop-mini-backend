@@ -5,12 +5,14 @@ import { LoginUserDto, RegisterUserDto } from './auth.dto'
 import * as argon from 'argon2'
 import { Request, Response } from 'express'
 import { UserService } from 'src/user/user.service'
+import { User } from '@prisma/client'
+import { UserFullType } from 'src/common/types/full-model.types'
 
 @Injectable()
 export class AuthService {
 	constructor(private prisma: PrismaService, private userService: UserService) {}
 
-	async registerUser(registerUserDto: RegisterUserDto) {
+	async registerUser(registerUserDto: RegisterUserDto): Promise<User> {
 		const { firstName, lastName, email, password, phoneNumber } = registerUserDto
 
 		const existingUser = await this.userService.getOneUser({ email })
@@ -35,13 +37,10 @@ export class AuthService {
 		return user
 	}
 
-	async loginUser(loginUserDto: LoginUserDto) {
+	async loginUser(loginUserDto: LoginUserDto): Promise<UserFullType> {
 		const { email, password } = loginUserDto
 
-		const user = await this.prisma.user.findUnique({
-			where: { email },
-			include: { seller: true }
-		})
+		const user = await this.userService.getOneUser({ email })
 
 		if (!user) throw new NotFoundException('This user doesn`t exist')
 
@@ -53,7 +52,7 @@ export class AuthService {
 		return user
 	}
 
-	logout(req: Request, res: Response) {
+	async logout(req: Request, res: Response): Promise<void> {
 		console.log(req.session)
 		req.logout(function (err) {
 			if (err) {
@@ -64,7 +63,7 @@ export class AuthService {
 		console.log(req.session)
 	}
 
-	destroy(req: Request, res: Response) {
+	async destroy(req: Request, res: Response): Promise<void> {
 		console.log(req.session)
 		req.session.destroy(err => {
 			if (err) {

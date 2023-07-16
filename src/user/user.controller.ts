@@ -1,6 +1,6 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common'
 import { UserService } from './user.service'
-import { UpdateProfileDto, UpdateUserDto } from './user.dto'
+import { UpdateUserDto } from './user.dto'
 import { User } from '@prisma/client'
 import { GetUser } from 'src/common/decorators/user.decorator'
 
@@ -21,16 +21,6 @@ export class UserController {
 	@Get('u/:userId')
 	get(@Param('userId') userId: string) {
 		return this.userService.getUserById(+userId)
-	}
-
-	@Get('profile')
-	getProfile(@GetUser() user: User | undefined) {
-		return this.userService.getUserProfile(user.id)
-	}
-
-	@Patch('profile/edit')
-	updateProfile(@GetUser() user: User, updateProfileDto: UpdateProfileDto) {
-		return this.userService.updateUserProfile(user.id, updateProfileDto)
 	}
 
 	@Patch('edit')

@@ -1,4 +1,4 @@
-import { Gender, Role } from '@prisma/client'
+import { Role } from '@prisma/client'
 import { IsEmail, IsEnum, IsMobilePhone, IsString, MaxLength, MinLength } from 'class-validator'
 
 export class UpdateUserDto {
@@ -15,15 +15,4 @@ export class UpdateUserDto {
 
 	@IsEnum(Role)
 	role?: Role
-}
-
-export class UpdateProfileDto {
-	@IsString()
-	firstName?: string
-
-	@IsString()
-	lastName?: string
-
-	@IsEnum(Gender)
-	gender?: Gender
 }

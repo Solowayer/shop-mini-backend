@@ -12,6 +12,7 @@ import { UploadModule } from './upload/upload.module'
 import { PaginationModule } from './pagination/pagination.module'
 import { APP_GUARD } from '@nestjs/core'
 import { RolesGuard } from './common/guards/roles.guard'
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
 	imports: [
@@ -28,7 +29,8 @@ import { RolesGuard } from './common/guards/roles.guard'
 		OrderModule,
 		CartModule,
 		UploadModule,
-		PaginationModule
+		PaginationModule,
+		ProfileModule
 	],
 	providers: [
 		{

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { Prisma, Profile, User } from '@prisma/client'
+import { Prisma, User } from '@prisma/client'
 import { PrismaService } from 'prisma/prisma.service'
-import { UpdateProfileDto, UpdateUserDto } from './user.dto'
+import { UpdateUserDto } from './user.dto'
 import { UserFullType } from 'src/common/types/full-model.types'
 import { userObject } from 'src/common/return-objects'
 
@@ -23,18 +23,6 @@ export class UserService {
 		const user = await this.getOneUser({ id: userId })
 		if (!user) throw new NotFoundException('User not found')
 		return user
-	}
-
-	async getUserProfile(userId: number): Promise<Profile> {
-		
-		const profile = this.prisma.profile.findUnique({ where: { userId } })
-		return profile
-	}
-
-	async updateUserProfile(userId: number, updateProfileDto: UpdateProfileDto): Promise<Profile> {
-		const updatedProfile = await this.prisma.profile.update({ where: { userId }, data: updateProfileDto })
-
-		return updatedProfile
 	}
 
 	async updateUser(userId: number, updateUserDto: UpdateUserDto): Promise<User> {
