@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { UpdateProfileDto } from './profile.dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { Profile } from '@prisma/client'
+import { Profile, Role } from '@prisma/client'
+import { Roles } from 'src/common/decorators/roles.decorator'
 
 @Injectable()
+@Roles(Role.USER, Role.SELLER)
 export class ProfileService {
 	constructor(private prisma: PrismaService) {}
 

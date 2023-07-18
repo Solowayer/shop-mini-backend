@@ -28,7 +28,8 @@ export const productObject: ProductObjectType = {
 	categoryId: true,
 	sellerId: true,
 	published: true,
-	rating: true
+	rating: true,
+	listId: false
 }
 
 export const sellerObject: SellerObjectType = {

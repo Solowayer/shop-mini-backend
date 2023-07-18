@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types'
-import { IsString, IsOptional, MaxLength, IsNotEmpty, IsArray, IsEmail, IsMobilePhone } from 'class-validator'
+import { IsString, IsOptional, MaxLength, IsNotEmpty, IsEmail, IsMobilePhone } from 'class-validator'
 
 export class CreateSellerDto {
 	@IsString()

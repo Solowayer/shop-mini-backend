@@ -1,4 +1,4 @@
-import { Controller, Get, Patch } from '@nestjs/common'
+import { Body, Controller, Get, Patch } from '@nestjs/common'
 import { ProfileService } from './profile.service'
 import { UpdateProfileDto } from './profile.dto'
 import { User } from '@prisma/client'
@@ -14,7 +14,7 @@ export class ProfileController {
 	}
 
 	@Patch('edit')
-	update(@GetUser() user: User, updateProfileDto: UpdateProfileDto) {
+	update(@GetUser() user: User, @Body() updateProfileDto: UpdateProfileDto) {
 		return this.profileService.updateProfile(user.id, updateProfileDto)
 	}
 }
