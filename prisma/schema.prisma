@@ -104,12 +104,10 @@ model List {
 
   name String
 
-  products Product[]
-
-  isDefault Boolean @default(false)
-
   user   User @relation(fields: [userId], references: [id])
   userId Int
+
+  products ProductsOnLists[]
 }
 
 model Order {
@@ -192,8 +190,17 @@ model Product {
   reviews Review[]
   rating  Float    @default(0)
 
-  list   List? @relation(fields: [listId], references: [id])
-  listId Int?
+  lists ProductsOnLists[]
+}
+
+model ProductsOnLists {
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  list   List @relation(fields: [listId], references: [id])
+  listId Int
+
+  @@id([productId, listId])
 }
 
 model Category {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateListDto, UpdateListDto } from './list.dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { List } from '@prisma/client'
@@ -8,9 +8,25 @@ export class ListService {
 	constructor(private prisma: PrismaService) {}
 
 	async createList(userId: number, createListDto: CreateListDto): Promise<List> {
-		const { name, isDefault } = createListDto
+		const { name } = createListDto
 
-		const list = await this.prisma.list.create({ data: { name, user: { connect: { id: userId } }, isDefault } })
+		const newList = await this.prisma.list.create({ data: { name, user: { connect: { id: userId } } } })
+		return newList
+	}
+
+	async updateList(userId: number, listId: number, updateListDto: UpdateListDto): Promise<List> {
+		await this.getOneList(userId, listId)
+
+		const updatedList = await this.prisma.list.update({ where: { id: listId }, data: { ...updateListDto } })
+
+		return updatedList
+	}
+
+	async getOneList(userId: number, listId: number) {
+		const list = await this.prisma.list.findUnique({ where: { id: listId } })
+
+		if (!list || list.userId !== userId) throw new NotFoundException('List not found')
+
 		return list
 	}
 
@@ -18,15 +34,7 @@ export class ListService {
 		return `This action returns all list`
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} list`
-	}
-
-	update(id: number, updateListDto: UpdateListDto) {
-		return `This action updates a #${id} list`
-	}
-
-	remove(id: number) {
+	removeList(id: number) {
 		return `This action removes a #${id} list`
 	}
 }
