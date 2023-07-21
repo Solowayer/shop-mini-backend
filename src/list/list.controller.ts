@@ -27,8 +27,8 @@ export class ListController {
 
 	@Get(':id')
 	getById(@GetUserId() userId: number, @Param('id') id: string) {
-		console.log('userId:', userId);
-		
+		console.log('userId:', userId)
+
 		return this.listService.getListById(userId, +id)
 	}
 
@@ -37,8 +37,13 @@ export class ListController {
 		return this.listService.findAllLists(userId)
 	}
 
-	@Post(':listId/product/:productId')
+	@Post('list/:listId/product/:productId')
 	addProduct(@GetUserId() userId: number, @Param('listId') listId: string, @Param('productId') productId: string) {
 		return this.listService.addProductToList(userId, +listId, +productId)
+	}
+
+	@Delete('list/:listId/product/:productId')
+	deleteProduct(@GetUserId() userId: number, @Param('listId') listId: string, @Param('productId') productId: string) {
+		return this.listService.deleteProductFromList(userId, +listId, +productId)
 	}
 }

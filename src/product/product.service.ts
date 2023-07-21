@@ -8,7 +8,6 @@ import { CategoryService } from 'src/category/category.service'
 import { SellerService } from 'src/seller/seller.service'
 import { ProductFullType } from 'src/common/types/full-model.types'
 import { productObject } from 'src/common/return-objects'
-import { ListService } from 'src/list/list.service'
 
 @Injectable()
 export class ProductService {
@@ -16,7 +15,6 @@ export class ProductService {
 		private prisma: PrismaService,
 		private paginationService: PaginationService,
 		private categoryService: CategoryService,
-		private listService: ListService,
 		private sellerService: SellerService
 	) {}
 
@@ -98,11 +96,11 @@ export class ProductService {
 		getAllProductsDto: GetAllProductsDto,
 		listId: number
 	): Promise<{ products: ProductFullType[]; length: number }> {
-		const where: Prisma.ProductWhereInput = {
-			listId
-		}
+		const productsOnLists = await this.prisma.productsOnLists.findMany({ where: { listId } })
 
-		const products = await this.getAllProducts(getAllProductsDto, where)
+		const productIds = productsOnLists.map(item => item.productId)
+
+		const products = await this.getAllProducts(getAllProductsDto, { id: { in: productIds } })
 
 		return products
 	}

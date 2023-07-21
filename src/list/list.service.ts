@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateListDto, UpdateListDto } from './list.dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { List, Prisma } from '@prisma/client'
+import { List, Prisma, ProductsOnLists } from '@prisma/client'
 import { listObject } from 'src/common/return-objects'
 import { ListFullType } from 'src/common/types/full-model.types'
+import { ProductService } from 'src/product/product.service'
 
 @Injectable()
 export class ListService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, @Inject(ProductService) private productService: ProductService) {}
 
 	async createList(userId: number, createListDto: CreateListDto): Promise<List> {
 		const { name } = createListDto
@@ -49,19 +50,26 @@ export class ListService {
 		return this.prisma.list.findMany({ where: { userId } })
 	}
 
-	async addProductToList(userId: number, listId: number, productId: number): Promise<List> {
+	async addProductToList(userId: number, listId: number, productId: number): Promise<ProductsOnLists> {
+		await this.productService.getProductById(productId)
+
 		await this.getListById(userId, listId)
 
-		const updatedList = await this.prisma.list.update({
-			where: { id: listId },
+		return await this.prisma.productsOnLists.create({
 			data: {
-				products: {
-					connect: { id: productId }
-				}
-			},
-			include: { products: true }
+				product: { connect: { id: productId } },
+				list: { connect: { id: listId } }
+			}
 		})
+	}
 
-		return updatedList
+	async deleteProductFromList(userId: number, listId: number, productId: number): Promise<ProductsOnLists> {
+		await this.productService.getProductById(productId)
+
+		await this.getListById(userId, listId)
+
+		return await this.prisma.productsOnLists.delete({
+			where: { productId_listId: { productId, listId } }
+		})
 	}
 }

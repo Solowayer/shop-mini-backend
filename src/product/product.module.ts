@@ -5,10 +5,10 @@ import { PaginationService } from 'src/pagination/pagination.service'
 import { CategoryService } from 'src/category/category.service'
 import { SellerService } from 'src/seller/seller.service'
 import { UserService } from 'src/user/user.service'
-import { ListService } from 'src/list/list.service'
 
 @Module({
 	controllers: [ProductController],
-	providers: [ProductService, PaginationService, CategoryService, ListService, SellerService, UserService]
+	providers: [ProductService, PaginationService, CategoryService, SellerService, UserService],
+	exports: [ProductService]
 })
 export class ProductModule {}

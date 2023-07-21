@@ -14,6 +14,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { RolesGuard } from './common/guards/roles.guard'
 import { ProfileModule } from './profile/profile.module';
 import { ListModule } from './list/list.module';
+import { ProductsOnListsModule } from './products-on-lists/products-on-lists.module';
 
 @Module({
 	imports: [
@@ -32,7 +33,8 @@ import { ListModule } from './list/list.module';
 		UploadModule,
 		PaginationModule,
 		ProfileModule,
-		ListModule
+		ListModule,
+		ProductsOnListsModule
 	],
 	providers: [
 		{

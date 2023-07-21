@@ -107,7 +107,20 @@ model List {
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  products Product[]
+  products ProductsOnLists[]
+}
+
+model ProductsOnLists {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  list   List @relation(fields: [listId], references: [id])
+  listId Int
+
+  @@id([productId, listId])
 }
 
 model Order {
@@ -190,8 +203,7 @@ model Product {
   reviews Review[]
   rating  Float    @default(0)
 
-  list   List? @relation(fields: [listId], references: [id], onDelete: Cascade)
-  listId Int?
+  lists ProductsOnLists[]
 }
 
 // ! isAvailable
