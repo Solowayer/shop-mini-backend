@@ -107,7 +107,7 @@ model List {
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  products ProductsOnLists[]
+  products Product[]
 }
 
 model Order {
@@ -190,18 +190,11 @@ model Product {
   reviews Review[]
   rating  Float    @default(0)
 
-  lists ProductsOnLists[]
+  list   List? @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId Int?
 }
 
-model ProductsOnLists {
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
-
-  list   List @relation(fields: [listId], references: [id])
-  listId Int
-
-  @@id([productId, listId])
-}
+// ! isAvailable
 
 model Category {
   id   Int    @id @default(autoincrement())

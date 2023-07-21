@@ -16,12 +16,17 @@ export class ProductController {
 
 	@Get('c/:categoryId')
 	getByCategoryId(@Param('categoryId') categoryId: string, @Query() getAllProductsDto: GetAllProductsDto) {
-		return this.productService.getProductsByCategoryId(+categoryId, getAllProductsDto)
+		return this.productService.getProductsByCategoryId(getAllProductsDto, +categoryId)
 	}
 
 	@Get('c/tree/:categoryId')
 	getByCategoryTree(@Param('categoryId') categoryId: string, @Query() getAllProductsDto: GetAllProductsDto) {
-		return this.productService.getProductsByCategoryTree(+categoryId, getAllProductsDto)
+		return this.productService.getProductsByCategoryTree(getAllProductsDto, +categoryId)
+	}
+
+	@Get('l/:listId')
+	getByList(@Param('listId') listId: string, @Query() getAllProductsDto: GetAllProductsDto) {
+		return this.productService.getProductsByList(getAllProductsDto, +listId)
 	}
 
 	// ?

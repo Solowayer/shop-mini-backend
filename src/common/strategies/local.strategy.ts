@@ -15,7 +15,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 
 	async validate(email: string, password: string): Promise<UserFullType> {
 		// eslint-disable-next-line no-console
-		console.log(`Strategy: ${email}, ${password}`)
+		// console.log(`Strategy: ${email}, ${password}`)
 
 		const user = await this.userService.getOneUser({ email })
 

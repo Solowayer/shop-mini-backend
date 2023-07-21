@@ -8,6 +8,7 @@ import { CategoryService } from 'src/category/category.service'
 import { SellerService } from 'src/seller/seller.service'
 import { ProductFullType } from 'src/common/types/full-model.types'
 import { productObject } from 'src/common/return-objects'
+import { ListService } from 'src/list/list.service'
 
 @Injectable()
 export class ProductService {
@@ -15,13 +16,15 @@ export class ProductService {
 		private prisma: PrismaService,
 		private paginationService: PaginationService,
 		private categoryService: CategoryService,
+		private listService: ListService,
 		private sellerService: SellerService
 	) {}
 
 	async getAllProducts(
 		getAllProductsDto: GetAllProductsDto,
-		where: Prisma.ProductWhereInput = {}
-	): Promise<{ products: Product[]; length: number }> {
+		where: Prisma.ProductWhereInput = {},
+		selectProduct: Prisma.ProductSelect = {}
+	): Promise<{ products: ProductFullType[]; length: number }> {
 		const { sort, min_price, max_price, searchTerm } = getAllProductsDto
 		const { perPage, skip } = this.paginationService.getPagination(getAllProductsDto)
 
@@ -49,7 +52,8 @@ export class ProductService {
 			where: finalWhere,
 			orderBy: productSort,
 			skip,
-			take: perPage
+			take: perPage,
+			select: { ...productObject, ...selectProduct }
 		})
 
 		if (!products) throw new NotFoundException('Products doesn`t exist')
@@ -62,9 +66,9 @@ export class ProductService {
 	}
 
 	async getProductsByCategoryId(
-		categoryId: number,
-		getAllProductsDto: GetAllProductsDto
-	): Promise<{ products: Product[]; length: number }> {
+		getAllProductsDto: GetAllProductsDto,
+		categoryId: number
+	): Promise<{ products: ProductFullType[]; length: number }> {
 		console.log('CategoryId:', categoryId)
 
 		const where: Prisma.ProductWhereInput = {
@@ -75,9 +79,9 @@ export class ProductService {
 	}
 
 	async getProductsByCategoryTree(
-		categoryId: number,
-		getAllProductsDto: GetAllProductsDto
-	): Promise<{ products: Product[]; length: number }> {
+		getAllProductsDto: GetAllProductsDto,
+		categoryId: number
+	): Promise<{ products: ProductFullType[]; length: number }> {
 		const categoryTree = await this.categoryService.getCategoryTree(categoryId)
 		if (!categoryTree) throw new NotFoundException('Category not found')
 
@@ -90,10 +94,23 @@ export class ProductService {
 		return await this.getAllProducts(getAllProductsDto, where)
 	}
 
+	async getProductsByList(
+		getAllProductsDto: GetAllProductsDto,
+		listId: number
+	): Promise<{ products: ProductFullType[]; length: number }> {
+		const where: Prisma.ProductWhereInput = {
+			listId
+		}
+
+		const products = await this.getAllProducts(getAllProductsDto, where)
+
+		return products
+	}
+
 	async getSellerProducts(
 		userId: number,
 		getAllProductsDto: GetAllProductsDto
-	): Promise<{ products: Product[]; length: number }> {
+	): Promise<{ products: ProductFullType[]; length: number }> {
 		const seller = await this.sellerService.getOneSeller({ userId }, { id: true })
 		if (!seller) throw new NotFoundException('Seller not found')
 
@@ -106,7 +123,7 @@ export class ProductService {
 
 	async getOneProduct(
 		uniqueArgs: Prisma.ProductWhereUniqueInput,
-		selectProduct?: Prisma.ProductSelect
+		selectProduct: Prisma.ProductSelect = {}
 	): Promise<ProductFullType> {
 		const product = await this.prisma.product.findUnique({
 			where: uniqueArgs,

@@ -5,7 +5,7 @@ import { GetUserId } from 'src/common/decorators/userId.decorator'
 import { Role } from '@prisma/client'
 import { Roles } from 'src/common/decorators/roles.decorator'
 
-@Controller('list')
+@Controller('lists')
 @Roles(Role.USER, Role.SELLER)
 export class ListController {
 	constructor(private readonly listService: ListService) {}
@@ -15,23 +15,30 @@ export class ListController {
 		return this.listService.createList(userId, createListDto)
 	}
 
-	@Get(':id')
-	getOne(@GetUserId() userId: number, @Param('id') id: string) {
-		return this.listService.getOneList(userId, +id)
-	}
-
-	@Get()
-	findAll() {
-		return this.listService.findAll()
-	}
-
 	@Patch('edit/:id')
 	update(@GetUserId() userId: number, @Param('id') id: string, @Body() updateListDto: UpdateListDto) {
 		return this.listService.updateList(userId, +id, updateListDto)
 	}
 
 	@Delete('delete/:id')
-	remove(@Param('id') id: string) {
-		return this.listService.removeList(+id)
+	remove(@GetUserId() userId: number, @Param('id') id: string) {
+		return this.listService.removeList(userId, +id)
+	}
+
+	@Get(':id')
+	getById(@GetUserId() userId: number, @Param('id') id: string) {
+		console.log('userId:', userId);
+		
+		return this.listService.getListById(userId, +id)
+	}
+
+	@Get()
+	getAll(@GetUserId() userId: number) {
+		return this.listService.findAllLists(userId)
+	}
+
+	@Post(':listId/product/:productId')
+	addProduct(@GetUserId() userId: number, @Param('listId') listId: string, @Param('productId') productId: string) {
+		return this.listService.addProductToList(userId, +listId, +productId)
 	}
 }

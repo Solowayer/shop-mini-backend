@@ -1,9 +1,9 @@
-import { Controller, Post, Body, Patch, Param, Delete, Get, ForbiddenException } from '@nestjs/common'
+import { Controller, Post, Body, Patch, Param, Delete, Get } from '@nestjs/common'
 import { CartService } from './cart.service'
 import { CreateCartItemDto, UpdateCartItemDto } from './cart.dto'
-import { GetUser } from 'src/common/decorators/user.decorator'
-import { Role, User } from '@prisma/client'
+import { Role } from '@prisma/client'
 import { Roles } from 'src/common/decorators/roles.decorator'
+import { GetUserId } from 'src/common/decorators/userId.decorator'
 
 @Controller('cart')
 @Roles(Role.USER, Role.SELLER)
@@ -11,19 +11,18 @@ export class CartController {
 	constructor(private readonly cartService: CartService) {}
 
 	@Get('')
-	get(@GetUser() user: User) {
-		if (!user) throw new ForbiddenException('User is not authorized')
-		return this.cartService.getCart(user.id)
+	get(@GetUserId() userId: number) {
+		return this.cartService.getCart(userId)
 	}
 
 	@Delete('delete')
-	delete(@GetUser() user: User) {
-		return this.cartService.deleteCart(user.id)
+	delete(@GetUserId() userId: number) {
+		return this.cartService.deleteCart(userId)
 	}
 
 	@Post('add')
-	addCartItem(@GetUser() user: User, @Body() createCartItemDto: CreateCartItemDto) {
-		return this.cartService.addCartItem(user.id, createCartItemDto)
+	addCartItem(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
+		return this.cartService.addCartItem(userId, createCartItemDto)
 	}
 
 	@Patch(':cartItemId')

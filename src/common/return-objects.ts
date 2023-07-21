@@ -1,4 +1,4 @@
-import { Category, Product, Seller, User } from '@prisma/client'
+import { Category, List, Product, Seller, User } from '@prisma/client'
 
 type ObjectWithTrueValues<T> = {
 	[K in keyof T]: boolean
@@ -8,6 +8,7 @@ type CategoryObjectType = ObjectWithTrueValues<Category>
 type ProductObjectType = ObjectWithTrueValues<Product>
 type SellerObjectType = ObjectWithTrueValues<Seller>
 type UserObjectType = ObjectWithTrueValues<User>
+type ListObjectType = ObjectWithTrueValues<List>
 
 export const categoryObject: CategoryObjectType = {
 	id: true,
@@ -28,7 +29,8 @@ export const productObject: ProductObjectType = {
 	categoryId: true,
 	sellerId: true,
 	published: true,
-	rating: true
+	rating: true,
+	listId: true
 }
 
 export const sellerObject: SellerObjectType = {
@@ -52,4 +54,12 @@ export const userObject: UserObjectType = {
 	phoneNumber: true,
 	passwordHash: true,
 	role: true
+}
+
+export const listObject: ListObjectType = {
+	id: true,
+	name: true,
+	createdAt: true,
+	updatedAt: true,
+	userId: true
 }

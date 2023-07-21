@@ -53,7 +53,7 @@ export class AuthService {
 	}
 
 	async logout(req: Request, res: Response): Promise<void> {
-		console.log(req.session)
+		// console.log(req.session)
 		req.logout(function (err) {
 			if (err) {
 				throw new BadRequestException('Error at exit session')
@@ -64,7 +64,7 @@ export class AuthService {
 	}
 
 	async destroy(req: Request, res: Response): Promise<void> {
-		console.log(req.session)
+		// console.log(req.session)
 		req.session.destroy(err => {
 			if (err) {
 				throw new BadRequestException('Error at destroy session')

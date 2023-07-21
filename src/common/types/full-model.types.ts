@@ -7,3 +7,5 @@ export type ProductFullType = Prisma.ProductGetPayload<{ select: { [K in keyof P
 export type SellerFullType = Prisma.SellerGetPayload<{ select: { [K in keyof Prisma.SellerSelect]: true } }>
 
 export type UserFullType = Prisma.UserGetPayload<{ select: { [K in keyof Prisma.UserSelect]: true } }>
+
+export type ListFullType = Prisma.ListGetPayload<{ select: { [K in keyof Prisma.ListSelect]: true } }>
