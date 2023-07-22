@@ -1,9 +1,9 @@
-import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, ForbiddenException, Get, Param, Patch, Post } from '@nestjs/common'
 import { SellerService } from './seller.service'
-import { CreateSellerDto, UpdateSellerDto } from './seller.dto'
-import { GetUser } from 'src/common/decorators/user.decorator'
+import { CreateSellerDto, UpdateSellerDto } from './dto'
+import { GetUser } from 'lib/decorators/user.decorator'
 import { Role, User } from '@prisma/client'
-import { Roles } from 'src/common/decorators/roles.decorator'
+import { Roles } from 'lib/decorators/roles.decorator'
 
 @Controller('seller')
 export class SellerController {

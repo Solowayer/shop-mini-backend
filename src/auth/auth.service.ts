@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaService } from 'prisma/prisma.service'
-import { LoginUserDto, RegisterUserDto } from './auth.dto'
+import { PrismaService } from 'lib/prisma/prisma.service'
+import { LoginUserDto, RegisterUserDto } from './dto'
 import * as argon from 'argon2'
 import { Request, Response } from 'express'
 import { UserService } from 'src/user/user.service'
 import { User } from '@prisma/client'
-import { UserFullType } from 'src/common/types/full-model.types'
+import { UserFullType } from 'lib/types/full-model.types'
 
 @Injectable()
 export class AuthService {

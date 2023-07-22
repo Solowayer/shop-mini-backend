@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaService } from 'prisma/prisma.service'
-import { CreateSellerDto, UpdateSellerDto } from './seller.dto'
+import { PrismaService } from 'lib/prisma/prisma.service'
+import { CreateSellerDto, UpdateSellerDto } from './dto'
 import { Prisma, Seller } from '@prisma/client'
-import { SellerFullType } from 'src/common/types/full-model.types'
-import { sellerObject } from 'src/common/return-objects'
+import { SellerFullType } from 'lib/types/full-model.types'
+import { sellerObject } from 'lib/return-objects'
 import { UserService } from 'src/user/user.service'
 
 @Injectable()

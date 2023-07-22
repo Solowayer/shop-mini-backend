@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common'
-import { CreateOrderDto } from './order.dto'
+import { CreateOrderDto } from './dto'
 import { OrderService } from './order.service'
 import { User } from '@prisma/client'
-import { GetUser } from 'src/common/decorators/user.decorator'
+import { GetUser } from 'lib/decorators/user.decorator'
 
 @Controller('orders')
 export class OrderController {

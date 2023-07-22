@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { PrismaModule } from '../prisma/prisma.module'
+import { PrismaModule } from '../lib/prisma/prisma.module'
 import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module'
 import { SellerModule } from './seller/seller.module'
@@ -11,10 +11,11 @@ import { CartModule } from './cart/cart.module'
 import { UploadModule } from './upload/upload.module'
 import { PaginationModule } from './pagination/pagination.module'
 import { APP_GUARD } from '@nestjs/core'
-import { RolesGuard } from './common/guards/roles.guard'
+import { RolesGuard } from 'lib/guards/roles.guard'
 import { ProfileModule } from './profile/profile.module';
 import { ListModule } from './list/list.module';
 import { ProductsOnListsModule } from './products-on-lists/products-on-lists.module';
+import { CartItemModule } from './cart-item/cart-item.module';
 
 @Module({
 	imports: [
@@ -34,7 +35,8 @@ import { ProductsOnListsModule } from './products-on-lists/products-on-lists.mod
 		PaginationModule,
 		ProfileModule,
 		ListModule,
-		ProductsOnListsModule
+		ProductsOnListsModule,
+		CartItemModule
 	],
 	providers: [
 		{

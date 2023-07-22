@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types'
 import { ArrayMinSize, IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class CreateCategoryDto {
@@ -19,5 +18,3 @@ export class CreateCategoryDto {
 	@ArrayMinSize(1)
 	childrenIds?: number[]
 }
-
-export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}

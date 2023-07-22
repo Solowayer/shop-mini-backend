@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, Get, UseGuards } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { LoginUserDto, RegisterUserDto } from './auth.dto'
+import { LoginUserDto, RegisterUserDto } from './dto'
 import { Request, Response } from 'express'
-import { LocalGuard } from 'src/common/guards/local.guard'
-import { Public } from 'src/common/decorators/public.decorator'
-import { AuthenticatedGuard } from 'src/common/guards/authenticated.guard'
+import { LocalGuard } from 'lib/guards/local.guard'
+import { Public } from 'lib/decorators/public.decorator'
+import { AuthenticatedGuard } from 'lib/guards/authenticated.guard'
 
 @Controller('auth')
 export class AuthController {

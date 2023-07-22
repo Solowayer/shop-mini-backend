@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { CreateCategoryDto, UpdateCategoryDto } from './category.dto'
-import { PrismaService } from 'prisma/prisma.service'
+import { CreateCategoryDto, UpdateCategoryDto } from './dto'
+import { PrismaService } from 'lib/prisma/prisma.service'
 import { Category, Prisma } from '@prisma/client'
-import { CategoryFullType } from 'src/common/types/full-model.types'
-import { categoryObject } from 'src/common/return-objects'
+import { CategoryFullType } from 'lib/types/full-model.types'
+import { categoryObject } from 'lib/return-objects'
 
 @Injectable()
 export class CategoryService {

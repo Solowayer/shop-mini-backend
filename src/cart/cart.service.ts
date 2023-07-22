@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { CreateCartItemDto, UpdateCartItemDto } from './cart.dto'
-import { PrismaService } from 'prisma/prisma.service'
+import { CreateCartItemDto, UpdateCartItemDto } from './dto'
+import { PrismaService } from 'lib/prisma/prisma.service'
 import { Cart, CartItem } from '@prisma/client'
 
 @Injectable()
@@ -102,5 +102,15 @@ export class CartService {
 		if (cart) await this.getCart(cart.userId)
 
 		return deletedCartItem
+	}
+
+	async getProductInCartQty(userId: number, productId: number): Promise<number> {
+		const cart = await this.prisma.cart.findUnique({ where: { userId } })
+
+		const cartItem = await this.prisma.cartItem.findFirst({ where: { productId, cartId: cart.id } })
+
+		const qty = cartItem.quantity
+
+		return qty
 	}
 }

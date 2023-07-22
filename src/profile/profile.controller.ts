@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Patch } from '@nestjs/common'
 import { ProfileService } from './profile.service'
-import { UpdateProfileDto } from './profile.dto'
+import { UpdateProfileDto } from './dto'
 import { User } from '@prisma/client'
-import { GetUser } from 'src/common/decorators/user.decorator'
+import { GetUser } from 'lib/decorators/user.decorator'
 
 @Controller('profile')
 export class ProfileController {

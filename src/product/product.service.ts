@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { CreateProductDto, GetAllProductsDto, ProductsSort, UpdateProductDto } from './product.dto'
-import { PrismaService } from 'prisma/prisma.service'
+import { CreateProductDto, GetAllProductsDto, ProductsSort, UpdateProductDto } from './dto'
+import { PrismaService } from 'lib/prisma/prisma.service'
 import { Prisma, Product } from '@prisma/client'
 import * as fs from 'fs'
 import { PaginationService } from 'src/pagination/pagination.service'
 import { CategoryService } from 'src/category/category.service'
 import { SellerService } from 'src/seller/seller.service'
-import { ProductFullType } from 'src/common/types/full-model.types'
-import { productObject } from 'src/common/return-objects'
+import { ProductFullType } from 'lib/types/full-model.types'
+import { productObject } from 'lib/return-objects'
 
 @Injectable()
 export class ProductService {
@@ -202,5 +202,24 @@ export class ProductService {
 		}
 
 		return this.prisma.product.delete({ where })
+	}
+
+	async getProductInCartQty(userId: number, productId: number): Promise<number> {
+		const product = await this.prisma.product.findUnique({
+			where: { id: productId },
+			include: {
+				cartItems: {
+					where: {
+						cart: {
+							userId
+						}
+					}
+				}
+			}
+		})
+
+		const qty = product.cartItems.reduce((totalQty, cartItem) => totalQty + cartItem.quantity, 0)
+
+		return qty
 	}
 }

@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
 import { CategoryService } from './category.service'
-import { CreateCategoryDto, UpdateCategoryDto } from './category.dto'
-import { Roles } from 'src/common/decorators/roles.decorator'
+import { CreateCategoryDto, UpdateCategoryDto } from './dto'
+import { Roles } from 'lib/decorators/roles.decorator'
 import { Role } from '@prisma/client'
 
 @Controller('categories')

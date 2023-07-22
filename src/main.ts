@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { PrismaService } from 'prisma/prisma.service'
+import { PrismaService } from 'lib/prisma/prisma.service'
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import * as session from 'express-session'

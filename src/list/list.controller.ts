@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
 import { ListService } from './list.service'
-import { CreateListDto, UpdateListDto } from './list.dto'
-import { GetUserId } from 'src/common/decorators/userId.decorator'
+import { CreateListDto, UpdateListDto } from './dto'
+import { GetUserId } from 'lib/decorators/userId.decorator'
 import { Role } from '@prisma/client'
-import { Roles } from 'src/common/decorators/roles.decorator'
+import { Roles } from 'lib/decorators/roles.decorator'
 
 @Controller('lists')
 @Roles(Role.USER, Role.SELLER)

@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common'
 import { ProductService } from './product.service'
-import { CreateProductDto, GetAllProductsDto, UpdateProductDto } from './product.dto'
-import { GetUser } from 'src/common/decorators/user.decorator'
+import { CreateProductDto, GetAllProductsDto, UpdateProductDto } from './dto'
+import { GetUser } from 'lib/decorators/user.decorator'
 import { Role, User } from '@prisma/client'
-import { Roles } from 'src/common/decorators/roles.decorator'
+import { Roles } from 'lib/decorators/roles.decorator'
 
 @Controller('products')
 export class ProductController {
