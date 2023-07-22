@@ -12,10 +12,9 @@ import { UploadModule } from './upload/upload.module'
 import { PaginationModule } from './pagination/pagination.module'
 import { APP_GUARD } from '@nestjs/core'
 import { RolesGuard } from 'lib/guards/roles.guard'
-import { ProfileModule } from './profile/profile.module';
-import { ListModule } from './list/list.module';
-import { ProductsOnListsModule } from './products-on-lists/products-on-lists.module';
-import { CartItemModule } from './cart-item/cart-item.module';
+import { ProfileModule } from './profile/profile.module'
+import { ListModule } from './list/list.module'
+import { ProductsOnListsModule } from './products-on-lists/products-on-lists.module'
 
 @Module({
 	imports: [
@@ -35,8 +34,7 @@ import { CartItemModule } from './cart-item/cart-item.module';
 		PaginationModule,
 		ProfileModule,
 		ListModule,
-		ProductsOnListsModule,
-		CartItemModule
+		ProductsOnListsModule
 	],
 	providers: [
 		{
