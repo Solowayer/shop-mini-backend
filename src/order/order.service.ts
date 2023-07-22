@@ -10,19 +10,13 @@ export class OrderService {
 	async checkout(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
 		const { adress, recipient } = createOrderDto
 
-		const cart = await this.prisma.cart.findUnique({ where: { userId }, include: { cartItems: true } })
-		if (!cart) throw new NotFoundException('Корзини не існує')
-
 		const order = await this.prisma.order.create({
 			data: {
 				recipient,
 				adress,
-				user: { connect: { id: userId } },
-				totalAmount: cart.totalAmount
+				user: { connect: { id: userId } }
 			}
 		})
-
-		await this.prisma.cart.delete({ where: { userId } })
 
 		return order
 	}

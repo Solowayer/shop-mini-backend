@@ -1,37 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateCartItemDto, UpdateCartItemDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { Cart, CartItem } from '@prisma/client'
+import { CartItem } from '@prisma/client'
 
 @Injectable()
 export class CartService {
 	constructor(private prisma: PrismaService) {}
 
-	async getCart(userId: number): Promise<Cart> {
-		const cart = await this.prisma.cart.findUnique({ where: { userId }, include: { cartItems: true } })
-		if (!cart) return null
-
-		const cartItems = cart.cartItems
-		const totalAmount = cartItems.reduce((total, item) => total + item.price, 0)
-		const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0)
-
-		return await this.prisma.cart.update({
-			where: { id: cart.id },
-			data: { totalAmount, totalQuantity },
-			include: { cartItems: true }
-		})
-	}
-
 	async addCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
 		const { productId, quantity } = createCartItemDto
-
-		let cart = await this.prisma.cart.findUnique({ where: { userId } })
-		if (!cart) cart = await this.prisma.cart.create({ data: { userId } })
 
 		const product = await this.prisma.product.findUnique({ where: { id: productId } })
 		if (!product) throw new NotFoundException('This product not found')
 
-		const existingCartItem = await this.prisma.cartItem.findFirst({ where: { productId, cartId: cart.id } })
+		const existingCartItem = await this.prisma.cartItem.findFirst({ where: { productId } })
 
 		if (existingCartItem) {
 			const newQuantity = existingCartItem.quantity + quantity
@@ -54,23 +36,11 @@ export class CartService {
 				price: product.price * quantity,
 				product: {
 					connect: { id: product.id }
-				},
-				cart: {
-					connect: { id: cart.id }
 				}
 			}
 		})
 
-		await this.getCart(userId)
-
 		return cartItem
-	}
-
-	async deleteCart(userId: number): Promise<Cart> {
-		const existingCart = await this.prisma.cart.findUnique({ where: { userId } })
-		if (!existingCart) throw new NotFoundException('Cart is not exist')
-
-		return await this.prisma.cart.delete({ where: { userId } })
 	}
 
 	async updateCartItem(cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
@@ -90,27 +60,6 @@ export class CartService {
 			where: { id: cartItemId }
 		})
 
-		const remainingCartItems = await this.prisma.cartItem.findMany({
-			where: { cartId: cartItem.cartId }
-		})
-
-		if (remainingCartItems.length === 0) {
-			await this.prisma.cart.delete({ where: { id: cartItem.cartId } })
-		}
-
-		const cart = await this.prisma.cart.findUnique({ where: { id: cartItem.cartId } })
-		if (cart) await this.getCart(cart.userId)
-
 		return deletedCartItem
-	}
-
-	async getProductInCartQty(userId: number, productId: number): Promise<number> {
-		const cart = await this.prisma.cart.findUnique({ where: { userId } })
-
-		const cartItem = await this.prisma.cartItem.findFirst({ where: { productId, cartId: cart.id } })
-
-		const qty = cartItem.quantity
-
-		return qty
 	}
 }

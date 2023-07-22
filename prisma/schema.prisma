@@ -29,9 +29,13 @@ model User {
   orders   Order[]
   lists    List[]
 
+  cartItems CartItem[]
+
   seller Seller?
-  cart   Cart?
 }
+
+// totalAmount   Int @default(0)
+// totalQuantity Int @default(0)
 
 model Profile {
   id        Int      @id @default(autoincrement())
@@ -222,20 +226,6 @@ model Category {
   product Product[]
 }
 
-model Cart {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  totalAmount   Int @default(0)
-  totalQuantity Int @default(0)
-
-  cartItems CartItem[]
-
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int  @unique
-}
-
 model CartItem {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -249,6 +239,6 @@ model CartItem {
   product   Product @relation(fields: [productId], references: [id])
   productId Int
 
-  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  cartId String
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
 }

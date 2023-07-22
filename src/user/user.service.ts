@@ -33,4 +33,8 @@ export class UserService {
 
 		return user
 	}
+
+	async getCart(userId: number) {
+		return
+	}
 }

@@ -10,16 +10,6 @@ import { GetUserId } from 'lib/decorators/userId.decorator'
 export class CartController {
 	constructor(private readonly cartService: CartService) {}
 
-	@Get('')
-	get(@GetUserId() userId: number) {
-		return this.cartService.getCart(userId)
-	}
-
-	@Delete('delete')
-	delete(@GetUserId() userId: number) {
-		return this.cartService.deleteCart(userId)
-	}
-
 	@Post('add')
 	addCartItem(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
 		return this.cartService.addCartItem(userId, createCartItemDto)
