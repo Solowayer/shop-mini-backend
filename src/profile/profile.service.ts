@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { UpdateProfileDto } from './dto'
-import { PrismaService } from 'lib/prisma/prisma.service'
+import { PrismaService } from 'prisma/prisma.service'
 import { Profile, Role } from '@prisma/client'
 import { Roles } from 'lib/decorators/roles.decorator'
 

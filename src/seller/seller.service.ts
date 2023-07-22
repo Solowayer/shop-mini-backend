@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaService } from 'lib/prisma/prisma.service'
+import { PrismaService } from 'prisma/prisma.service'
 import { CreateSellerDto, UpdateSellerDto } from './dto'
 import { Prisma, Seller } from '@prisma/client'
 import { SellerFullType } from 'lib/types/full-model.types'

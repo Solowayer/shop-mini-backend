@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateListDto, UpdateListDto } from './dto'
-import { PrismaService } from 'lib/prisma/prisma.service'
+import { PrismaService } from 'prisma/prisma.service'
 import { List, Prisma, ProductsOnLists } from '@prisma/client'
 import { listObject } from 'lib/return-objects'
 import { ListFullType } from 'lib/types/full-model.types'

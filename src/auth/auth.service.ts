@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaService } from 'lib/prisma/prisma.service'
+import { PrismaService } from 'prisma/prisma.service'
 import { LoginUserDto, RegisterUserDto } from './dto'
 import * as argon from 'argon2'
 import { Request, Response } from 'express'

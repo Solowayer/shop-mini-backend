@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateCartItemDto, UpdateCartItemDto } from './dto'
-import { PrismaService } from 'lib/prisma/prisma.service'
+import { PrismaService } from 'prisma/prisma.service'
 import { Cart, CartItem } from '@prisma/client'
 
 @Injectable()
