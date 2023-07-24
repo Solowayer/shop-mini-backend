@@ -34,9 +34,6 @@ model User {
   seller Seller?
 }
 
-// totalAmount   Int @default(0)
-// totalQuantity Int @default(0)
-
 model Profile {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -238,7 +235,8 @@ model CartItem {
 
   product   Product @relation(fields: [productId], references: [id])
   productId Int
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
 
-  user   User? @relation(fields: [userId], references: [id])
-  userId Int?
+  @@unique([productId, userId])
 }

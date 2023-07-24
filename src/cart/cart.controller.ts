@@ -10,18 +10,37 @@ import { GetUserId } from 'lib/decorators/userId.decorator'
 export class CartController {
 	constructor(private readonly cartService: CartService) {}
 
+	@Get('')
+	getAllItems(@GetUserId() userId: number) {
+		return this.cartService.getAllCartItems(userId)
+	}
+
+	@Get('p/:productId')
+	getItemByProductId(@GetUserId() userId: number, @Param('productId') productId: string) {
+		return this.cartService.getCartItemByProductId(userId, +productId)
+	}
+
+	@Delete('')
+	deleteItems(@GetUserId() userId: number) {
+		return this.cartService.deleteAllCartItems(userId)
+	}
+
 	@Post('add')
-	addCartItem(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
+	addItem(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
 		return this.cartService.addCartItem(userId, createCartItemDto)
 	}
 
 	@Patch(':cartItemId')
-	updateCartItem(@Param('cartItemId') cartItemId: number, @Body() updateCartItemDto: UpdateCartItemDto) {
-		return this.cartService.updateCartItem(cartItemId, updateCartItemDto)
+	updateItem(
+		@GetUserId() userId: number,
+		@Param('cartItemId') cartItemId: string,
+		@Body() updateCartItemDto: UpdateCartItemDto
+	) {
+		return this.cartService.updateCartItem(userId, +cartItemId, updateCartItemDto)
 	}
 
 	@Delete(':cartItemId')
-	deleteCartItem(@Param('cartItemId') cartItemId: number) {
-		return this.cartService.deleteCartItem(+cartItemId)
+	deleteItem(@GetUserId() userId: number, @Param('cartItemId') cartItemId: number) {
+		return this.cartService.deleteCartItem(userId, +cartItemId)
 	}
 }

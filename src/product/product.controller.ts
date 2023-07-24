@@ -4,6 +4,7 @@ import { CreateProductDto, GetAllProductsDto, UpdateProductDto } from './dto'
 import { GetUser } from 'lib/decorators/user.decorator'
 import { Role, User } from '@prisma/client'
 import { Roles } from 'lib/decorators/roles.decorator'
+import { GetUserId } from 'lib/decorators/userId.decorator'
 
 @Controller('products')
 export class ProductController {

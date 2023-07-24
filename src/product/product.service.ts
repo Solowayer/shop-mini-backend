@@ -203,23 +203,4 @@ export class ProductService {
 
 		return this.prisma.product.delete({ where })
 	}
-
-	// async getProductInCartQty(userId: number, productId: number): Promise<number> {
-	// 	const product = await this.prisma.product.findUnique({
-	// 		where: { id: productId },
-	// 		include: {
-	// 			cartItems: {
-	// 				where: {
-	// 					cart: {
-	// 						userId
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	})
-
-	// 	const qty = product.cartItems.reduce((totalQty, cartItem) => totalQty + cartItem.quantity, 0)
-
-	// 	return qty
-	// }
 }
