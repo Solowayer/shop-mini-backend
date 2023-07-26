@@ -6,6 +6,7 @@ import { ProductModule } from 'src/product/product.module'
 @Module({
 	imports: [ProductModule],
 	controllers: [CartController],
-	providers: [CartService]
+	providers: [CartService],
+	exports: [CartService]
 })
 export class CartModule {}

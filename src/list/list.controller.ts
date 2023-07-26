@@ -37,7 +37,7 @@ export class ListController {
 		return this.listService.findAllLists(userId)
 	}
 
-	@Post('list/:listId/product/:productId')
+	@Post(':listId/product/:productId')
 	addProduct(@GetUserId() userId: number, @Param('listId') listId: string, @Param('productId') productId: string) {
 		return this.listService.addProductToList(userId, +listId, +productId)
 	}

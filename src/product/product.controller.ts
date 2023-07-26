@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { CreateProductDto, GetAllProductsDto, UpdateProductDto } from './dto'
 import { GetUser } from 'lib/decorators/user.decorator'
@@ -11,13 +11,16 @@ export class ProductController {
 	constructor(private readonly productService: ProductService) {}
 
 	@Get()
-	async getAll(@Query() getAllProductsDto: GetAllProductsDto) {
+	async getAll(@GetUserId() userId: number, @Query() getAllProductsDto: GetAllProductsDto) {
 		return await this.productService.getAllProducts(getAllProductsDto)
 	}
 
 	@Get('c/:categoryId')
-	getByCategoryId(@Param('categoryId') categoryId: string, @Query() getAllProductsDto: GetAllProductsDto) {
-		return this.productService.getProductsByCategoryId(getAllProductsDto, +categoryId)
+	getByCategoryId(
+		@Param('categoryId', ParseIntPipe) categoryId: number,
+		@Query() getAllProductsDto: GetAllProductsDto
+	) {
+		return this.productService.getProductsByCategoryId(getAllProductsDto, categoryId)
 	}
 
 	@Get('c/tree/:categoryId')

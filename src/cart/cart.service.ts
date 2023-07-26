@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common'
 import { CreateCartItemDto, UpdateCartItemDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { CartItem, Prisma } from '@prisma/client'
@@ -8,7 +8,10 @@ import { cartItemObject } from 'lib/return-objects'
 
 @Injectable()
 export class CartService {
-	constructor(private prisma: PrismaService, @Inject(ProductService) private productService: ProductService) {}
+	constructor(
+		private prisma: PrismaService,
+		@Inject(forwardRef(() => ProductService)) private productService: ProductService
+	) {}
 
 	async getAllCartItems(
 		userId: number
@@ -40,8 +43,6 @@ export class CartService {
 		const cartItem = await this.prisma.cartItem.findUnique({
 			where: { productId_userId: { productId, userId } }
 		})
-
-		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
 		return cartItem
 	}
@@ -94,8 +95,6 @@ export class CartService {
 
 	async updateCartItem(userId: number, cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
 		const cartItem = await this.getOneCartItem(userId, cartItemId, { product: { select: { price: true } } })
-
-		console.log('cartItem:', cartItem)
 
 		const price = cartItem.product.price
 
