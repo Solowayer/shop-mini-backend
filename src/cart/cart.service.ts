@@ -55,7 +55,7 @@ export class CartService {
 	async addCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
 		const { productId, quantity } = createCartItemDto
 
-		const product = await this.productService.getOneProduct({ id: productId }, {})
+		const product = await this.productService.getOneProduct({ id: productId })
 		if (!product) throw new NotFoundException('This product not found')
 
 		const existingCartItem = await this.prisma.cartItem.findUnique({
