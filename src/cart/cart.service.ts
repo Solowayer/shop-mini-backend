@@ -10,7 +10,8 @@ import { cartItemObject } from 'lib/return-objects'
 export class CartService {
 	constructor(
 		private prisma: PrismaService,
-		@Inject(forwardRef(() => ProductService)) private productService: ProductService
+		@Inject(forwardRef(() => ProductService))
+		private productService: ProductService
 	) {}
 
 	async getAllCartItems(

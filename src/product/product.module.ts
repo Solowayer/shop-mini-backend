@@ -1,15 +1,16 @@
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { ProductController } from './product.controller'
-import { PaginationService } from 'src/pagination/pagination.service'
-import { CategoryService } from 'src/category/category.service'
-import { SellerService } from 'src/seller/seller.service'
-import { UserService } from 'src/user/user.service'
-import { CartService } from 'src/cart/cart.service'
+import { PaginationModule } from 'src/pagination/pagination.module'
+import { SellerModule } from 'src/seller/seller.module'
+import { CategoryModule } from 'src/category/category.module'
+import { UserModule } from 'src/user/user.module'
+import { CartModule } from 'src/cart/cart.module'
 
 @Module({
+	imports: [PaginationModule, CategoryModule, SellerModule, UserModule, forwardRef(() => CartModule)],
 	controllers: [ProductController],
-	providers: [ProductService, PaginationService, CategoryService, SellerService, UserService, CartService],
+	providers: [ProductService],
 	exports: [ProductService]
 })
 export class ProductModule {}

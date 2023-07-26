@@ -20,12 +20,9 @@ import { ProductsOnListsModule } from './products-on-lists/products-on-lists.mod
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
 		PrismaModule,
-
 		AuthModule,
 		UserModule,
-
 		SellerModule,
-
 		ProductModule,
 		CategoryModule,
 		OrderModule,

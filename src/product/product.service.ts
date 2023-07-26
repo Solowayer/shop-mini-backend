@@ -6,18 +6,17 @@ import * as fs from 'fs'
 import { PaginationService } from 'src/pagination/pagination.service'
 import { CategoryService } from 'src/category/category.service'
 import { SellerService } from 'src/seller/seller.service'
-import { ProductFullType } from 'lib/types/full-model.types'
-import { productObject } from 'lib/return-objects'
 import { CartService } from 'src/cart/cart.service'
 
 @Injectable()
 export class ProductService {
 	constructor(
 		private prisma: PrismaService,
-		private paginationService: PaginationService,
-		private categoryService: CategoryService,
-		private sellerService: SellerService,
-		@Inject(forwardRef(() => CartService)) private cartService: CartService
+		@Inject(PaginationService) private paginationService: PaginationService,
+		@Inject(CategoryService) private categoryService: CategoryService,
+		@Inject(SellerService) private sellerService: SellerService,
+		@Inject(forwardRef(() => CartService))
+		private cartService: CartService
 	) {}
 
 	async getAllProducts(
@@ -127,7 +126,7 @@ export class ProductService {
 		return product
 	}
 
-	async getProductById(id: number): Promise<ProductFullType> {
+	async getProductById(id: number): Promise<Product> {
 		const product = await this.getOneProduct({ id })
 
 		if (!product) throw new NotFoundException('Product not found')
@@ -135,7 +134,7 @@ export class ProductService {
 		return product
 	}
 
-	async getProductBySlug(slug: string): Promise<ProductFullType> {
+	async getProductBySlug(slug: string): Promise<Product> {
 		const product = await this.getOneProduct({ slug })
 
 		if (!product) throw new NotFoundException('Product not found')
