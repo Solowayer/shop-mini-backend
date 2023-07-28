@@ -124,6 +124,11 @@ export class CartService {
 	}
 
 	async isProductInCart(userId: number, productId: number): Promise<{ isInCart: boolean }> {
+		const product = await this.productService.findOneProduct({ id: productId })
+		if (!product) {
+			throw new NotFoundException('Product not found')
+		}
+
 		const cartItem = await this.findOneCartItem({ productId_userId: { productId, userId } })
 
 		return { isInCart: !!cartItem }
