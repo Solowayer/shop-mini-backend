@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Delete, Get } from '@nestjs/common'
+import { Controller, Post, Body, Patch, Param, Delete, Get, ParseIntPipe } from '@nestjs/common'
 import { CartService } from './cart.service'
 import { CreateCartItemDto, UpdateCartItemDto } from './dto'
 import { Role } from '@prisma/client'
@@ -10,14 +10,14 @@ import { GetUserId } from 'lib/decorators/userId.decorator'
 export class CartController {
 	constructor(private readonly cartService: CartService) {}
 
-	@Get('')
-	getAllItems(@GetUserId() userId: number) {
-		return this.cartService.getAllCartItems(userId)
+	@Get('check/:productId')
+	async checkProductInCart(@GetUserId() userId: number, @Param('productId', ParseIntPipe) productId: number) {
+		return this.cartService.isProductInCart(userId, productId)
 	}
 
-	@Get('p/:productId')
-	getItemByProductId(@GetUserId() userId: number, @Param('productId') productId: string) {
-		return this.cartService.getCartItemByProductId(userId, +productId)
+	@Get('')
+	getAllItems(@GetUserId() userId: number) {
+		return this.cartService.findAllCartItems(userId)
 	}
 
 	@Delete('')
@@ -26,8 +26,8 @@ export class CartController {
 	}
 
 	@Post('add')
-	addItem(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
-		return this.cartService.addCartItem(userId, createCartItemDto)
+	createItem(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
+		return this.cartService.createCartItem(userId, createCartItemDto)
 	}
 
 	@Patch(':cartItemId')

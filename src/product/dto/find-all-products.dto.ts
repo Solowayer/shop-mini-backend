@@ -10,7 +10,7 @@ export enum ProductsSort {
 	RATING = 'rating'
 }
 
-export class GetAllProductsDto extends PaginationDto {
+export class FindAllProductsDto extends PaginationDto {
 	@IsOptional()
 	@IsEnum(ProductsSort)
 	sort?: ProductsSort

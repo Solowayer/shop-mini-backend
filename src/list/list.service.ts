@@ -51,7 +51,7 @@ export class ListService {
 	}
 
 	async addProductToList(userId: number, listId: number, productId: number): Promise<ProductsOnLists> {
-		await this.productService.getProductById(productId)
+		await this.productService.findProductById(productId)
 
 		await this.getListById(userId, listId)
 
@@ -64,7 +64,7 @@ export class ListService {
 	}
 
 	async deleteProductFromList(userId: number, listId: number, productId: number): Promise<ProductsOnLists> {
-		await this.productService.getProductById(productId)
+		await this.productService.findProductById(productId)
 
 		await this.getListById(userId, listId)
 

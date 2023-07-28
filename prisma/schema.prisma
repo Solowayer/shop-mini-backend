@@ -197,9 +197,7 @@ model Product {
   seller   Seller? @relation(fields: [sellerId], references: [id])
   sellerId Int?
 
-  isInCart   Boolean @default(false)
-  isFavorite Boolean @default(false)
-  published  Boolean @default(false)
+  published Boolean @default(false)
 
   cartItems CartItem[]
 

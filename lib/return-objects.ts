@@ -30,9 +30,7 @@ export const productObject: ProductObjectType = {
 	categoryId: true,
 	sellerId: true,
 	published: true,
-	rating: true,
-	isInCart: true,
-	isFavorite: true
+	rating: true
 }
 
 export const cartItemObject: CartItemObjectType = {

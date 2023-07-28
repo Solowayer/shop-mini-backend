@@ -1,53 +1,52 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common'
 import { ProductService } from './product.service'
-import { CreateProductDto, GetAllProductsDto, UpdateProductDto } from './dto'
+import { CreateProductDto, FindAllProductsDto, UpdateProductDto } from './dto'
 import { GetUser } from 'lib/decorators/user.decorator'
 import { Role, User } from '@prisma/client'
 import { Roles } from 'lib/decorators/roles.decorator'
-import { GetUserId } from 'lib/decorators/userId.decorator'
 
 @Controller('products')
 export class ProductController {
 	constructor(private readonly productService: ProductService) {}
 
 	@Get()
-	async getAll(@GetUserId() userId: number, @Query() getAllProductsDto: GetAllProductsDto) {
-		return await this.productService.getAllProducts(getAllProductsDto)
+	async findAll(@Query() findAllProductsDto: FindAllProductsDto) {
+		return await this.productService.findAllProducts(findAllProductsDto)
 	}
 
 	@Get('c/:categoryId')
-	getByCategoryId(
+	findByCategoryId(
 		@Param('categoryId', ParseIntPipe) categoryId: number,
-		@Query() getAllProductsDto: GetAllProductsDto
+		@Query() findAllProductsDto: FindAllProductsDto
 	) {
-		return this.productService.getProductsByCategoryId(getAllProductsDto, categoryId)
+		return this.productService.findProductsByCategoryId(findAllProductsDto, categoryId)
 	}
 
 	@Get('c/tree/:categoryId')
-	getByCategoryTree(@Param('categoryId') categoryId: string, @Query() getAllProductsDto: GetAllProductsDto) {
-		return this.productService.getProductsByCategoryTree(getAllProductsDto, +categoryId)
+	findByCategoryTree(@Param('categoryId') categoryId: string, @Query() findAllProductsDto: FindAllProductsDto) {
+		return this.productService.findProductsByCategoryTree(findAllProductsDto, +categoryId)
 	}
 
 	@Get('l/:listId')
-	getByList(@Param('listId') listId: string, @Query() getAllProductsDto: GetAllProductsDto) {
-		return this.productService.getProductsByList(getAllProductsDto, +listId)
+	findByList(@Param('listId') listId: string, @Query() findAllProductsDto: FindAllProductsDto) {
+		return this.productService.findProductsByList(findAllProductsDto, +listId)
 	}
 
 	// ?
 	@Roles(Role.SELLER)
 	@Get('seller')
-	getSellerProducts(@GetUser() user: User, @Query() getAllProductsDto: GetAllProductsDto) {
-		return this.productService.getSellerProducts(user.id, getAllProductsDto)
+	findSellerProducts(@GetUser() user: User, @Query() findAllProductsDto: FindAllProductsDto) {
+		return this.productService.findSellerProducts(user.id, findAllProductsDto)
 	}
 
 	@Get('p/:id')
-	getById(@Param('id') id: string) {
-		return this.productService.getProductById(+id)
+	findById(@Param('id') id: string) {
+		return this.productService.findProductById(+id)
 	}
 
 	@Get(':slug')
-	getBySlug(@Param('slug') slug: string) {
-		return this.productService.getProductBySlug(slug)
+	findBySlug(@Param('slug') slug: string) {
+		return this.productService.findProductBySlug(slug)
 	}
 
 	@Roles(Role.SELLER)
