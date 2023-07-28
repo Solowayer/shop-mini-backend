@@ -9,33 +9,33 @@ export class CategoryController {
 	constructor(private readonly categoryService: CategoryService) {}
 
 	@Get('')
-	getAll() {
-		return this.categoryService.getAllCategories()
+	findAll() {
+		return this.categoryService.findAllCategories()
 	}
 
 	@Get('main')
-	getMain() {
-		return this.categoryService.getMainCategories()
+	findMain() {
+		return this.categoryService.findMainCategories()
 	}
 
 	@Get('c/:id')
-	getById(@Param('id') id: string) {
-		return this.categoryService.getCategoryById(+id)
+	findById(@Param('id') id: string) {
+		return this.categoryService.findCategoryById(+id)
 	}
 
 	@Get(':slug')
-	getBySlug(@Param('slug') slug: string) {
-		return this.categoryService.getCategoryBySlug(slug)
+	findBySlug(@Param('slug') slug: string) {
+		return this.categoryService.findCategoryBySlug(slug)
 	}
 
 	@Get('tree/:id')
-	getTree(@Param('id') id: string) {
-		return this.categoryService.getCategoryTree(+id)
+	findTree(@Param('id') id: string) {
+		return this.categoryService.findCategoryTree(+id)
 	}
 
 	@Get('breadcrumbs/:id')
-	getBreadcrumbs(@Param('id') id: string) {
-		return this.categoryService.getCategoryBreadcrumbs(+id)
+	findBreadcrumbs(@Param('id') id: string) {
+		return this.categoryService.findCategoryBreadcrumbs(+id)
 	}
 
 	// @Roles(Role.ADMIN)

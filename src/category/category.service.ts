@@ -3,50 +3,56 @@ import { CreateCategoryDto, UpdateCategoryDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Category, Prisma } from '@prisma/client'
 import { CategoryFullType } from 'lib/types/full-model.types'
-import { categoryObject } from 'lib/return-objects'
 
 @Injectable()
 export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
-	async getAllCategories(): Promise<Category[]> {
+	async findAllCategories(): Promise<Category[]> {
 		const categories = await this.prisma.category.findMany()
 		if (!categories) throw new NotFoundException('Categories not found')
 		return categories
 	}
 
-	async getMainCategories(): Promise<Category[]> {
+	async findMainCategories(): Promise<Category[]> {
 		return await this.prisma.category.findMany({ where: { parentId: null } })
 	}
 
-	async getOneCategory(
+	async findOneCategory(
 		uniqueArgs: Prisma.CategoryWhereUniqueInput,
-		selectCategory?: Prisma.CategorySelect
+		select?: Prisma.CategorySelect
 	): Promise<CategoryFullType> {
+		const defaultCategorySelect: Prisma.CategorySelectScalar = {
+			id: true,
+			slug: true,
+			name: true,
+			parentId: true
+		}
+
 		const category = await this.prisma.category.findUnique({
 			where: uniqueArgs,
-			select: { ...categoryObject, ...selectCategory }
+			select: { ...defaultCategorySelect, ...select }
 		})
 
 		return category
 	}
 
-	async getCategoryById(id: number): Promise<CategoryFullType> {
-		const category = await this.getOneCategory({ id }, { children: true })
+	async findCategoryById(id: number): Promise<CategoryFullType> {
+		const category = await this.findOneCategory({ id }, { children: true })
 		if (!category) throw new NotFoundException('Category not found')
 
 		return category
 	}
 
-	async getCategoryBySlug(slug: string): Promise<CategoryFullType> {
-		const category = await this.getOneCategory({ slug })
+	async findCategoryBySlug(slug: string): Promise<CategoryFullType> {
+		const category = await this.findOneCategory({ slug })
 		if (!category) throw new NotFoundException('Category not found')
 
 		return category
 	}
 
-	async getCategoryTree(id: number): Promise<CategoryFullType[]> {
-		const category = await this.getOneCategory({ id })
+	async findCategoryTree(id: number): Promise<CategoryFullType[]> {
+		const category = await this.findOneCategory({ id })
 		if (!category) throw new NotFoundException('Category not found')
 
 		const children = await this.prisma.category.findMany({
@@ -54,7 +60,7 @@ export class CategoryService {
 			include: { children: true }
 		})
 
-		const nestedCategories = await Promise.all(children.map(child => this.getCategoryTree(child.id)))
+		const nestedCategories = await Promise.all(children.map(child => this.findCategoryTree(child.id)))
 		const flattenedCategories = nestedCategories.flat()
 
 		const categoryTree = [category, ...flattenedCategories]
@@ -62,12 +68,12 @@ export class CategoryService {
 		return categoryTree
 	}
 
-	async getCategoryBreadcrumbs(id: number): Promise<CategoryFullType[]> {
+	async findCategoryBreadcrumbs(id: number): Promise<CategoryFullType[]> {
 		const breadcrumbs: CategoryFullType[] = []
 
 		let categoryId = id
 		while (categoryId) {
-			const category = await this.getOneCategory({ id: categoryId })
+			const category = await this.findOneCategory({ id: categoryId })
 			if (!category) throw new NotFoundException('Category not found')
 
 			breadcrumbs.unshift(category)
@@ -80,8 +86,8 @@ export class CategoryService {
 	async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
 		const { name, slug, parentId, childrenIds } = createCategoryDto
 
-		const existingSlug = await this.getOneCategory({ slug })
-		const existingName = await this.getOneCategory({ name })
+		const existingSlug = await this.findOneCategory({ slug })
+		const existingName = await this.findOneCategory({ name })
 		if (existingSlug || existingName) throw new BadRequestException('This category already exists')
 
 		const children = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
@@ -108,7 +114,7 @@ export class CategoryService {
 	): Promise<Category> {
 		const { parentId, childrenIds } = updateCategoryDto
 
-		const category = await this.getOneCategory(where)
+		const category = await this.findOneCategory(where)
 		if (!category) throw new NotFoundException('Category not found')
 
 		const childrens = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
@@ -127,7 +133,7 @@ export class CategoryService {
 	}
 
 	async deleteCategory(where: Prisma.CategoryWhereUniqueInput): Promise<Category> {
-		const category = await this.getOneCategory(where)
+		const category = await this.findOneCategory(where)
 		if (!category) throw new NotFoundException('Category not found')
 
 		return this.prisma.category.delete({ where })

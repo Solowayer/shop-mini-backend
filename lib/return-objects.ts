@@ -1,4 +1,4 @@
-import { CartItem, Category, List, Product, Seller, User } from '@prisma/client'
+import { CartItem, Category, List, Prisma, Product, Seller, User } from '@prisma/client'
 
 type ObjectWithBooleanValues<T> = {
 	[K in keyof T]: boolean
@@ -11,7 +11,7 @@ type SellerObjectType = ObjectWithBooleanValues<Seller>
 type UserObjectType = ObjectWithBooleanValues<User>
 type ListObjectType = ObjectWithBooleanValues<List>
 
-export const categoryObject: CategoryObjectType = {
+export const categoryObject: Prisma.CategorySelectScalar = {
 	id: true,
 	slug: true,
 	name: true,

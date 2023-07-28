@@ -6,6 +6,7 @@ import * as fs from 'fs'
 import { PaginationService } from 'src/pagination/pagination.service'
 import { CategoryService } from 'src/category/category.service'
 import { SellerService } from 'src/seller/seller.service'
+import { ProductFullType } from 'lib/types/full-model.types'
 
 @Injectable()
 export class ProductService {
@@ -76,7 +77,7 @@ export class ProductService {
 		findAllProductsDto: FindAllProductsDto,
 		categoryId: number
 	): Promise<{ products: Product[]; length: number }> {
-		const categoryTree = await this.categoryService.getCategoryTree(categoryId)
+		const categoryTree = await this.categoryService.findCategoryTree(categoryId)
 		if (!categoryTree) throw new NotFoundException('Category not found')
 
 		const categoryIds = categoryTree.map(cat => cat.id)
@@ -115,15 +116,34 @@ export class ProductService {
 		return await this.findAllProducts(getAllProductsDto, where)
 	}
 
-	async findOneProduct(uniqueArgs: Prisma.ProductWhereUniqueInput): Promise<Product> {
+	async findOneProduct(
+		uniqueArgs: Prisma.ProductWhereUniqueInput,
+		select: Prisma.ProductSelect = {}
+	): Promise<ProductFullType> {
+		const defaultProductSelect: Prisma.ProductSelectScalar = {
+			id: true,
+			createdAt: false,
+			updatedAt: false,
+			slug: true,
+			images: true,
+			name: true,
+			description: true,
+			price: true,
+			categoryId: true,
+			sellerId: true,
+			published: true,
+			rating: true
+		}
+
 		const product = await this.prisma.product.findUnique({
-			where: uniqueArgs
+			where: uniqueArgs,
+			select: { ...defaultProductSelect, ...select }
 		})
 
 		return product
 	}
 
-	async findProductById(id: number): Promise<Product> {
+	async findProductById(id: number): Promise<ProductFullType> {
 		const product = await this.findOneProduct({ id })
 
 		if (!product) throw new NotFoundException('Product not found')
@@ -131,7 +151,7 @@ export class ProductService {
 		return product
 	}
 
-	async findProductBySlug(slug: string): Promise<Product> {
+	async findProductBySlug(slug: string): Promise<ProductFullType> {
 		const product = await this.findOneProduct({ slug })
 
 		if (!product) throw new NotFoundException('Product not found')
@@ -148,7 +168,7 @@ export class ProductService {
 
 		const seller = await this.sellerService.getSellerByUserId(userId)
 
-		const categoryExist = await this.categoryService.getOneCategory({ id: categoryId })
+		const categoryExist = await this.categoryService.findOneCategory({ id: categoryId })
 		if (!categoryExist) throw new NotFoundException('Category not found')
 
 		const existingProduct = await this.findOneProduct({ slug: createProductDto.slug })

@@ -20,11 +20,33 @@ export class CartService {
 		return { cartItems, totalAmount, totalQuantity }
 	}
 
-	async findOneCartItem(where: Prisma.CartItemWhereUniqueInput): Promise<CartItemFullType> {
+	async findOneCartItem(
+		where: Prisma.CartItemWhereUniqueInput,
+		select: Prisma.CartItemSelect = {}
+	): Promise<CartItemFullType> {
+		const defaultCartItemSelect: Prisma.CartItemSelectScalar = {
+			id: true,
+			createdAt: false,
+			updatedAt: false,
+			name: true,
+			image: true,
+			quantity: true,
+			price: true,
+			productId: true,
+			userId: true
+		}
+
 		const cartItem = await this.prisma.cartItem.findUnique({
 			where: where,
-			include: { product: true }
+			select: { ...defaultCartItemSelect, ...select }
 		})
+
+		return cartItem
+	}
+
+	async findCartItemById(userId: number, cartItemId: number): Promise<CartItemFullType> {
+		const cartItem = this.findOneCartItem({ id: cartItemId, userId })
+		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
 		return cartItem
 	}
@@ -40,8 +62,8 @@ export class CartService {
 		const product = await this.productService.findOneProduct({ id: productId })
 		if (!product) throw new NotFoundException('This product not found')
 
-		const existingCartItem = await this.prisma.cartItem.findUnique({
-			where: { productId_userId: { productId, userId } }
+		const existingCartItem = await this.findOneCartItem({
+			productId_userId: { productId, userId }
 		})
 
 		if (existingCartItem) {
@@ -76,7 +98,8 @@ export class CartService {
 	}
 
 	async updateCartItem(userId: number, cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
-		const cartItem = await this.findOneCartItem({ userId, id: cartItemId })
+		const cartItem = await this.findOneCartItem({ id: cartItemId, userId }, { product: true })
+
 		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
 		const price = cartItem.product.price

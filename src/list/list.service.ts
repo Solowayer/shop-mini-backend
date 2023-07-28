@@ -2,13 +2,31 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateListDto, UpdateListDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { List, Prisma, ProductsOnLists } from '@prisma/client'
-import { listObject } from 'lib/return-objects'
-import { ListFullType } from 'lib/types/full-model.types'
 import { ProductService } from 'src/product/product.service'
+// import { ListFullType } from 'lib/types/full-model.types'
 
 @Injectable()
 export class ListService {
 	constructor(private prisma: PrismaService, @Inject(ProductService) private productService: ProductService) {}
+
+	findAllLists(userId: number): Promise<List[]> {
+		return this.prisma.list.findMany({ where: { userId } })
+	}
+
+	async findOneList(where: Prisma.ListWhereUniqueInput): Promise<List> {
+		const list = await this.prisma.list.findUnique({ where })
+		return list
+	}
+
+	async findListById(userId: number, listId: number): Promise<List> {
+		const list = await this.findOneList({ id: listId })
+
+		if (!list || list.userId !== userId) {
+			throw new NotFoundException('List not found')
+		}
+
+		return list
+	}
 
 	async createList(userId: number, createListDto: CreateListDto): Promise<List> {
 		const { name } = createListDto
@@ -18,42 +36,26 @@ export class ListService {
 	}
 
 	async updateList(userId: number, listId: number, updateListDto: UpdateListDto): Promise<List> {
-		await this.getListById(userId, listId)
+		await this.findListById(userId, listId)
 
 		const updatedList = await this.prisma.list.update({ where: { id: listId }, data: { ...updateListDto } })
 
 		return updatedList
 	}
 
-	async removeList(userId: number, listId: number) {
-		await this.getListById(userId, listId)
+	async deleteList(userId: number, listId: number) {
+		const list = await this.findOneList({ userId, id: listId })
+		if (!list) throw new NotFoundException('List not found')
 
 		return this.prisma.list.delete({ where: { id: listId } })
 	}
 
-	async getOneList(listId: number, selectList: Prisma.ListSelect = {}): Promise<ListFullType> {
-		const list = await this.prisma.list.findUnique({ where: { id: listId }, select: { ...listObject, ...selectList } })
-		return list
-	}
-
-	async getListById(userId: number, listId: number): Promise<ListFullType> {
-		const list = await this.getOneList(listId, { products: true })
-
-		if (!list || list.userId !== userId) {
-			throw new NotFoundException('List not found')
-		}
-
-		return list
-	}
-
-	findAllLists(userId: number): Promise<List[]> {
-		return this.prisma.list.findMany({ where: { userId } })
-	}
-
 	async addProductToList(userId: number, listId: number, productId: number): Promise<ProductsOnLists> {
-		await this.productService.findProductById(productId)
+		const product = await this.productService.findOneProduct({ id: productId })
+		if (!product) throw new NotFoundException('Product not found')
 
-		await this.getListById(userId, listId)
+		const list = await this.findOneList({ userId, id: listId })
+		if (!list) throw new NotFoundException('List not found')
 
 		return await this.prisma.productsOnLists.create({
 			data: {
@@ -64,9 +66,11 @@ export class ListService {
 	}
 
 	async deleteProductFromList(userId: number, listId: number, productId: number): Promise<ProductsOnLists> {
-		await this.productService.findProductById(productId)
+		const product = await this.productService.findOneProduct({ id: productId })
+		if (!product) throw new NotFoundException('Product not found')
 
-		await this.getListById(userId, listId)
+		const list = await this.findOneList({ userId, id: listId })
+		if (!list) throw new NotFoundException('List not found')
 
 		return await this.prisma.productsOnLists.delete({
 			where: { productId_listId: { productId, listId } }

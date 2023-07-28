@@ -10,11 +10,6 @@ import { GetUserId } from 'lib/decorators/userId.decorator'
 export class CartController {
 	constructor(private readonly cartService: CartService) {}
 
-	@Get('check/:productId')
-	async checkProductInCart(@GetUserId() userId: number, @Param('productId', ParseIntPipe) productId: number) {
-		return this.cartService.isProductInCart(userId, productId)
-	}
-
 	@Get('')
 	getAllItems(@GetUserId() userId: number) {
 		return this.cartService.findAllCartItems(userId)
@@ -42,5 +37,10 @@ export class CartController {
 	@Delete(':cartItemId')
 	deleteItem(@GetUserId() userId: number, @Param('cartItemId') cartItemId: number) {
 		return this.cartService.deleteCartItem(userId, +cartItemId)
+	}
+
+	@Get('check/:productId')
+	async checkProductInCart(@GetUserId() userId: number, @Param('productId', ParseIntPipe) productId: number) {
+		return this.cartService.isProductInCart(userId, productId)
 	}
 }

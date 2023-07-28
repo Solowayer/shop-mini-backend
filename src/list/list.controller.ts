@@ -10,6 +10,18 @@ import { Roles } from 'lib/decorators/roles.decorator'
 export class ListController {
 	constructor(private readonly listService: ListService) {}
 
+	@Get()
+	findAll(@GetUserId() userId: number) {
+		return this.listService.findAllLists(userId)
+	}
+
+	@Get(':id')
+	findById(@GetUserId() userId: number, @Param('id') id: string) {
+		console.log('userId:', userId)
+
+		return this.listService.findListById(userId, +id)
+	}
+
 	@Post('create')
 	create(@GetUserId() userId: number, @Body() createListDto: CreateListDto) {
 		return this.listService.createList(userId, createListDto)
@@ -21,20 +33,8 @@ export class ListController {
 	}
 
 	@Delete('delete/:id')
-	remove(@GetUserId() userId: number, @Param('id') id: string) {
-		return this.listService.removeList(userId, +id)
-	}
-
-	@Get(':id')
-	getById(@GetUserId() userId: number, @Param('id') id: string) {
-		console.log('userId:', userId)
-
-		return this.listService.getListById(userId, +id)
-	}
-
-	@Get()
-	getAll(@GetUserId() userId: number) {
-		return this.listService.findAllLists(userId)
+	delete(@GetUserId() userId: number, @Param('id') id: string) {
+		return this.listService.deleteList(userId, +id)
 	}
 
 	@Post(':listId/product/:productId')
