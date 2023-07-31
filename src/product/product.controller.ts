@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { CreateProductDto, FindAllProductsDto, UpdateProductDto } from './dto'
-import { Role, User } from '@prisma/client'
+import { Role } from '@prisma/client'
 import { Roles } from 'lib/decorators/roles.decorator'
 import { GetUserId } from 'lib/decorators/userId.decorator'
 
