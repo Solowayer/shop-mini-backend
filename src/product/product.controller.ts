@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { CreateProductDto, FindAllProductsDto, UpdateProductDto } from './dto'
-import { GetUser } from 'lib/decorators/user.decorator'
 import { Role, User } from '@prisma/client'
 import { Roles } from 'lib/decorators/roles.decorator'
+import { GetUserId } from 'lib/decorators/userId.decorator'
 
 @Controller('products')
 export class ProductController {
@@ -35,8 +35,8 @@ export class ProductController {
 	// ?
 	@Roles(Role.SELLER)
 	@Get('seller')
-	findSellerProducts(@GetUser() user: User, @Query() findAllProductsDto: FindAllProductsDto) {
-		return this.productService.findSellerProducts(user.id, findAllProductsDto)
+	findSellerProducts(@GetUserId() userId: number, @Query() findAllProductsDto: FindAllProductsDto) {
+		return this.productService.findSellerProducts(userId, findAllProductsDto)
 	}
 
 	@Get('p/:id')
@@ -51,8 +51,14 @@ export class ProductController {
 
 	@Roles(Role.SELLER)
 	@Post('create')
-	create(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
-		return this.productService.createProduct(createProductDto, user.id)
+	create(@Body() createProductDto: CreateProductDto, @GetUserId() userId: number) {
+		return this.productService.createProduct(createProductDto, userId)
+	}
+
+	@Roles(Role.SELLER)
+	@Post('create-many')
+	createMany(@Body() createProductDtos: CreateProductDto[], @GetUserId() userId: number) {
+		return this.productService.createManyProducts(createProductDtos, userId)
 	}
 
 	@Roles(Role.SELLER)

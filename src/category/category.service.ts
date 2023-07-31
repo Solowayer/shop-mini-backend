@@ -45,7 +45,7 @@ export class CategoryService {
 	}
 
 	async findCategoryBySlug(slug: string): Promise<CategoryFullType> {
-		const category = await this.findOneCategory({ slug })
+		const category = await this.findOneCategory({ slug }, { children: true })
 		if (!category) throw new NotFoundException('Category not found')
 
 		return category
@@ -87,8 +87,7 @@ export class CategoryService {
 		const { name, slug, parentId, childrenIds } = createCategoryDto
 
 		const existingSlug = await this.findOneCategory({ slug })
-		const existingName = await this.findOneCategory({ name })
-		if (existingSlug || existingName) throw new BadRequestException('This category already exists')
+		if (existingSlug) throw new BadRequestException('This category already exists')
 
 		const children = childrenIds ? childrenIds.map(childrenId => ({ id: childrenId })) : []
 

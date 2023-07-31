@@ -186,6 +186,17 @@ export class ProductService {
 		return product
 	}
 
+	async createManyProducts(createProductDtos: CreateProductDto[], userId?: number): Promise<Product[]> {
+		const products: Product[] = []
+
+		for (const createProductDto of createProductDtos) {
+			const product = await this.createProduct(createProductDto, userId)
+			products.push(product)
+		}
+
+		return products
+	}
+
 	async updateProduct(where: Prisma.ProductWhereUniqueInput, updateProductDto: UpdateProductDto): Promise<Product> {
 		const product = await this.findOneProduct(where)
 		if (!product) throw new NotFoundException('Product not found')

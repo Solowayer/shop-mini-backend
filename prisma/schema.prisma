@@ -118,7 +118,7 @@ model ProductsOnLists {
   product   Product @relation(fields: [productId], references: [id])
   productId Int
 
-  list   List @relation(fields: [listId], references: [id])
+  list   List @relation(fields: [listId], references: [id], onDelete: Cascade)
   listId Int
 
   @@id([productId, listId])
@@ -213,7 +213,7 @@ model Category {
   id   Int    @id @default(autoincrement())
   slug String @unique
 
-  name String @unique
+  name String
 
   parentId Int?
 

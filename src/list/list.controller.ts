@@ -42,9 +42,9 @@ export class ListController {
 		return this.listService.addProductToList(userId, +listId, +productId)
 	}
 
-	@Delete(':listId/product/:productId')
-	deleteProduct(@GetUserId() userId: number, @Param('listId') listId: string, @Param('productId') productId: string) {
-		return this.listService.deleteProductFromList(userId, +listId, +productId)
+	@Delete('product/:productId')
+	deleteProduct(@GetUserId() userId: number, @Param('productId') productId: string) {
+		return this.listService.deleteProductFromList(userId, +productId)
 	}
 
 	@Get('check/:productId')
