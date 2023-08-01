@@ -27,5 +27,5 @@ export class FindAllProductsDto extends PaginationDto {
 
 	@IsOptional()
 	@IsString()
-	searchTerm?: string
+	q?: string
 }

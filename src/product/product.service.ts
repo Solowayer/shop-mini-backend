@@ -18,11 +18,11 @@ export class ProductService {
 	) {}
 
 	async findAllProducts(
-		getAllProductsDto: FindAllProductsDto,
+		findAllProductsDto: FindAllProductsDto,
 		where: Prisma.ProductWhereInput = {}
 	): Promise<{ products: Product[]; length: number }> {
-		const { sort, min_price, max_price, searchTerm } = getAllProductsDto
-		const { perPage, skip } = this.paginationService.getPagination(getAllProductsDto)
+		const { sort, min_price, max_price, q } = findAllProductsDto
+		const { perPage, skip } = this.paginationService.getPagination(findAllProductsDto)
 
 		const productSort: Prisma.ProductOrderByWithRelationInput = {
 			price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined,
@@ -32,8 +32,8 @@ export class ProductService {
 
 		const productFilter: Prisma.ProductWhereInput = {
 			OR: [
-				{ category: { name: { contains: searchTerm, mode: 'insensitive' } } },
-				{ name: { contains: searchTerm, mode: 'insensitive' } }
+				{ category: { name: { contains: q, mode: 'insensitive' } } },
+				{ name: { contains: q, mode: 'insensitive' } }
 			],
 			price: { gte: min_price, lte: max_price }
 		}
