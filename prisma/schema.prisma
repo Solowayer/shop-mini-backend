@@ -115,7 +115,7 @@ model ProductsOnLists {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
 
   list   List @relation(fields: [listId], references: [id], onDelete: Cascade)
@@ -191,6 +191,8 @@ model Product {
   description String?
   price       Float
 
+  attributes AttributeValue[]
+
   category   Category? @relation(fields: [categoryId], references: [id])
   categoryId Int?
 
@@ -207,12 +209,35 @@ model Product {
   lists ProductsOnLists[]
 }
 
-// ! isAvailable
+model Attribute {
+  id   Int    @id @default(autoincrement())
+  name String @unique // Наприклад, "Колір", "Розмір", "Пам'ять" тощо
+
+  values AttributeValue[]
+}
+
+model AttributeValue {
+  id    Int    @id @default(autoincrement())
+  value String // Наприклад, "Червоний", "XXL", "16GB" тощо
+
+  attribute   Attribute? @relation(fields: [attributeId], references: [id])
+  attributeId Int?
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model ProductVariant {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  price Float @default(0)
+}
 
 model Category {
   id   Int    @id @default(autoincrement())
   slug String @unique
-
   name String
 
   parentId Int?
@@ -233,9 +258,9 @@ model CartItem {
   quantity Int
   price    Float
 
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
 
   @@unique([productId, userId])

@@ -64,8 +64,6 @@ export class ProductService {
 		getAllProductsDto: FindAllProductsDto,
 		categoryId: number
 	): Promise<{ products: Product[]; length: number }> {
-		console.log('CategoryId:', categoryId)
-
 		const where: Prisma.ProductWhereInput = {
 			categoryId
 		}

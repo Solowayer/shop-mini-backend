@@ -14,6 +14,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { RolesGuard } from 'lib/guards/roles.guard'
 import { ProfileModule } from './profile/profile.module'
 import { ListModule } from './list/list.module'
+import { AttributeModule } from './attribute/attribute.module';
 
 @Module({
 	imports: [
@@ -29,7 +30,8 @@ import { ListModule } from './list/list.module'
 		UploadModule,
 		PaginationModule,
 		ProfileModule,
-		ListModule
+		ListModule,
+		AttributeModule
 	],
 	providers: [
 		{
