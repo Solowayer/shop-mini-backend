@@ -35,7 +35,7 @@ export class ProductService {
 				{ category: { name: { contains: q, mode: 'insensitive' } } },
 				{ name: { contains: q, mode: 'insensitive' } }
 			],
-			price: { gte: min_price, lte: max_price }
+			price: { gte: min_price, lte: max_price },
 		}
 
 		const finalWhere: Prisma.ProductWhereInput = {
