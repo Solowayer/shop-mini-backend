@@ -13,8 +13,8 @@ import { PaginationModule } from './pagination/pagination.module'
 import { APP_GUARD } from '@nestjs/core'
 import { RolesGuard } from 'lib/guards/roles.guard'
 import { ProfileModule } from './profile/profile.module'
-import { ListModule } from './list/list.module'
-import { AttributeModule } from './attribute/attribute.module';
+import { UserWishlistModule } from './user-wishlist/user-wishlist.module'
+import { AttributeModule } from './attribute/attribute.module'
 
 @Module({
 	imports: [
@@ -30,7 +30,7 @@ import { AttributeModule } from './attribute/attribute.module';
 		UploadModule,
 		PaginationModule,
 		ProfileModule,
-		ListModule,
+		UserWishlistModule,
 		AttributeModule
 	],
 	providers: [

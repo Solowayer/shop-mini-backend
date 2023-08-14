@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
-import { ListService } from './list.service'
-import { CreateListDto, UpdateListDto } from './dto'
+import { UserWishlistService } from './user-wishlist.service'
+import { CreateWishlistDto, UpdateWishlistDto } from './dto'
 import { GetUserId } from 'lib/decorators/userId.decorator'
 import { Role } from '@prisma/client'
 import { Roles } from 'lib/decorators/roles.decorator'
 
 @Controller('lists')
 @Roles(Role.USER, Role.SELLER)
-export class ListController {
-	constructor(private readonly listService: ListService) {}
+export class UserWishlistController {
+	constructor(private readonly listService: UserWishlistService) {}
 
 	@Get()
 	findAll(@GetUserId() userId: number) {
@@ -23,13 +23,13 @@ export class ListController {
 	}
 
 	@Post('create')
-	create(@GetUserId() userId: number, @Body() createListDto: CreateListDto) {
-		return this.listService.createList(userId, createListDto)
+	create(@GetUserId() userId: number, @Body() createWishlistDto: CreateWishlistDto) {
+		return this.listService.createList(userId, createWishlistDto)
 	}
 
 	@Patch('edit/:id')
-	update(@GetUserId() userId: number, @Param('id') id: string, @Body() updateListDto: UpdateListDto) {
-		return this.listService.updateList(userId, +id, updateListDto)
+	update(@GetUserId() userId: number, @Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
+		return this.listService.updateList(userId, +id, updateWishlistDto)
 	}
 
 	@Delete('delete/:id')
