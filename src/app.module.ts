@@ -14,7 +14,6 @@ import { APP_GUARD } from '@nestjs/core'
 import { RolesGuard } from 'lib/guards/roles.guard'
 import { UserProfileModule } from './user-profile/user-profile.module'
 import { UserWishlistModule } from './user-wishlist/user-wishlist.module'
-import { AttributeModule } from './attribute/attribute.module'
 
 @Module({
 	imports: [
@@ -30,8 +29,7 @@ import { AttributeModule } from './attribute/attribute.module'
 		UploadModule,
 		PaginationModule,
 		UserProfileModule,
-		UserWishlistModule,
-		AttributeModule
+		UserWishlistModule
 	],
 	providers: [
 		{

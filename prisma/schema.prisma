@@ -173,8 +173,6 @@ model Product {
   description String?
   price       Float
 
-  attributes AttributeValue[]
-
   category   Category? @relation(fields: [categoryId], references: [id])
   categoryId Int?
 
@@ -188,32 +186,6 @@ model Product {
   rating Float @default(0)
 
   wishlists WishlistProducts[]
-}
-
-model ProductVariant {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  price Float @default(0)
-}
-
-model Attribute {
-  id   Int    @id @default(autoincrement())
-  name String @unique // Наприклад, "Колір", "Розмір", "Пам'ять" тощо
-
-  values AttributeValue[]
-}
-
-model AttributeValue {
-  id    Int    @id @default(autoincrement())
-  value String // Наприклад, "Червоний", "XXL", "16GB" тощо
-
-  attribute   Attribute? @relation(fields: [attributeId], references: [id])
-  attributeId Int?
-
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
 }
 
 // Department

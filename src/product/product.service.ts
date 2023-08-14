@@ -35,7 +35,7 @@ export class ProductService {
 				{ category: { name: { contains: q, mode: 'insensitive' } } },
 				{ name: { contains: q, mode: 'insensitive' } }
 			],
-			price: { gte: min_price, lte: max_price },
+			price: { gte: min_price, lte: max_price }
 		}
 
 		const finalWhere: Prisma.ProductWhereInput = {
@@ -89,9 +89,9 @@ export class ProductService {
 
 	async findProductsByList(
 		getAllProductsDto: FindAllProductsDto,
-		listId: number
+		wishlistId: number
 	): Promise<{ products: Product[]; length: number }> {
-		const productsOnLists = await this.prisma.productsOnLists.findMany({ where: { listId } })
+		const productsOnLists = await this.prisma.wishlistProducts.findMany({ where: { wishlistId } })
 
 		const productIds = productsOnLists.map(item => item.productId)
 
