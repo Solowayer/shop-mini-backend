@@ -12,7 +12,7 @@ import { UploadModule } from './upload/upload.module'
 import { PaginationModule } from './pagination/pagination.module'
 import { APP_GUARD } from '@nestjs/core'
 import { RolesGuard } from 'lib/guards/roles.guard'
-import { ProfileModule } from './profile/profile.module'
+import { UserProfileModule } from './user-profile/user-profile.module'
 import { UserWishlistModule } from './user-wishlist/user-wishlist.module'
 import { AttributeModule } from './attribute/attribute.module'
 
@@ -29,7 +29,7 @@ import { AttributeModule } from './attribute/attribute.module'
 		CartModule,
 		UploadModule,
 		PaginationModule,
-		ProfileModule,
+		UserProfileModule,
 		UserWishlistModule,
 		AttributeModule
 	],

@@ -216,6 +216,8 @@ model AttributeValue {
   productId Int
 }
 
+// Department
+
 model Category {
   id   Int    @id @default(autoincrement())
   slug String @unique

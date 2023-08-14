@@ -8,47 +8,47 @@ import { Roles } from 'lib/decorators/roles.decorator'
 @Controller('lists')
 @Roles(Role.USER, Role.SELLER)
 export class UserWishlistController {
-	constructor(private readonly listService: UserWishlistService) {}
+	constructor(private readonly userWishlistService: UserWishlistService) {}
 
 	@Get()
 	findAll(@GetUserId() userId: number) {
-		return this.listService.findAllLists(userId)
+		return this.userWishlistService.findAllLists(userId)
 	}
 
 	@Get(':id')
 	findById(@GetUserId() userId: number, @Param('id') id: string) {
 		console.log('userId:', userId)
 
-		return this.listService.findListById(userId, +id)
+		return this.userWishlistService.findListById(userId, +id)
 	}
 
 	@Post('create')
 	create(@GetUserId() userId: number, @Body() createWishlistDto: CreateWishlistDto) {
-		return this.listService.createList(userId, createWishlistDto)
+		return this.userWishlistService.createList(userId, createWishlistDto)
 	}
 
 	@Patch('edit/:id')
 	update(@GetUserId() userId: number, @Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
-		return this.listService.updateList(userId, +id, updateWishlistDto)
+		return this.userWishlistService.updateList(userId, +id, updateWishlistDto)
 	}
 
 	@Delete('delete/:id')
 	delete(@GetUserId() userId: number, @Param('id') id: string) {
-		return this.listService.deleteList(userId, +id)
+		return this.userWishlistService.deleteList(userId, +id)
 	}
 
 	@Post(':listId/product/:productId')
 	addProduct(@GetUserId() userId: number, @Param('listId') listId: string, @Param('productId') productId: string) {
-		return this.listService.addProductToList(userId, +listId, +productId)
+		return this.userWishlistService.addProductToList(userId, +listId, +productId)
 	}
 
 	@Delete('product/:productId')
 	deleteProduct(@GetUserId() userId: number, @Param('productId') productId: string) {
-		return this.listService.deleteProductFromList(userId, +productId)
+		return this.userWishlistService.deleteProductFromList(userId, +productId)
 	}
 
 	@Get('check/:productId')
 	checkProductInList(@GetUserId() userId: number, @Param('productId') productId: string) {
-		return this.listService.isProductInList(userId, +productId)
+		return this.userWishlistService.isProductInList(userId, +productId)
 	}
 }
