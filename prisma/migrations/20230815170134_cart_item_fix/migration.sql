@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "CartItem" ALTER COLUMN "name" SET DATA TYPE TEXT;

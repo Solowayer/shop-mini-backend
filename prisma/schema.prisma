@@ -209,6 +209,8 @@ model CartItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  name     String
+  price    Int
   quantity Int
 
   user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)

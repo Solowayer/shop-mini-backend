@@ -132,7 +132,22 @@ export class ProductService {
 		return await this.findAll(getAllProductsDto, where)
 	}
 
-	async findOne(uniqueArgs: Prisma.ProductWhereUniqueInput): Promise<Product> {
+	async findOne(
+		uniqueArgs: Prisma.ProductWhereUniqueInput,
+		selectProduct: Prisma.ProductSelect = {}
+	): Promise<Product> {
+		const defaultProductSelect: Prisma.ProductSelectScalar = {
+			id: true,
+			createdAt: false,
+			updatedAt: false,
+			slug: true,
+			name: true,
+			description: true,
+			categoryId: true,
+			sellerId: true,
+			rating: true
+		}
+
 		const product = await this.prisma.product.findUnique({
 			where: uniqueArgs,
 			include: {
