@@ -3,7 +3,6 @@ import { Prisma, User } from '@prisma/client'
 import { PrismaService } from 'prisma/prisma.service'
 import { UpdateUserDto } from './dto'
 import { UserFullType } from 'lib/types/full-model.types'
-import { userObject } from 'lib/return-objects'
 
 @Injectable()
 export class UserService {
@@ -15,7 +14,17 @@ export class UserService {
 	}
 
 	async getOneUser(where: Prisma.UserWhereUniqueInput, userSelect: Prisma.UserSelect = {}): Promise<UserFullType> {
-		const user = await this.prisma.user.findUnique({ where, select: { ...userObject, ...userSelect } })
+		const defaultUserSelect: Prisma.UserSelectScalar = {
+			id: true,
+			createdAt: true,
+			updatedAt: true,
+			email: true,
+			phoneNumber: true,
+			passwordHash: true,
+			role: true
+		}
+
+		const user = await this.prisma.user.findUnique({ where, select: { ...defaultUserSelect, ...userSelect } })
 		return user
 	}
 

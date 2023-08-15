@@ -3,7 +3,6 @@ import { PrismaService } from 'prisma/prisma.service'
 import { CreateSellerDto, UpdateSellerDto } from './dto'
 import { Prisma, Seller } from '@prisma/client'
 import { SellerFullType } from 'lib/types/full-model.types'
-import { sellerObject } from 'lib/return-objects'
 import { UserService } from 'src/user/user.service'
 
 @Injectable()
@@ -16,9 +15,22 @@ export class SellerService {
 
 	async getOneSeller(
 		where: Prisma.SellerWhereUniqueInput,
-		selectSeller?: Prisma.SellerSelect
+		sellerSelect?: Prisma.SellerSelect
 	): Promise<SellerFullType> {
-		return await this.prisma.seller.findUnique({ where, select: { ...sellerObject, ...selectSeller } })
+		const defaultSellerSelect: Prisma.SellerSelectScalar = {
+			id: true,
+			createdAt: true,
+			updatedAt: true,
+			name: true,
+			adress: true,
+			description: true,
+			email: true,
+			phoneNumber: true,
+			pib: true,
+			userId: true
+		}
+
+		return await this.prisma.seller.findUnique({ where, select: { ...defaultSellerSelect, ...sellerSelect } })
 	}
 
 	async getSellerById(sellerId: number): Promise<SellerFullType> {

@@ -69,15 +69,6 @@ export class ProductService {
 		return { products, length }
 	}
 
-	// include: {
-	// 	variations: {
-	// 		orderBy: {
-	// 			price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined
-	// 		},
-	// 		take: 1 // Вибираємо лише одну варіацію для сортування за ціною
-	// 	}
-	// }
-
 	async findByCategoryId(
 		getAllProductsDto: FindAllProductsDto,
 		categoryId: number
@@ -133,7 +124,7 @@ export class ProductService {
 
 	async findOne(
 		uniqueArgs: Prisma.ProductWhereUniqueInput,
-		selectProduct: Prisma.ProductSelect = {}
+		productSelect: Prisma.ProductSelect = {}
 	): Promise<Product> {
 		const defaultProductSelect: Prisma.ProductSelectScalar = {
 			id: true,

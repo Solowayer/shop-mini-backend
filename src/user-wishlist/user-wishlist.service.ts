@@ -15,7 +15,7 @@ export class UserWishlistService {
 
 	async findOne(
 		where: Prisma.UserWishlistWhereUniqueInput,
-		select: Prisma.UserWishlistSelect = {}
+		wishlistSelect: Prisma.UserWishlistSelect = {}
 	): Promise<WishlistFullType> {
 		const defaultListSelect: Prisma.UserWishlistSelectScalar = {
 			id: true,
@@ -25,7 +25,10 @@ export class UserWishlistService {
 			userId: true
 		}
 
-		const wishlist = await this.prisma.userWishlist.findUnique({ where, select: { ...defaultListSelect, ...select } })
+		const wishlist = await this.prisma.userWishlist.findUnique({
+			where,
+			select: { ...defaultListSelect, ...wishlistSelect }
+		})
 		return wishlist
 	}
 
