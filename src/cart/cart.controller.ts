@@ -11,32 +11,32 @@ export class CartController {
 	constructor(private readonly cartService: CartService) {}
 
 	@Get('')
-	getAllItems(@GetUserId() userId: number) {
-		return this.cartService.findAllCartItems(userId)
-	}
-
-	@Delete('')
-	deleteItems(@GetUserId() userId: number) {
-		return this.cartService.deleteAllCartItems(userId)
+	getAll(@GetUserId() userId: number) {
+		return this.cartService.findAll(userId)
 	}
 
 	@Post('add')
-	createItem(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
-		return this.cartService.createCartItem(userId, createCartItemDto)
+	create(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
+		return this.cartService.create(userId, createCartItemDto)
 	}
 
 	@Patch(':cartItemId')
-	updateItem(
+	update(
 		@GetUserId() userId: number,
 		@Param('cartItemId') cartItemId: string,
 		@Body() updateCartItemDto: UpdateCartItemDto
 	) {
-		return this.cartService.updateCartItem(userId, +cartItemId, updateCartItemDto)
+		return this.cartService.update(userId, +cartItemId, updateCartItemDto)
 	}
 
 	@Delete(':cartItemId')
-	deleteItem(@GetUserId() userId: number, @Param('cartItemId') cartItemId: number) {
-		return this.cartService.deleteCartItem(userId, +cartItemId)
+	delete(@GetUserId() userId: number, @Param('cartItemId') cartItemId: number) {
+		return this.cartService.delete(userId, +cartItemId)
+	}
+
+	@Delete('')
+	deleteAll(@GetUserId() userId: number) {
+		return this.cartService.deleteAll(userId)
 	}
 
 	@Get('check/:productId')

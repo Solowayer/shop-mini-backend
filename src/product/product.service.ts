@@ -105,14 +105,13 @@ export class ProductService {
 		return await this.findAll(findAllProductsDto, where)
 	}
 
-	async findByList(wishlistId: number): Promise<ProductVariation[]> {
-		const productsOnLists = await this.prisma.productToWishlist.findMany({ where: { wishlistId } })
+	async findByList(wishlistId: number): Promise<Product[]> {
+		const productToWishlist = await this.prisma.productToWishlist.findMany({ where: { wishlistId } })
 
-		const productVariationIds = productsOnLists.map(item => item.productVariationId)
+		const productVariationIds = productToWishlist.map(item => item.productId)
 
-		const products = await this.prisma.productVariation.findMany({
-			where: { id: { in: productVariationIds } },
-			include: { product: true }
+		const products = await this.prisma.product.findMany({
+			where: { id: { in: productVariationIds } }
 		})
 
 		return products

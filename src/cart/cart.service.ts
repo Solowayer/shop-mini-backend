@@ -34,12 +34,12 @@ export class CartService {
 		return cartItem
 	}
 
-	async deleteAllCartItems(userId: number) {
+	async deleteAll(userId: number) {
 		const deletedCartItems = await this.prisma.cartItem.deleteMany({ where: { userId } })
 		return deletedCartItems
 	}
 
-	async createCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
+	async create(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
 		const { productVariationId, quantity } = createCartItemDto
 
 		const productVariation = await this.prisma.productVariation.findUnique({
@@ -80,7 +80,7 @@ export class CartService {
 		}
 	}
 
-	async updateCartItem(userId: number, cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
+	async update(userId: number, cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
 		const cartItem = await this.findOne({ id: cartItemId, userId })
 
 		if (!cartItem) throw new NotFoundException('This product not found inside cart')
@@ -93,7 +93,7 @@ export class CartService {
 		return updatedCartItem
 	}
 
-	async deleteCartItem(userId: number, cartItemId: number): Promise<CartItem> {
+	async delete(userId: number, cartItemId: number): Promise<CartItem> {
 		const cartItem = await this.findOne({ userId, id: cartItemId })
 		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 

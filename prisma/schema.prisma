@@ -143,16 +143,17 @@ model Seller {
 }
 
 model Product {
-  id          Int                @id @default(autoincrement())
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  slug        String             @unique
+  id          Int                 @id @default(autoincrement())
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  slug        String              @unique
   name        String
   description String?
   tags        Tag[]
-  rating      Float              @default(0)
+  rating      Float               @default(0)
   variations  ProductVariation[]
   reviews     ReviewToProduct[]
+  wishlists   ProductToWishlist[]
 
   category   Category? @relation(fields: [categoryId], references: [id])
   categoryId Int?
@@ -171,7 +172,6 @@ model ProductVariation {
   stock  Int
 
   cartItems CartItem[]
-  wishlists ProductToWishlist[]
 
   product   Product? @relation(fields: [productId], references: [id])
   productId Int?
@@ -270,14 +270,14 @@ model ReviewToProduct {
 }
 
 model ProductToWishlist {
-  id                 Int @id @default(autoincrement())
-  productVariationId Int
-  wishlistId         Int
+  id         Int @id @default(autoincrement())
+  productId  Int
+  wishlistId Int
 
-  productVariation ProductVariation @relation(fields: [productVariationId], references: [id])
-  wishlist         UserWishlist     @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product  Product      @relation(fields: [productId], references: [id])
+  wishlist UserWishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
 
-  @@unique([productVariationId, wishlistId])
+  @@unique([productId, wishlistId])
 }
 
 enum Role {

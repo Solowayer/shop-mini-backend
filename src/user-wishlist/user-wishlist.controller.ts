@@ -12,29 +12,29 @@ export class UserWishlistController {
 
 	@Get()
 	findAll(@GetUserId() userId: number) {
-		return this.userWishlistService.findAllLists(userId)
+		return this.userWishlistService.findAll(userId)
 	}
 
 	@Get(':id')
 	findById(@GetUserId() userId: number, @Param('id') id: string) {
 		console.log('userId:', userId)
 
-		return this.userWishlistService.findListById(userId, +id)
+		return this.userWishlistService.findById(userId, +id)
 	}
 
 	@Post('create')
 	create(@GetUserId() userId: number, @Body() createWishlistDto: CreateWishlistDto) {
-		return this.userWishlistService.createList(userId, createWishlistDto)
+		return this.userWishlistService.create(userId, createWishlistDto)
 	}
 
 	@Patch('edit/:id')
 	update(@GetUserId() userId: number, @Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
-		return this.userWishlistService.updateList(userId, +id, updateWishlistDto)
+		return this.userWishlistService.update(userId, +id, updateWishlistDto)
 	}
 
 	@Delete('delete/:id')
 	delete(@GetUserId() userId: number, @Param('id') id: string) {
-		return this.userWishlistService.deleteList(userId, +id)
+		return this.userWishlistService.delete(userId, +id)
 	}
 
 	@Post(':listId/product/:productId')

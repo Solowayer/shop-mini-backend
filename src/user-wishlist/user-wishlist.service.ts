@@ -3,21 +3,20 @@ import { CreateWishlistDto, UpdateWishlistDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { UserWishlist, Prisma, ProductToWishlist } from '@prisma/client'
 import { ProductService } from 'src/product/product.service'
-import { ListFullType } from 'lib/types/full-model.types'
-// import { ListFullType } from 'lib/types/full-model.types'
+import { WishlistFullType } from 'lib/types/full-model.types'
 
 @Injectable()
 export class UserWishlistService {
 	constructor(private prisma: PrismaService, @Inject(ProductService) private productService: ProductService) {}
 
-	findAllLists(userId: number): Promise<UserWishlist[]> {
+	findAll(userId: number): Promise<UserWishlist[]> {
 		return this.prisma.userWishlist.findMany({ where: { userId } })
 	}
 
-	async findOneList(
+	async findOne(
 		where: Prisma.UserWishlistWhereUniqueInput,
 		select: Prisma.UserWishlistSelect = {}
-	): Promise<ListFullType> {
+	): Promise<WishlistFullType> {
 		const defaultListSelect: Prisma.UserWishlistSelectScalar = {
 			id: true,
 			createdAt: false,
@@ -30,8 +29,8 @@ export class UserWishlistService {
 		return wishlist
 	}
 
-	async findListById(userId: number, listId: number): Promise<ListFullType> {
-		const wishlist = await this.findOneList({ id: listId })
+	async findById(userId: number, listId: number): Promise<WishlistFullType> {
+		const wishlist = await this.findOne({ id: listId })
 
 		if (!wishlist || wishlist.userId !== userId) {
 			throw new NotFoundException('List not found')
@@ -40,33 +39,36 @@ export class UserWishlistService {
 		return wishlist
 	}
 
-	async createList(userId: number, createWishlistDto: CreateWishlistDto): Promise<UserWishlist> {
+	async create(userId: number, createWishlistDto: CreateWishlistDto): Promise<UserWishlist> {
 		const { name } = createWishlistDto
 
 		const newWishlist = await this.prisma.userWishlist.create({ data: { name, user: { connect: { id: userId } } } })
 		return newWishlist
 	}
 
-	async updateList(userId: number, listId: number, updateWishlistDto: UpdateWishlistDto): Promise<UserWishlist> {
-		await this.findListById(userId, listId)
+	async update(userId: number, listId: number, updateWishlistDto: UpdateWishlistDto): Promise<UserWishlist> {
+		await this.findById(userId, listId)
 
-		const updatedWishlist = await this.prisma.userWishlist.update({ where: { id: listId }, data: { ...updateWishlistDto } })
+		const updatedWishlist = await this.prisma.userWishlist.update({
+			where: { id: listId },
+			data: { ...updateWishlistDto }
+		})
 
 		return updatedWishlist
 	}
 
-	async deleteList(userId: number, listId: number) {
-		const wishlist = await this.findOneList({ userId, id: listId })
+	async delete(userId: number, listId: number) {
+		const wishlist = await this.findOne({ userId, id: listId })
 		if (!wishlist) throw new NotFoundException('List not found')
 
 		return this.prisma.userWishlist.delete({ where: { userId, id: listId } })
 	}
 
 	async addProductToList(userId: number, listId: number, productId: number): Promise<ProductToWishlist> {
-		const product = await this.productService.findOneProduct({ id: productId })
+		const product = await this.productService.findOne({ id: productId })
 		if (!product) throw new NotFoundException('Product not found')
 
-		const wishlist = await this.findOneList({ userId, id: listId })
+		const wishlist = await this.findOne({ userId, id: listId })
 		if (!wishlist) throw new NotFoundException('List not found')
 
 		const existingProductInLists = await this.prisma.productToWishlist.findFirst({
@@ -90,8 +92,8 @@ export class UserWishlistService {
 		})
 	}
 
-	async deleteProductFromList(userId: number, productId: number): Promise<productToWishlist> {
-		const product = await this.productService.findOneProduct({ id: productId })
+	async deleteProductFromList(userId: number, productId: number): Promise<ProductToWishlist> {
+		const product = await this.productService.findOne({ id: productId })
 		if (!product) throw new NotFoundException('Product not found')
 
 		const wishlist = await this.prisma.userWishlist.findFirst({
@@ -111,7 +113,7 @@ export class UserWishlistService {
 	}
 
 	async isProductInList(userId: number, productId: number): Promise<{ isInList: boolean }> {
-		const product = await this.productService.findOneProduct({ id: productId })
+		const product = await this.productService.findOne({ id: productId })
 		if (!product) {
 			throw new NotFoundException('Product not found')
 		}
