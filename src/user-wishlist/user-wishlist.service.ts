@@ -1,7 +1,7 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateWishlistDto, UpdateWishlistDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { UserWishlist, Prisma, WishlistProducts } from '@prisma/client'
+import { UserWishlist, Prisma, ProductToWishlist } from '@prisma/client'
 import { ProductService } from 'src/product/product.service'
 import { ListFullType } from 'lib/types/full-model.types'
 // import { ListFullType } from 'lib/types/full-model.types'
@@ -62,14 +62,14 @@ export class UserWishlistService {
 		return this.prisma.userWishlist.delete({ where: { userId, id: listId } })
 	}
 
-	async addProductToList(userId: number, listId: number, productId: number): Promise<WishlistProducts> {
+	async addProductToList(userId: number, listId: number, productId: number): Promise<ProductToWishlist> {
 		const product = await this.productService.findOneProduct({ id: productId })
 		if (!product) throw new NotFoundException('Product not found')
 
 		const wishlist = await this.findOneList({ userId, id: listId })
 		if (!wishlist) throw new NotFoundException('List not found')
 
-		const existingProductInLists = await this.prisma.wishlistProducts.findFirst({
+		const existingProductInLists = await this.prisma.productToWishlist.findFirst({
 			where: {
 				wishlist: {
 					userId
@@ -82,7 +82,7 @@ export class UserWishlistService {
 			throw new ConflictException('Product already exists in the list.')
 		}
 
-		return await this.prisma.wishlistProducts.create({
+		return await this.prisma.productToWishlist.create({
 			data: {
 				product: { connect: { id: productId } },
 				wishlist: { connect: { id: listId } }
@@ -90,7 +90,7 @@ export class UserWishlistService {
 		})
 	}
 
-	async deleteProductFromList(userId: number, productId: number): Promise<WishlistProducts> {
+	async deleteProductFromList(userId: number, productId: number): Promise<productToWishlist> {
 		const product = await this.productService.findOneProduct({ id: productId })
 		if (!product) throw new NotFoundException('Product not found')
 
@@ -105,7 +105,7 @@ export class UserWishlistService {
 			throw new NotFoundException('Product is not in any list.')
 		}
 
-		return await this.prisma.wishlistProducts.delete({
+		return await this.prisma.productToWishlist.delete({
 			where: { productId_wishlistId: { productId, wishlistId: wishlist.id } }
 		})
 	}

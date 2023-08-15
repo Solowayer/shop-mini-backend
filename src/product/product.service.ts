@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateProductDto, FindAllProductsDto, ProductsSort, UpdateProductDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { Prisma, Product } from '@prisma/client'
-import * as fs from 'fs'
+import { Prisma, Product, ProductVariation } from '@prisma/client'
+
 import { PaginationService } from 'src/pagination/pagination.service'
 import { CategoryService } from 'src/category/category.service'
 import { SellerService } from 'src/seller/seller.service'
@@ -17,7 +17,7 @@ export class ProductService {
 		@Inject(SellerService) private sellerService: SellerService
 	) {}
 
-	async findAllProducts(
+	async findAll(
 		findAllProductsDto: FindAllProductsDto,
 		where: Prisma.ProductWhereInput = {}
 	): Promise<{ products: Product[]; length: number }> {
@@ -25,28 +25,37 @@ export class ProductService {
 		const { perPage, skip } = this.paginationService.getPagination(findAllProductsDto)
 
 		const productSort: Prisma.ProductOrderByWithRelationInput = {
-			price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined,
 			rating: sort === ProductsSort.RATING ? 'desc' : undefined,
 			createdAt: sort === ProductsSort.NEWEST ? 'desc' : sort === ProductsSort.OLDEST ? 'asc' : undefined
 		}
+
+		// const variationSort: Prisma.ProductVariationOrderByWithRelationInput = {
+		// 	price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined
+		// }
 
 		const productFilter: Prisma.ProductWhereInput = {
 			OR: [
 				{ category: { name: { contains: q, mode: 'insensitive' } } },
 				{ name: { contains: q, mode: 'insensitive' } }
 			],
-			price: { gte: min_price, lte: max_price }
+			variations: {
+				some: {
+					AND: [{ price: { gte: min_price } }, { price: { lte: max_price } }]
+				}
+			}
 		}
 
 		const finalWhere: Prisma.ProductWhereInput = {
 			...where,
-			published: true,
 			...productFilter
 		}
 
 		const products = await this.prisma.product.findMany({
 			where: finalWhere,
 			orderBy: productSort,
+			// include: {
+			// 	variations: { orderBy: variationSort }
+			// },
 			skip,
 			take: perPage
 		})
@@ -60,7 +69,16 @@ export class ProductService {
 		return { products, length }
 	}
 
-	async findProductsByCategoryId(
+	// include: {
+	// 	variations: {
+	// 		orderBy: {
+	// 			price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined
+	// 		},
+	// 		take: 1 // Вибираємо лише одну варіацію для сортування за ціною
+	// 	}
+	// }
+
+	async findByCategoryId(
 		getAllProductsDto: FindAllProductsDto,
 		categoryId: number
 	): Promise<{ products: Product[]; length: number }> {
@@ -68,10 +86,10 @@ export class ProductService {
 			categoryId
 		}
 
-		return await this.findAllProducts(getAllProductsDto, where)
+		return await this.findAll(getAllProductsDto, where)
 	}
 
-	async findProductsByCategoryTree(
+	async findByCategoryTree(
 		findAllProductsDto: FindAllProductsDto,
 		categoryId: number
 	): Promise<{ products: Product[]; length: number }> {
@@ -84,18 +102,18 @@ export class ProductService {
 			categoryId: { in: categoryIds }
 		}
 
-		return await this.findAllProducts(findAllProductsDto, where)
+		return await this.findAll(findAllProductsDto, where)
 	}
 
-	async findProductsByList(
-		getAllProductsDto: FindAllProductsDto,
-		wishlistId: number
-	): Promise<{ products: Product[]; length: number }> {
-		const productsOnLists = await this.prisma.wishlistProducts.findMany({ where: { wishlistId } })
+	async findByList(wishlistId: number): Promise<ProductVariation[]> {
+		const productsOnLists = await this.prisma.productToWishlist.findMany({ where: { wishlistId } })
 
-		const productIds = productsOnLists.map(item => item.productId)
+		const productVariationIds = productsOnLists.map(item => item.productVariationId)
 
-		const products = await this.findAllProducts(getAllProductsDto, { id: { in: productIds } })
+		const products = await this.prisma.productVariation.findMany({
+			where: { id: { in: productVariationIds } },
+			include: { product: true }
+		})
 
 		return products
 	}
@@ -111,54 +129,38 @@ export class ProductService {
 			sellerId: seller.id
 		}
 
-		return await this.findAllProducts(getAllProductsDto, where)
+		return await this.findAll(getAllProductsDto, where)
 	}
 
-	async findOneProduct(
-		uniqueArgs: Prisma.ProductWhereUniqueInput,
-		select: Prisma.ProductSelect = {}
-	): Promise<ProductFullType> {
-		const defaultProductSelect: Prisma.ProductSelectScalar = {
-			id: true,
-			createdAt: false,
-			updatedAt: false,
-			slug: true,
-			images: true,
-			name: true,
-			description: true,
-			price: true,
-			categoryId: true,
-			sellerId: true,
-			published: true,
-			rating: true
-		}
-
+	async findOne(uniqueArgs: Prisma.ProductWhereUniqueInput): Promise<Product> {
 		const product = await this.prisma.product.findUnique({
 			where: uniqueArgs,
-			select: { ...defaultProductSelect, ...select }
+			include: {
+				variations: true
+			}
 		})
 
 		return product
 	}
 
-	async findProductById(id: number): Promise<ProductFullType> {
-		const product = await this.findOneProduct({ id })
+	async findById(id: number): Promise<Product> {
+		const product = await this.findOne({ id })
 
 		if (!product) throw new NotFoundException('Product not found')
 
 		return product
 	}
 
-	async findProductBySlug(slug: string): Promise<ProductFullType> {
-		const product = await this.findOneProduct({ slug })
+	async findBySlug(slug: string): Promise<Product> {
+		const product = await this.findOne({ slug })
 
 		if (!product) throw new NotFoundException('Product not found')
 
 		return product
 	}
 
-	async createProduct(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
-		const { categoryId, images, ...productData } = createProductDto
+	async create(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
+		const { tags, categoryId, images, price, stock, attributes, ...productData } = createProductDto
 
 		if (images && images.length > 10) {
 			throw new BadRequestException('Max 10 images')
@@ -169,59 +171,67 @@ export class ProductService {
 		const categoryExist = await this.categoryService.findOneCategory({ id: categoryId })
 		if (!categoryExist) throw new NotFoundException('Category not found')
 
-		const existingProduct = await this.findOneProduct({ slug: createProductDto.slug })
+		const existingProduct = await this.findOne({ slug: createProductDto.slug })
 		if (existingProduct) throw new BadRequestException(`Product with slug: ${productData.slug} already exist`)
 
 		const product = await this.prisma.product.create({
 			data: {
 				...productData,
+				tags: {
+					createMany: { data: tags.map(tag => ({ name: tag })) }
+				},
 				category: categoryExist && { connect: { id: categoryExist.id } },
 				seller: userId && { connect: { id: seller.id } },
-				images: images || []
+				variations: {
+					create: {
+						images,
+						price,
+						stock,
+						attributes: {
+							create: attributes.map(attr => ({
+								value: attr.value,
+								attribute: { connect: { id: attr.attributeId } }
+							}))
+						}
+					}
+				}
 			}
 		})
 
 		return product
 	}
 
-	async createManyProducts(createProductDtos: CreateProductDto[], userId?: number): Promise<Product[]> {
+	async createMany(createProductDtos: CreateProductDto[], userId?: number): Promise<Product[]> {
 		const products: Product[] = []
 
 		for (const createProductDto of createProductDtos) {
-			const product = await this.createProduct(createProductDto, userId)
+			const product = await this.create(createProductDto, userId)
 			products.push(product)
 		}
 
 		return products
 	}
 
-	async updateProduct(where: Prisma.ProductWhereUniqueInput, updateProductDto: UpdateProductDto): Promise<Product> {
-		const product = await this.findOneProduct(where)
-		if (!product) throw new NotFoundException('Product not found')
+	async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
+		const { tags } = updateProductDto
 
-		return await this.prisma.product.update({ where, data: updateProductDto })
+		await this.prisma.tag.deleteMany({ where: { productId: id } })
+
+		const updatedProduct = await this.prisma.product.update({
+			where: { id },
+			data: {
+				...updateProductDto,
+				tags: { createMany: { data: tags.map(tag => ({ name: tag })) } }
+			}
+		})
+
+		return updatedProduct
 	}
 
-	async deleteProduct(where: Prisma.ProductWhereUniqueInput) {
-		const product = await this.findOneProduct(where)
+	async delete(id: number) {
+		const product = await this.findOne({ id })
 		if (!product) throw new NotFoundException('Product not found')
 
-		const productImages = product.images
-
-		if (productImages) {
-			for (const imageUrl of productImages) {
-				const imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
-
-				const imagePath = `uploads/images/${imageName}`
-				try {
-					await fs.promises.unlink(imagePath)
-					console.log(`Видалено файл: ${imageUrl}`)
-				} catch (error) {
-					console.log(`Помилка при видаленні файлу: ${imageUrl}`, error)
-				}
-			}
-		}
-
-		return this.prisma.product.delete({ where })
+		return this.prisma.product.delete({ where: { id } })
 	}
 }

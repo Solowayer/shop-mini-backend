@@ -1,7 +1,5 @@
 import {
-	IsString,
 	IsOptional,
-	MaxLength,
 	IsNumber,
 	IsNotEmpty,
 	IsArray,
@@ -9,25 +7,7 @@ import {
 	ArrayMinSize
 } from 'class-validator'
 
-export class CreateProductDto {
-	@IsNotEmpty()
-	@IsString()
-	slug: string
-
-	@IsString()
-	@IsNotEmpty()
-	name: string
-
-	@IsString()
-	@IsOptional()
-	@MaxLength(1000)
-	description?: string
-
-	@IsArray()
-	@IsOptional()
-	@ArrayMaxSize(20)
-	tags: string[]
-
+export class CreateProductVariationDto {
 	@IsNumber()
 	@IsNotEmpty()
 	categoryId: number

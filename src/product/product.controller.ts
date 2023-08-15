@@ -11,7 +11,7 @@ export class ProductController {
 
 	@Get()
 	async findAll(@Query() findAllProductsDto: FindAllProductsDto) {
-		return await this.productService.findAllProducts(findAllProductsDto)
+		return await this.productService.findAll(findAllProductsDto)
 	}
 
 	@Get('c/:categoryId')
@@ -19,17 +19,17 @@ export class ProductController {
 		@Param('categoryId', ParseIntPipe) categoryId: number,
 		@Query() findAllProductsDto: FindAllProductsDto
 	) {
-		return this.productService.findProductsByCategoryId(findAllProductsDto, categoryId)
+		return this.productService.findByCategoryId(findAllProductsDto, categoryId)
 	}
 
 	@Get('c/tree/:categoryId')
 	findByCategoryTree(@Param('categoryId') categoryId: string, @Query() findAllProductsDto: FindAllProductsDto) {
-		return this.productService.findProductsByCategoryTree(findAllProductsDto, +categoryId)
+		return this.productService.findByCategoryTree(findAllProductsDto, +categoryId)
 	}
 
 	@Get('l/:wishlistId')
 	findByList(@Param('wishlistId') wishlistId: string, @Query() findAllProductsDto: FindAllProductsDto) {
-		return this.productService.findProductsByList(findAllProductsDto, +wishlistId)
+		return this.productService.findByList(+wishlistId)
 	}
 
 	// ?
@@ -41,35 +41,35 @@ export class ProductController {
 
 	@Get('p/:id')
 	findById(@Param('id') id: string) {
-		return this.productService.findProductById(+id)
+		return this.productService.findById(+id)
 	}
 
 	@Get(':slug')
 	findBySlug(@Param('slug') slug: string) {
-		return this.productService.findProductBySlug(slug)
+		return this.productService.findBySlug(slug)
 	}
 
 	@Roles(Role.SELLER)
 	@Post('create')
 	create(@Body() createProductDto: CreateProductDto, @GetUserId() userId: number) {
-		return this.productService.createProduct(createProductDto, userId)
+		return this.productService.create(createProductDto, userId)
 	}
 
 	@Roles(Role.SELLER)
 	@Post('create-many')
 	createMany(@Body() createProductDtos: CreateProductDto[], @GetUserId() userId: number) {
-		return this.productService.createManyProducts(createProductDtos, userId)
+		return this.productService.createMany(createProductDtos, userId)
 	}
 
 	@Roles(Role.SELLER)
 	@Patch('p/:id')
 	update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-		return this.productService.updateProduct({ id: +id }, updateProductDto)
+		return this.productService.update(+id, updateProductDto)
 	}
 
 	@Roles(Role.SELLER)
 	@Delete('p/:id')
 	delete(@Param('id') id: string) {
-		return this.productService.deleteProduct({ id: +id })
+		return this.productService.delete(+id)
 	}
 }

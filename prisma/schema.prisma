@@ -26,6 +26,7 @@ model User {
   profile   UserProfile?
   adresses  UserAddress[]
   wishlists UserWishlist[]
+  reviews   UserReview[]
   orders    Order[]
 
   cartItems CartItem[]
@@ -80,30 +81,21 @@ model UserWishlist {
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  products WishlistProducts[]
+  products ProductToWishlist[]
 }
 
-model ProductReview {
+model UserReview {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   rating  Int
-  comment String?
-}
+  content String?
 
-model WishlistProducts {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
 
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId Int
-
-  wishlist   UserWishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
-  wishlistId Int
-
-  @@unique([productId, wishlistId])
+  products ReviewToProduct[]
 }
 
 model Order {
@@ -121,18 +113,6 @@ model Order {
   seller   Seller? @relation(fields: [sellerId], references: [id])
   sellerId Int?
 }
-
-// model OrderDetails {
-//   id        Int      @id @default(autoincrement())
-//   createdAt  DateTime @default(now())
-//   updatedAt  DateTime @updatedAt
-//   orderId    String
-//   address    String
-//   city       String
-//   state      String
-//   country    String
-//   postalCode String
-// }
 
 enum OrderStatus {
   PENDING
@@ -163,35 +143,89 @@ model Seller {
 }
 
 model Product {
-  id        Int      @id @default(autoincrement())
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  images      String[]
+  id          Int                @id @default(autoincrement())
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  slug        String             @unique
   name        String
   description String?
-  price       Float
+  tags        Tag[]
+  rating      Float              @default(0)
+  variations  ProductVariation[]
+  reviews     ReviewToProduct[]
 
   category   Category? @relation(fields: [categoryId], references: [id])
   categoryId Int?
 
   seller   Seller? @relation(fields: [sellerId], references: [id])
   sellerId Int?
+}
 
-  published Boolean @default(false)
+model ProductVariation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images String[]
+  price  Float
+  stock  Int
 
   cartItems CartItem[]
+  wishlists ProductToWishlist[]
 
-  rating Float @default(0)
+  product   Product? @relation(fields: [productId], references: [id])
+  productId Int?
 
-  wishlists WishlistProducts[]
+  attributes AttributeValue[]
+}
+
+// byDefault
+// active
+
+model Attribute {
+  id   Int    @id @default(autoincrement())
+  name String // Наприклад, "Колір", "Розмір", "Пам'ять" тощо
+
+  values AttributeValue[]
+
+  categories AttributeToCategory[]
+}
+
+model AttributeValue {
+  id    Int    @id @default(autoincrement())
+  value String // Наприклад, "Червоний", "XXL", "16GB" тощо
+
+  attribute   Attribute @relation(fields: [attributeId], references: [id])
+  attributeId Int
+
+  productVariation   ProductVariation @relation(fields: [productVariationId], references: [id])
+  productVariationId Int
+
+  @@unique([attributeId, productVariationId])
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quantity Int
+
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             Int
+  productVariation   ProductVariation? @relation(fields: [productVariationId], references: [id])
+  productVariationId Int?
+
+  @@unique([productVariationId, userId])
 }
 
 // Department
 
 model Category {
-  id   Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   slug String @unique
   name String
 
@@ -200,25 +234,48 @@ model Category {
   parent   Category?  @relation("ChildrensParents", fields: [parentId], references: [id])
   children Category[] @relation("ChildrensParents")
 
-  product Product[]
+  product    Product[]
+  attributes AttributeToCategory[]
 }
 
-model CartItem {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String
 
-  name     String
-  image    String?
-  quantity Int
-  price    Float
+  product   Product? @relation(fields: [productId], references: [id])
+  productId Int?
+}
 
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+model AttributeToCategory {
+  id          Int       @id @default(autoincrement())
+  categoryId  Int
+  attributeId Int
+  category    Category  @relation(fields: [categoryId], references: [id])
+  attribute   Attribute @relation(fields: [attributeId], references: [id])
+
+  @@unique([categoryId, attributeId]) // Забезпечує унікальність пари значень
+}
+
+model ReviewToProduct {
+  id        Int @id @default(autoincrement())
   productId Int
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
+  reviewId  Int
 
-  @@unique([productId, userId])
+  product Product    @relation(fields: [productId], references: [id])
+  review  UserReview @relation(fields: [reviewId], references: [id])
+
+  @@unique([productId, reviewId])
+}
+
+model ProductToWishlist {
+  id                 Int @id @default(autoincrement())
+  productVariationId Int
+  wishlistId         Int
+
+  productVariation ProductVariation @relation(fields: [productVariationId], references: [id])
+  wishlist         UserWishlist     @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+
+  @@unique([productVariationId, wishlistId])
 }
 
 enum Role {
@@ -232,3 +289,15 @@ enum Gender {
   FEMALE
   OTHER
 }
+
+// model OrderDetails {
+//   id        Int      @id @default(autoincrement())
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+//   orderId    String
+//   address    String
+//   city       String
+//   state      String
+//   country    String
+//   postalCode String
+// }
