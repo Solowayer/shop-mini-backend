@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateProductDto, FindAllProductsDto, ProductsSort, UpdateProductDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
-import { Prisma, Product, ProductVariation } from '@prisma/client'
+import { Prisma, Product } from '@prisma/client'
 
 import { PaginationService } from 'src/pagination/pagination.service'
 import { CategoryService } from 'src/category/category.service'

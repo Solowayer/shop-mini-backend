@@ -15,6 +15,7 @@ import { RolesGuard } from 'lib/guards/roles.guard'
 import { UserProfileModule } from './user-profile/user-profile.module'
 import { UserWishlistModule } from './user-wishlist/user-wishlist.module'
 import { ProductVariationModule } from './product-variation/product-variation.module';
+import { AttributeModule } from './attribute/attribute.module';
 
 @Module({
 	imports: [
@@ -31,7 +32,8 @@ import { ProductVariationModule } from './product-variation/product-variation.mo
 		PaginationModule,
 		UserProfileModule,
 		UserWishlistModule,
-		ProductVariationModule
+		ProductVariationModule,
+		AttributeModule
 	],
 	providers: [
 		{
