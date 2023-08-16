@@ -1,16 +1,8 @@
-import {
-	IsOptional,
-	IsNumber,
-	IsNotEmpty,
-	IsArray,
-	ArrayMaxSize,
-	ArrayMinSize
-} from 'class-validator'
+import { IsOptional, IsNumber, IsNotEmpty, IsArray, ArrayMaxSize, ArrayMinSize } from 'class-validator'
 
 export class CreateProductVariationDto {
 	@IsNumber()
-	@IsNotEmpty()
-	categoryId: number
+	productId: number
 
 	@IsArray()
 	@IsOptional()

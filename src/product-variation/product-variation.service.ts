@@ -3,11 +3,12 @@ import { CreateProductVariationDto } from './dto/create-product-variation.dto'
 import { UpdateProductVariationDto } from './dto/update-product-variation.dto'
 import { Prisma, ProductVariation } from '@prisma/client'
 import { PrismaService } from 'prisma/prisma.service'
+import { ProductService } from 'src/product/product.service'
 import * as fs from 'fs'
 
 @Injectable()
 export class ProductVariationService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, private productService: ProductService) {}
 
 	async findOne(where: Prisma.ProductVariationWhereUniqueInput): Promise<ProductVariation> {
 		const variation = await this.prisma.productVariation.findUnique({
@@ -27,11 +28,15 @@ export class ProductVariationService {
 	}
 
 	async create(createProductVariationDto: CreateProductVariationDto) {
-		const { attributes } = createProductVariationDto
+		const { attributes, productId, ...rest } = createProductVariationDto
+
+		const product = await this.productService.findOne({ id: productId })
+		if (!product) throw new NotFoundException(`Product not found`)
 
 		const variation = await this.prisma.productVariation.create({
 			data: {
-				...createProductVariationDto,
+				...rest,
+				product: { connect: { id: productId } },
 				attributes: {
 					create: attributes.map(attr => ({
 						value: attr.value,

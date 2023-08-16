@@ -3,18 +3,18 @@ import { ProductVariationService } from './product-variation.service'
 import { CreateProductVariationDto } from './dto/create-product-variation.dto'
 import { UpdateProductVariationDto } from './dto/update-product-variation.dto'
 
-@Controller('product-variation')
+@Controller('product-variations')
 export class ProductVariationController {
 	constructor(private readonly productVariationService: ProductVariationService) {}
-
-	@Post()
-	create(@Body() createProductVariationDto: CreateProductVariationDto) {
-		return this.productVariationService.create(createProductVariationDto)
-	}
 
 	@Get(':id')
 	findOne(@Param('id') id: string) {
 		return this.productVariationService.findById(+id)
+	}
+
+	@Post('create')
+	create(@Body() createProductVariationDto: CreateProductVariationDto) {
+		return this.productVariationService.create(createProductVariationDto)
 	}
 
 	@Patch(':id')

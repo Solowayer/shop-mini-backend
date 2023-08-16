@@ -9,7 +9,7 @@ export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
 	async findAllCategories(): Promise<Category[]> {
-		const categories = await this.prisma.category.findMany()
+		const categories = await this.prisma.category.findMany({ include: { attributes: true } })
 		if (!categories) throw new NotFoundException('Categories not found')
 		return categories
 	}

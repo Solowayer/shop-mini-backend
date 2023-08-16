@@ -27,9 +27,9 @@ export class ProductController {
 		return this.productService.findByCategoryTree(findAllProductsDto, +categoryId)
 	}
 
-	@Get('l/:wishlistId')
+	@Get('wishlist/:wishlistId')
 	findByList(@Param('wishlistId') wishlistId: string, @Query() findAllProductsDto: FindAllProductsDto) {
-		return this.productService.findByList(+wishlistId)
+		return this.productService.findByList(findAllProductsDto, +wishlistId)
 	}
 
 	// ?

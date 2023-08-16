@@ -10,7 +10,7 @@ export class AttributeService {
 	constructor(private prisma: PrismaService) {}
 
 	async findAll() {
-		return await this.prisma.attribute.findMany({ include: { values: true } })
+		return await this.prisma.attribute.findMany({ include: { values: true, categories: true } })
 	}
 
 	async findOne(id: number) {
@@ -42,13 +42,16 @@ export class AttributeService {
 	}
 
 	async create(createAttributeDto: CreateAttributeDto): Promise<Attribute> {
-		const { name } = createAttributeDto
+		const { name, categoryIds } = createAttributeDto
 
 		const attr = await this.prisma.attribute.create({
 			data: {
-				name
+				name,
+				categories: {
+					create: categoryIds.map(categoryId => ({ categoryId }))
+				}
 			},
-			include: { values: true }
+			include: { values: true, categories: true }
 		})
 
 		return attr
@@ -81,10 +84,10 @@ export class AttributeService {
 	}
 
 	update(id: number, updateAttributeDto: UpdateAttributeDto) {
-		return `This action updates a #${id} attribute`
+		return this.prisma.attribute.update({ where: { id }, data: updateAttributeDto })
 	}
 
 	remove(id: number) {
-		return `This action removes a #${id} attribute`
+		return this.prisma.attribute.delete({ where: { id } })
 	}
 }

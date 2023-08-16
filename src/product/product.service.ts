@@ -29,9 +29,9 @@ export class ProductService {
 			createdAt: sort === ProductsSort.NEWEST ? 'desc' : sort === ProductsSort.OLDEST ? 'asc' : undefined
 		}
 
-		// const variationSort: Prisma.ProductVariationOrderByWithRelationInput = {
-		// 	price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined
-		// }
+		const variationSort: Prisma.ProductVariationOrderByWithRelationInput = {
+			price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined
+		}
 
 		const productFilter: Prisma.ProductWhereInput = {
 			OR: [
@@ -53,9 +53,10 @@ export class ProductService {
 		const products = await this.prisma.product.findMany({
 			where: finalWhere,
 			orderBy: productSort,
-			// include: {
-			// 	variations: { orderBy: variationSort }
-			// },
+			include: {
+				tags: true,
+				variations: { include: { attributes: true } }
+			},
 			skip,
 			take: perPage
 		})
@@ -96,14 +97,15 @@ export class ProductService {
 		return await this.findAll(findAllProductsDto, where)
 	}
 
-	async findByList(wishlistId: number): Promise<Product[]> {
+	async findByList(
+		findAllProductsDto: FindAllProductsDto,
+		wishlistId: number
+	): Promise<{ products: Product[]; length: number }> {
 		const productToWishlist = await this.prisma.productToWishlist.findMany({ where: { wishlistId } })
 
 		const productVariationIds = productToWishlist.map(item => item.productId)
 
-		const products = await this.prisma.product.findMany({
-			where: { id: { in: productVariationIds } }
-		})
+		const products = await this.findAll(findAllProductsDto, { id: { in: productVariationIds } })
 
 		return products
 	}
@@ -194,8 +196,8 @@ export class ProductService {
 						stock,
 						attributes: {
 							create: attributes.map(attr => ({
-								value: attr.value,
-								attribute: { connect: { id: attr.attributeId } }
+								attribute: { connect: { id: attr.attributeId } },
+								value: attr.value
 							}))
 						}
 					}
