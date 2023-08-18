@@ -58,11 +58,11 @@ export class AttributeService {
 	}
 
 	async createValue(createValueDto: CreateAttributeValueDto): Promise<AttributeValue> {
-		const { value, attributeId, productVariationId } = createValueDto
+		const { value, attributeId, variantId } = createValueDto
 
 		const existingAttrValue = await this.prisma.attributeValue.findUnique({
 			where: {
-				attributeId_productVariationId: { attributeId, productVariationId }
+				attributeId_variantId: { attributeId, variantId }
 			}
 		})
 
@@ -76,8 +76,8 @@ export class AttributeService {
 				attribute: {
 					connect: { id: attributeId }
 				},
-				productVariation: {
-					connect: { id: productVariationId }
+				variant: {
+					connect: { id: variantId }
 				}
 			}
 		})

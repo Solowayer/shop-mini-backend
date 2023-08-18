@@ -8,5 +8,5 @@ export class CreateAttributeValueDto {
 	attributeId: number
 
 	@IsNumber()
-	productVariationId: number
+	variantId: number
 }

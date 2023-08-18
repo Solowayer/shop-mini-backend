@@ -162,6 +162,10 @@ model Product {
   sellerId Int?
 }
 
+// model ProductDetails {
+//   id Int @id @default(autoincrement())
+// }
+
 model Variant {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())

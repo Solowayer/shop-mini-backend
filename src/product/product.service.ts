@@ -29,7 +29,7 @@ export class ProductService {
 			createdAt: sort === ProductsSort.NEWEST ? 'desc' : sort === ProductsSort.OLDEST ? 'asc' : undefined
 		}
 
-		const variationSort: Prisma.ProductVariationOrderByWithRelationInput = {
+		const variationSort: Prisma.VariantOrderByWithRelationInput = {
 			price: sort === ProductsSort.LOW_PRICE ? 'asc' : sort === ProductsSort.HIGH_PRICE ? 'desc' : undefined
 		}
 
@@ -38,7 +38,7 @@ export class ProductService {
 				{ category: { name: { contains: q, mode: 'insensitive' } } },
 				{ name: { contains: q, mode: 'insensitive' } }
 			],
-			variations: {
+			variants: {
 				some: {
 					AND: [{ price: { gte: min_price } }, { price: { lte: max_price } }]
 				}
@@ -55,7 +55,7 @@ export class ProductService {
 			orderBy: productSort,
 			include: {
 				tags: true,
-				variations: { include: { attributeValues: true }, orderBy: { price: 'asc' } }
+				variants: { include: { attributeValues: true }, orderBy: { price: 'asc' } }
 			},
 			skip,
 			take: perPage
@@ -143,7 +143,7 @@ export class ProductService {
 		const product = await this.prisma.product.findUnique({
 			where: uniqueArgs,
 			include: {
-				variations: true
+				variants: true
 			}
 		})
 
@@ -167,11 +167,7 @@ export class ProductService {
 	}
 
 	async create(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
-		const { tags, categoryId, images, price, stock, attributeValues, ...productData } = createProductDto
-
-		if (images && images.length > 10) {
-			throw new BadRequestException('Max 10 images')
-		}
+		const { tags, categoryId, ...productData } = createProductDto
 
 		const seller = await this.sellerService.getSellerByUserId(userId)
 
@@ -188,20 +184,7 @@ export class ProductService {
 					createMany: { data: tags.map(tag => ({ name: tag })) }
 				},
 				category: categoryExist && { connect: { id: categoryExist.id } },
-				seller: userId && { connect: { id: seller.id } },
-				variations: {
-					create: {
-						images,
-						price,
-						stock,
-						attributeValues: {
-							create: attributeValues.map(attr => ({
-								attribute: { connect: { id: attr.attributeId } },
-								value: attr.value
-							}))
-						}
-					}
-				}
+				seller: userId && { connect: { id: seller.id } }
 			}
 		})
 
@@ -220,14 +203,14 @@ export class ProductService {
 	}
 
 	async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
-		const { tags } = updateProductDto
+		const { tags, ...rest } = updateProductDto
 
 		await this.prisma.tag.deleteMany({ where: { productId: id } })
 
 		const updatedProduct = await this.prisma.product.update({
 			where: { id },
 			data: {
-				...updateProductDto,
+				...rest,
 				tags: { createMany: { data: tags.map(tag => ({ name: tag })) } }
 			}
 		})

@@ -1,44 +1,44 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { CreateProductVariationDto } from './dto/create-product-variation.dto'
-import { UpdateProductVariationDto } from './dto/update-product-variation.dto'
-import { Prisma, ProductVariation } from '@prisma/client'
+import { CreateVariantDto } from './dto/create-variant.dto'
+import { UpdateVariantDto } from './dto/update-variant.dto'
+import { Prisma, Variant } from '@prisma/client'
 import { PrismaService } from 'prisma/prisma.service'
 import { ProductService } from 'src/product/product.service'
 import * as fs from 'fs'
 
 @Injectable()
-export class ProductVariationService {
+export class VariantService {
 	constructor(private prisma: PrismaService, private productService: ProductService) {}
 
-	async findOne(where: Prisma.ProductVariationWhereUniqueInput): Promise<ProductVariation> {
-		const variation = await this.prisma.productVariation.findUnique({
+	async findOne(where: Prisma.VariantWhereUniqueInput): Promise<Variant> {
+		const variation = await this.prisma.variant.findUnique({
 			where
 		})
 		return variation
 	}
 
-	async findById(id: number): Promise<ProductVariation> {
+	async findById(id: number): Promise<Variant> {
 		const variation = await this.findOne({ id })
 		if (!variation) throw new NotFoundException('Product variation not found')
 		return variation
 	}
 
-	async findByProductId(productId: number): Promise<ProductVariation[]> {
-		return await this.prisma.productVariation.findMany({ where: { productId } })
+	async findByProductId(productId: number): Promise<Variant[]> {
+		return await this.prisma.variant.findMany({ where: { productId } })
 	}
 
-	async create(createProductVariationDto: CreateProductVariationDto) {
-		const { attributes, productId, ...rest } = createProductVariationDto
+	async create(createVariantDto: CreateVariantDto) {
+		const { attributeValues, productId, ...rest } = createVariantDto
 
 		const product = await this.productService.findOne({ id: productId })
 		if (!product) throw new NotFoundException(`Product not found`)
 
-		const variation = await this.prisma.productVariation.create({
+		const variation = await this.prisma.variant.create({
 			data: {
 				...rest,
 				product: { connect: { id: productId } },
 				attributeValues: {
-					create: attributes.map(attr => ({
+					create: attributeValues.map(attr => ({
 						value: attr.value,
 						attribute: { connect: { id: attr.attributeId } }
 					}))
@@ -49,17 +49,17 @@ export class ProductVariationService {
 		return variation
 	}
 
-	async update(id: number, updateProductVariationDto: UpdateProductVariationDto): Promise<ProductVariation> {
-		const { attributes } = updateProductVariationDto
+	async update(id: number, updateVariantDto: UpdateVariantDto): Promise<Variant> {
+		const { attributeValues, ...rest } = updateVariantDto
 
-		await this.prisma.attributeValue.deleteMany({ where: { productVariationId: id } })
+		await this.prisma.attributeValue.deleteMany({ where: { variantId: id } })
 
-		const updatedProductVariation = await this.prisma.productVariation.update({
+		const updatedProductVariation = await this.prisma.variant.update({
 			where: { id },
 			data: {
-				...updateProductVariationDto,
+				...rest,
 				attributeValues: {
-					create: attributes.map(attr => ({
+					create: attributeValues.map(attr => ({
 						value: attr.value,
 						attribute: { connect: { id: attr.attributeId } }
 					}))
@@ -71,7 +71,7 @@ export class ProductVariationService {
 	}
 
 	async delete(id: number) {
-		const variation = await this.prisma.productVariation.findUnique({ where: { id } })
+		const variation = await this.prisma.variant.findUnique({ where: { id } })
 		const variationImages = variation.images
 
 		if (variationImages) {
@@ -88,7 +88,7 @@ export class ProductVariationService {
 			}
 		}
 
-		const deletedProductVariation = await this.prisma.productVariation.delete({ where: { id } })
+		const deletedProductVariation = await this.prisma.variant.delete({ where: { id } })
 
 		return deletedProductVariation
 	}

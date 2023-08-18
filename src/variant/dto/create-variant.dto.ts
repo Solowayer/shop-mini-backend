@@ -1,6 +1,7 @@
 import { IsOptional, IsNumber, IsNotEmpty, IsArray, ArrayMaxSize, ArrayMinSize } from 'class-validator'
+import { CreateAttributeValueDto } from './create-attribute-value.dto'
 
-export class CreateProductVariationDto {
+export class CreateVariantDto {
 	@IsNumber()
 	productId: number
 
@@ -18,6 +19,6 @@ export class CreateProductVariationDto {
 	stock: number
 
 	@IsArray()
-	@ArrayMinSize(1) // Мінімум 1 атрибут повинен бути вказаний
-	attributes?: Array<{ attributeId: number; value: string }>
+	@ArrayMinSize(1)
+	attributeValues?: CreateAttributeValueDto[]
 }

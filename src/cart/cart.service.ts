@@ -30,7 +30,7 @@ export class CartService {
 			price: true,
 			quantity: true,
 			userId: true,
-			productVariationId: true
+			variantId: true
 		}
 
 		const cartItem = await this.prisma.cartItem.findUnique({
@@ -54,15 +54,15 @@ export class CartService {
 	}
 
 	async create(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
-		const { productVariationId, quantity } = createCartItemDto
+		const { variantId, quantity } = createCartItemDto
 
-		const productVariation = await this.prisma.productVariation.findUnique({
-			where: { id: productVariationId },
+		const productVariation = await this.prisma.variant.findUnique({
+			where: { id: variantId },
 			include: { product: true }
 		})
 
 		const existingCartItem = await this.findOne({
-			productVariationId_userId: { productVariationId, userId }
+			variantId_userId: { variantId, userId }
 		})
 
 		if (existingCartItem) {
@@ -82,7 +82,7 @@ export class CartService {
 					name: productVariation.product.name,
 					price: productVariation.price * quantity,
 					quantity,
-					productVariation: {
+					variant: {
 						connect: { id: productVariation.id }
 					},
 					user: {
@@ -97,10 +97,10 @@ export class CartService {
 	async update(userId: number, cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
 		const { quantity } = updateCartItemDto
 
-		const cartItem = await this.findOne({ id: cartItemId, userId }, { productVariation: true })
+		const cartItem = await this.findOne({ id: cartItemId, userId }, { variant: true })
 		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
-		const price = cartItem.productVariation.price
+		const price = cartItem.variant.price
 
 		const updatedCartItem = await this.prisma.cartItem.update({
 			where: { id: cartItemId, userId },
@@ -127,7 +127,7 @@ export class CartService {
 			throw new NotFoundException('Product not found')
 		}
 
-		const productVariations = await this.prisma.productVariation.findMany({
+		const productVariations = await this.prisma.variant.findMany({
 			where: { productId },
 			include: { cartItems: { where: { userId } } }
 		})
