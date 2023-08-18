@@ -37,7 +37,7 @@ export class ProductVariationService {
 			data: {
 				...rest,
 				product: { connect: { id: productId } },
-				attributes: {
+				attributeValues: {
 					create: attributes.map(attr => ({
 						value: attr.value,
 						attribute: { connect: { id: attr.attributeId } }
@@ -58,7 +58,7 @@ export class ProductVariationService {
 			where: { id },
 			data: {
 				...updateProductVariationDto,
-				attributes: {
+				attributeValues: {
 					create: attributes.map(attr => ({
 						value: attr.value,
 						attribute: { connect: { id: attr.attributeId } }

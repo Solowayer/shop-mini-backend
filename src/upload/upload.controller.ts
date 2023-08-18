@@ -58,20 +58,13 @@ export class UploadController {
 			}
 		})
 	)
-	
 	uploadImages(@UploadedFiles() files: Express.Multer.File[]) {
-		// Формування масиву посилань на завантажені зображення
 		const imageUrls = files.map(file => {
-			// Шлях до папки з зображеннями
 			const uploadFolder = 'uploads/images'
-			// Повний шлях до зображення
 			const imagePath = join(uploadFolder, file.filename)
-			// Replace backslashes with forward slashes in the path
 			const imageUrl = imagePath.replace(/\\/g, '/')
-			// Повернення посилання на зображення
 			return `http://localhost:4200/${imageUrl}`
 		})
-		// console.log(files)
 		return { message: 'Завантажено успішно', imageUrls }
 	}
 

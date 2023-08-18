@@ -55,7 +55,7 @@ export class ProductService {
 			orderBy: productSort,
 			include: {
 				tags: true,
-				variations: { include: { attributes: true } }
+				variations: { include: { attributeValues: true }, orderBy: { price: 'asc' } }
 			},
 			skip,
 			take: perPage
@@ -167,7 +167,7 @@ export class ProductService {
 	}
 
 	async create(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
-		const { tags, categoryId, images, price, stock, attributes, ...productData } = createProductDto
+		const { tags, categoryId, images, price, stock, attributeValues, ...productData } = createProductDto
 
 		if (images && images.length > 10) {
 			throw new BadRequestException('Max 10 images')
@@ -194,8 +194,8 @@ export class ProductService {
 						images,
 						price,
 						stock,
-						attributes: {
-							create: attributes.map(attr => ({
+						attributeValues: {
+							create: attributeValues.map(attr => ({
 								attribute: { connect: { id: attr.attributeId } },
 								value: attr.value
 							}))

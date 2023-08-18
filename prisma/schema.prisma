@@ -151,7 +151,7 @@ model Product {
   description String?
   tags        Tag[]
   rating      Float               @default(0)
-  variations  ProductVariation[]
+  variants    Variant[]
   reviews     ReviewToProduct[]
   wishlists   ProductToWishlist[]
 
@@ -162,7 +162,7 @@ model Product {
   sellerId Int?
 }
 
-model ProductVariation {
+model Variant {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -176,10 +176,10 @@ model ProductVariation {
   product   Product? @relation(fields: [productId], references: [id])
   productId Int?
 
-  attributes AttributeValue[]
+  attributeValues AttributeValue[]
 }
 
-// byDefault
+// default
 // active
 
 model Attribute {
@@ -198,10 +198,10 @@ model AttributeValue {
   attribute   Attribute @relation(fields: [attributeId], references: [id])
   attributeId Int
 
-  productVariation   ProductVariation @relation(fields: [productVariationId], references: [id])
-  productVariationId Int
+  variant   Variant @relation(fields: [variantId], references: [id])
+  variantId Int
 
-  @@unique([attributeId, productVariationId])
+  @@unique([attributeId, variantId])
 }
 
 model CartItem {
@@ -213,12 +213,12 @@ model CartItem {
   price    Int
   quantity Int
 
-  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId             Int
-  productVariation   ProductVariation? @relation(fields: [productVariationId], references: [id])
-  productVariationId Int?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  variant   Variant? @relation(fields: [variantId], references: [id])
+  variantId Int?
 
-  @@unique([productVariationId, userId])
+  @@unique([variantId, userId])
 }
 
 // Department

@@ -47,5 +47,5 @@ export class CreateProductDto {
 
 	@IsArray()
 	@ArrayMinSize(1) // Мінімум 1 атрибут повинен бути вказаний
-	attributes?: Array<{ attributeId: number; value: string }>
+	attributeValues?: Array<{ attributeId: number; value: string }>
 }
