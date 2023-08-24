@@ -28,7 +28,7 @@ export class CategoryService {
 
 		const categories = await this.prisma.category.findMany({
 			where: finalWhere,
-			include: { attributes: true, parent: true, children: true }
+			include: { parent: true, children: true }
 		})
 		if (!categories) throw new NotFoundException('Categories not found')
 		return categories

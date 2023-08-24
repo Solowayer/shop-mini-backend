@@ -12,12 +12,12 @@ export class CartController {
 
 	@Get('')
 	getAll(@GetUserId() userId: number) {
-		return this.cartService.findAll(userId)
+		return this.cartService.findAllCartItems(userId)
 	}
 
 	@Post('add')
 	create(@GetUserId() userId: number, @Body() createCartItemDto: CreateCartItemDto) {
-		return this.cartService.create(userId, createCartItemDto)
+		return this.cartService.createCartItem(userId, createCartItemDto)
 	}
 
 	@Patch(':cartItemId')
@@ -26,17 +26,17 @@ export class CartController {
 		@Param('cartItemId') cartItemId: string,
 		@Body() updateCartItemDto: UpdateCartItemDto
 	) {
-		return this.cartService.update(userId, +cartItemId, updateCartItemDto)
+		return this.cartService.updateCartItem(userId, +cartItemId, updateCartItemDto)
 	}
 
 	@Delete(':cartItemId')
 	delete(@GetUserId() userId: number, @Param('cartItemId') cartItemId: number) {
-		return this.cartService.delete(userId, +cartItemId)
+		return this.cartService.deleteCartItem(userId, +cartItemId)
 	}
 
 	@Delete('')
 	deleteAll(@GetUserId() userId: number) {
-		return this.cartService.deleteAll(userId)
+		return this.cartService.deleteAllCartItems(userId)
 	}
 
 	@Get('check/:productId')

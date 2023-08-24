@@ -9,7 +9,9 @@ import { CartItemFullType } from 'lib/types/full-model.types'
 export class CartService {
 	constructor(private prisma: PrismaService, @Inject(ProductService) private productService: ProductService) {}
 
-	async findAll(userId: number): Promise<{ cartItems: CartItem[]; totalAmount: number; totalQuantity: number }> {
+	async findAllCartItems(
+		userId: number
+	): Promise<{ cartItems: CartItem[]; totalAmount: number; totalQuantity: number }> {
 		const cartItems = await this.prisma.cartItem.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } })
 
 		const totalAmount = cartItems.reduce((total, item) => total + item.price, 0)
@@ -18,7 +20,7 @@ export class CartService {
 		return { cartItems, totalAmount, totalQuantity }
 	}
 
-	async findOne(
+	async findOneCartItem(
 		where: Prisma.CartItemWhereUniqueInput,
 		cartItemSelect: Prisma.CartItemSelect = {}
 	): Promise<CartItemFullType> {
@@ -41,26 +43,26 @@ export class CartService {
 		return cartItem
 	}
 
-	async findById(userId: number, cartItemId: number): Promise<CartItem> {
-		const cartItem = this.findOne({ id: cartItemId, userId })
+	async findCartItemById(userId: number, cartItemId: number): Promise<CartItem> {
+		const cartItem = this.findOneCartItem({ id: cartItemId, userId })
 		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
 		return cartItem
 	}
 
-	async deleteAll(userId: number) {
+	async deleteAllCartItems(userId: number) {
 		const deletedCartItems = await this.prisma.cartItem.deleteMany({ where: { userId } })
 		return deletedCartItems
 	}
 
-	async create(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
+	async createCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
 		const { productId, quantity } = createCartItemDto
 
 		const product = await this.prisma.product.findUnique({
 			where: { id: productId }
 		})
 
-		const existingCartItem = await this.findOne({
+		const existingCartItem = await this.findOneCartItem({
 			productId_userId: { productId, userId }
 		})
 
@@ -91,10 +93,10 @@ export class CartService {
 		}
 	}
 
-	async update(userId: number, cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
+	async updateCartItem(userId: number, cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
 		const { quantity } = updateCartItemDto
 
-		const cartItem = await this.findOne({ id: cartItemId, userId }, { product: true })
+		const cartItem = await this.findOneCartItem({ id: cartItemId, userId }, { product: true })
 		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
 		const price = cartItem.product.price
@@ -107,8 +109,8 @@ export class CartService {
 		return updatedCartItem
 	}
 
-	async delete(userId: number, cartItemId: number): Promise<CartItem> {
-		const cartItem = await this.findOne({ userId, id: cartItemId })
+	async deleteCartItem(userId: number, cartItemId: number): Promise<CartItem> {
+		const cartItem = await this.findOneCartItem({ userId, id: cartItemId })
 		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
 		const deletedCartItem = await this.prisma.cartItem.delete({
@@ -119,12 +121,12 @@ export class CartService {
 	}
 
 	async isProductInCart(userId: number, productId: number): Promise<{ isInCart: boolean }> {
-		const product = await this.productService.findOne({ id: productId })
+		const product = await this.productService.findOneProduct({ id: productId })
 		if (!product) {
 			throw new NotFoundException('Product not found')
 		}
 
-		const cartItem = await this.findOne({ productId_userId: { productId, userId } })
+		const cartItem = await this.findOneCartItem({ productId_userId: { productId, userId } })
 
 		return { isInCart: !!cartItem }
 	}
