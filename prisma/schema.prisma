@@ -162,8 +162,9 @@ model Product {
   sellerId Int?
 }
 
-// model ProductDetails {
-//   id Int @id @default(autoincrement())
+// model ProductType {
+//   id   Int    @id @default(autoincrement())
+//   name String
 // }
 
 model Variant {
@@ -186,6 +187,7 @@ model Variant {
 // default
 // active
 
+// Variant Type
 model Attribute {
   id   Int    @id @default(autoincrement())
   name String // Наприклад, "Колір", "Розмір", "Пам'ять" тощо

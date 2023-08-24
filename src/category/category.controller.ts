@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common'
 import { CategoryService } from './category.service'
-import { CreateCategoryDto, UpdateCategoryDto } from './dto'
+import { CreateCategoryDto, FindAllCategoriesDto, UpdateCategoryDto } from './dto'
 import { Roles } from 'lib/decorators/roles.decorator'
 import { Role } from '@prisma/client'
 
@@ -8,51 +8,61 @@ import { Role } from '@prisma/client'
 export class CategoryController {
 	constructor(private readonly categoryService: CategoryService) {}
 
-	@Get('')
-	findAll() {
-		return this.categoryService.findAllCategories()
-	}
-
 	@Get('main')
-	findMain() {
+	findMainCategories() {
 		return this.categoryService.findMainCategories()
 	}
 
-	@Get('c/:id')
-	findById(@Param('id') id: string) {
+	@Get('')
+	findAllCategories(@Query() findAllCategoriesDto: FindAllCategoriesDto) {
+		return this.categoryService.findAllCategories(findAllCategoriesDto)
+	}
+
+	@Get('all/:parentId')
+	findCategoriesByParentId(@Param('parentId') id: string) {
+		return this.categoryService.findCategoriesByParentId(+id)
+	}
+
+	@Get('tree/:id')
+	findCategoryTreeById(@Param('id') id: string) {
+		return this.categoryService.findCategoryTreeById(+id)
+	}
+
+	@Get('category-children/:id')
+	findCategoryAndChildrenById(@Param('id') id: string) {
+		return this.categoryService.findCategoryAndChildrenById(+id)
+	}
+
+	@Get('category/:id')
+	findCategoryById(@Param('id') id: string) {
 		return this.categoryService.findCategoryById(+id)
 	}
 
 	@Get(':slug')
-	findBySlug(@Param('slug') slug: string) {
+	findCategoryBySlug(@Param('slug') slug: string) {
 		return this.categoryService.findCategoryBySlug(slug)
 	}
 
-	@Get('tree/:id')
-	findTree(@Param('id') id: string) {
-		return this.categoryService.findCategoryTree(+id)
-	}
-
 	@Get('breadcrumbs/:id')
-	findBreadcrumbs(@Param('id') id: string) {
+	findCategoryBreadcrumbs(@Param('id') id: string) {
 		return this.categoryService.findCategoryBreadcrumbs(+id)
 	}
 
 	// @Roles(Role.ADMIN)
 	@Post('create')
-	create(@Body() createCategoryDto: CreateCategoryDto) {
+	createCategory(@Body() createCategoryDto: CreateCategoryDto) {
 		return this.categoryService.createCategory(createCategoryDto)
 	}
 
 	@Roles(Role.ADMIN)
-	@Patch('c/:id')
-	update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+	@Patch(':id')
+	updateCategory(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
 		return this.categoryService.updateCategory({ id: +id }, updateCategoryDto)
 	}
 
-	@Roles(Role.ADMIN)
-	@Delete('c/:id')
-	delete(@Param('id') id: string) {
+	// @Roles(Role.ADMIN)
+	@Delete(':id')
+	deleteCategory(@Param('id') id: string) {
 		return this.categoryService.deleteCategory({ id: +id })
 	}
 }

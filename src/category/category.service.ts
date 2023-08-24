@@ -1,57 +1,44 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { CreateCategoryDto, UpdateCategoryDto } from './dto'
+import { CreateCategoryDto, FindAllCategoriesDto, UpdateCategoryDto } from './dto'
 import { PrismaService } from 'prisma/prisma.service'
 import { Category, Prisma } from '@prisma/client'
-import { CategoryFullType } from 'lib/types/full-model.types'
 
 @Injectable()
 export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
-	async findAllCategories(): Promise<Category[]> {
-		const categories = await this.prisma.category.findMany({ include: { attributes: true } })
+	async findMainCategories(): Promise<Category[]> {
+		return await this.prisma.category.findMany({ where: { parentId: null }, include: { children: true } })
+	}
+
+	async findAllCategories(
+		findAllCategoriesDto: FindAllCategoriesDto,
+		where: Prisma.CategoryWhereInput = {}
+	): Promise<Category[]> {
+		const { q } = findAllCategoriesDto
+
+		const categoryFilter: Prisma.CategoryWhereInput = {
+			name: { contains: q, mode: 'insensitive' }
+		}
+
+		const finalWhere: Prisma.CategoryWhereInput = {
+			...where,
+			...categoryFilter
+		}
+
+		const categories = await this.prisma.category.findMany({
+			where: finalWhere,
+			include: { attributes: true, parent: true, children: true }
+		})
 		if (!categories) throw new NotFoundException('Categories not found')
 		return categories
 	}
 
-	async findMainCategories(): Promise<Category[]> {
-		return await this.prisma.category.findMany({ where: { parentId: null } })
+	async findCategoriesByParentId(parentId: number): Promise<Category[]> {
+		return await this.prisma.category.findMany({ where: { parentId } })
 	}
 
-	async findOneCategory(
-		uniqueArgs: Prisma.CategoryWhereUniqueInput,
-		select?: Prisma.CategorySelect
-	): Promise<CategoryFullType> {
-		const defaultCategorySelect: Prisma.CategorySelectScalar = {
-			id: true,
-			slug: true,
-			name: true,
-			parentId: true
-		}
-
-		const category = await this.prisma.category.findUnique({
-			where: uniqueArgs,
-			select: { ...defaultCategorySelect, ...select }
-		})
-
-		return category
-	}
-
-	async findCategoryById(id: number): Promise<CategoryFullType> {
-		const category = await this.findOneCategory({ id }, { children: true })
-		if (!category) throw new NotFoundException('Category not found')
-
-		return category
-	}
-
-	async findCategoryBySlug(slug: string): Promise<CategoryFullType> {
-		const category = await this.findOneCategory({ slug }, { children: true })
-		if (!category) throw new NotFoundException('Category not found')
-
-		return category
-	}
-
-	async findCategoryTree(id: number): Promise<CategoryFullType[]> {
+	async findCategoryTreeById(id: number): Promise<Category[]> {
 		const category = await this.findOneCategory({ id })
 		if (!category) throw new NotFoundException('Category not found')
 
@@ -60,16 +47,51 @@ export class CategoryService {
 			include: { children: true }
 		})
 
-		const nestedCategories = await Promise.all(children.map(child => this.findCategoryTree(child.id)))
+		const nestedCategories = await Promise.all(children.map(child => this.findCategoryTreeById(child.id)))
 		const flattenedCategories = nestedCategories.flat()
 
-		const categoryTree = [category, ...flattenedCategories]
+		const categoryFlatTree = [category, ...flattenedCategories]
 
-		return categoryTree
+		return categoryFlatTree
 	}
 
-	async findCategoryBreadcrumbs(id: number): Promise<CategoryFullType[]> {
-		const breadcrumbs: CategoryFullType[] = []
+	async findOneCategory(uniqueArgs: Prisma.CategoryWhereUniqueInput): Promise<Category> {
+		const category = await this.prisma.category.findUnique({
+			where: uniqueArgs,
+			include: { children: true }
+		})
+
+		return category
+	}
+
+	async findCategoryAndChildrenById(id: number): Promise<{ category: Category; children: Category[] }> {
+		const category = await this.findOneCategory({ id })
+		if (!category) throw new NotFoundException('Category not found')
+
+		const children = await this.prisma.category.findMany({
+			where: { parentId: category.id },
+			include: { children: true }
+		})
+
+		return { category, children }
+	}
+
+	async findCategoryById(id: number): Promise<Category> {
+		const category = await this.findOneCategory({ id })
+		if (!category) throw new NotFoundException('Category not found')
+
+		return category
+	}
+
+	async findCategoryBySlug(slug: string): Promise<Category> {
+		const category = await this.findOneCategory({ slug })
+		if (!category) throw new NotFoundException('Category not found')
+
+		return category
+	}
+
+	async findCategoryBreadcrumbs(id: number): Promise<Category[]> {
+		const breadcrumbs: Category[] = []
 
 		let categoryId = id
 		while (categoryId) {

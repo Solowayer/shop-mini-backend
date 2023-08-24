@@ -85,8 +85,7 @@ export class ProductService {
 		findAllProductsDto: FindAllProductsDto,
 		categoryId: number
 	): Promise<{ products: Product[]; length: number }> {
-		const categoryTree = await this.categoryService.findCategoryTree(categoryId)
-		if (!categoryTree) throw new NotFoundException('Category not found')
+		const categoryTree = await this.categoryService.findCategoryTreeById(categoryId)
 
 		const categoryIds = categoryTree.map(cat => cat.id)
 
@@ -124,22 +123,7 @@ export class ProductService {
 		return await this.findAll(getAllProductsDto, where)
 	}
 
-	async findOne(
-		uniqueArgs: Prisma.ProductWhereUniqueInput,
-		productSelect: Prisma.ProductSelect = {}
-	): Promise<Product> {
-		const defaultProductSelect: Prisma.ProductSelectScalar = {
-			id: true,
-			createdAt: false,
-			updatedAt: false,
-			slug: true,
-			name: true,
-			description: true,
-			categoryId: true,
-			sellerId: true,
-			rating: true
-		}
-
+	async findOne(uniqueArgs: Prisma.ProductWhereUniqueInput): Promise<Product> {
 		const product = await this.prisma.product.findUnique({
 			where: uniqueArgs,
 			include: {
@@ -167,7 +151,7 @@ export class ProductService {
 	}
 
 	async create(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
-		const { tags, categoryId, ...productData } = createProductDto
+		const { tags, categoryId, images, price, stock, attributeValues, ...productData } = createProductDto
 
 		const seller = await this.sellerService.getSellerByUserId(userId)
 
@@ -184,7 +168,20 @@ export class ProductService {
 					createMany: { data: tags.map(tag => ({ name: tag })) }
 				},
 				category: categoryExist && { connect: { id: categoryExist.id } },
-				seller: userId && { connect: { id: seller.id } }
+				seller: userId && { connect: { id: seller.id } },
+				variants: {
+					create: {
+						images,
+						price,
+						stock,
+						attributeValues: {
+							create: attributeValues.map(attr => ({
+								attribute: { connect: { id: attr.attributeId } },
+								value: attr.value
+							}))
+						}
+					}
+				}
 			}
 		})
 

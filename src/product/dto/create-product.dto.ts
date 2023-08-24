@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength, IsNumber, IsNotEmpty, IsArray, ArrayMaxSize } from 'class-validator'
+import { IsString, IsOptional, MaxLength, IsNumber, IsNotEmpty, IsArray, ArrayMaxSize, ArrayMinSize } from 'class-validator'
 
 export class CreateProductDto {
 	@IsNotEmpty()
@@ -22,4 +22,21 @@ export class CreateProductDto {
 	@IsNumber()
 	@IsNotEmpty()
 	categoryId: number
+
+	@IsArray()
+	@IsOptional()
+	@ArrayMaxSize(10)
+	images?: string[]
+
+	@IsNotEmpty()
+	@IsNumber()
+	price: number
+
+	@IsNotEmpty()
+	@IsNumber()
+	stock: number
+
+	@IsArray()
+	@ArrayMinSize(1) // Мінімум 1 атрибут повинен бути вказаний
+	attributeValues?: Array<{ attributeId: number; value: string }>
 }

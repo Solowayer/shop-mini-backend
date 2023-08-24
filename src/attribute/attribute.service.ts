@@ -10,7 +10,7 @@ export class AttributeService {
 	constructor(private prisma: PrismaService) {}
 
 	async findAll() {
-		return await this.prisma.attribute.findMany({ include: { values: true, categories: true } })
+		return await this.prisma.attribute.findMany()
 	}
 
 	async findOne(id: number) {

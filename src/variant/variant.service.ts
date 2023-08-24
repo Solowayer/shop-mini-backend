@@ -49,6 +49,17 @@ export class VariantService {
 		return variation
 	}
 
+	async createMany(createVariantDtos: CreateVariantDto[]) {
+		const variants: Variant[] = []
+
+		for (const createVariantDto of createVariantDtos) {
+			const variant = await this.create(createVariantDto)
+			variants.push(variant)
+		}
+
+		return variants
+	}
+
 	async update(id: number, updateVariantDto: UpdateVariantDto): Promise<Variant> {
 		const { attributeValues, ...rest } = updateVariantDto
 
