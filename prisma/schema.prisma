@@ -143,71 +143,30 @@ model Seller {
 }
 
 model Product {
-  id          Int                 @id @default(autoincrement())
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  slug        String              @unique
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  slug      String   @unique
+
   name        String
   description String?
   tags        Tag[]
-  rating      Float               @default(0)
-  variants    Variant[]
-  reviews     ReviewToProduct[]
-  wishlists   ProductToWishlist[]
+
+  images String[]
+  price  Float
+  stock  Int
+
+  rating    Float               @default(0)
+  reviews   ReviewToProduct[]
+  wishlists ProductToWishlist[]
 
   category   Category? @relation(fields: [categoryId], references: [id])
   categoryId Int?
 
   seller   Seller? @relation(fields: [sellerId], references: [id])
   sellerId Int?
-}
 
-// model ProductType {
-//   id   Int    @id @default(autoincrement())
-//   name String
-// }
-
-model Variant {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  images String[]
-  price  Float
-  stock  Int
-
-  cartItems CartItem[]
-
-  product   Product? @relation(fields: [productId], references: [id])
-  productId Int?
-
-  attributeValues AttributeValue[]
-}
-
-// default
-// active
-
-// Variant Type
-model Attribute {
-  id   Int    @id @default(autoincrement())
-  name String // Наприклад, "Колір", "Розмір", "Пам'ять" тощо
-
-  values AttributeValue[]
-
-  categories AttributeToCategory[]
-}
-
-model AttributeValue {
-  id    Int    @id @default(autoincrement())
-  value String // Наприклад, "Червоний", "XXL", "16GB" тощо
-
-  attribute   Attribute @relation(fields: [attributeId], references: [id])
-  attributeId Int
-
-  variant   Variant @relation(fields: [variantId], references: [id])
-  variantId Int
-
-  @@unique([attributeId, variantId])
+  cartItem CartItem[]
 }
 
 model CartItem {
@@ -219,12 +178,13 @@ model CartItem {
   price    Int
   quantity Int
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  variant   Variant? @relation(fields: [variantId], references: [id])
-  variantId Int?
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
 
-  @@unique([variantId, userId])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@unique([productId, userId])
 }
 
 // Department
@@ -242,8 +202,7 @@ model Category {
   parent   Category?  @relation("ChildrensParents", fields: [parentId], references: [id])
   children Category[] @relation("ChildrensParents")
 
-  product    Product[]
-  attributes AttributeToCategory[]
+  product Product[]
 }
 
 model Tag {
@@ -252,16 +211,6 @@ model Tag {
 
   product   Product? @relation(fields: [productId], references: [id])
   productId Int?
-}
-
-model AttributeToCategory {
-  id          Int       @id @default(autoincrement())
-  categoryId  Int
-  attributeId Int
-  category    Category  @relation(fields: [categoryId], references: [id])
-  attribute   Attribute @relation(fields: [attributeId], references: [id])
-
-  @@unique([categoryId, attributeId]) // Забезпечує унікальність пари значень
 }
 
 model ReviewToProduct {

@@ -30,7 +30,7 @@ export class CartService {
 			price: true,
 			quantity: true,
 			userId: true,
-			variantId: true
+			productId: true
 		}
 
 		const cartItem = await this.prisma.cartItem.findUnique({
@@ -54,15 +54,14 @@ export class CartService {
 	}
 
 	async create(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
-		const { variantId, quantity } = createCartItemDto
+		const { productId, quantity } = createCartItemDto
 
-		const productVariation = await this.prisma.variant.findUnique({
-			where: { id: variantId },
-			include: { product: true }
+		const product = await this.prisma.product.findUnique({
+			where: { id: productId }
 		})
 
 		const existingCartItem = await this.findOne({
-			variantId_userId: { variantId, userId }
+			productId_userId: { productId, userId }
 		})
 
 		if (existingCartItem) {
@@ -71,7 +70,7 @@ export class CartService {
 			const cartItem = await this.prisma.cartItem.update({
 				where: { id: existingCartItem.id },
 				data: {
-					price: productVariation.price * newQuantity,
+					price: product.price * newQuantity,
 					quantity: newQuantity
 				}
 			})
@@ -79,12 +78,10 @@ export class CartService {
 		} else {
 			const cartItem = await this.prisma.cartItem.create({
 				data: {
-					name: productVariation.product.name,
-					price: productVariation.price * quantity,
+					name: product.name,
+					price: product.price * quantity,
 					quantity,
-					variant: {
-						connect: { id: productVariation.id }
-					},
+					product: { connect: { id: productId } },
 					user: {
 						connect: { id: userId }
 					}
@@ -97,10 +94,10 @@ export class CartService {
 	async update(userId: number, cartItemId: number, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
 		const { quantity } = updateCartItemDto
 
-		const cartItem = await this.findOne({ id: cartItemId, userId }, { variant: true })
+		const cartItem = await this.findOne({ id: cartItemId, userId }, { product: true })
 		if (!cartItem) throw new NotFoundException('This product not found inside cart')
 
-		const price = cartItem.variant.price
+		const price = cartItem.product.price
 
 		const updatedCartItem = await this.prisma.cartItem.update({
 			where: { id: cartItemId, userId },
@@ -127,13 +124,8 @@ export class CartService {
 			throw new NotFoundException('Product not found')
 		}
 
-		const productVariations = await this.prisma.variant.findMany({
-			where: { productId },
-			include: { cartItems: { where: { userId } } }
-		})
+		const cartItem = await this.findOne({ productId_userId: { productId, userId } })
 
-		const isInCart = productVariations.some(variation => variation.cartItems.length > 0)
-
-		return { isInCart }
+		return { isInCart: !!cartItem }
 	}
 }

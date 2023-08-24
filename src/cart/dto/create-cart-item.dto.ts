@@ -8,5 +8,5 @@ export class CreateCartItemDto {
 
 	@IsNumber()
 	@IsNotEmpty()
-	variantId: number
+	productId: number
 }
