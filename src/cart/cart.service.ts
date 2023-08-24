@@ -50,11 +50,6 @@ export class CartService {
 		return cartItem
 	}
 
-	async deleteAllCartItems(userId: number) {
-		const deletedCartItems = await this.prisma.cartItem.deleteMany({ where: { userId } })
-		return deletedCartItems
-	}
-
 	async createCartItem(userId: number, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
 		const { productId, quantity } = createCartItemDto
 
@@ -120,7 +115,12 @@ export class CartService {
 		return deletedCartItem
 	}
 
-	async isProductInCart(userId: number, productId: number): Promise<{ isInCart: boolean }> {
+	async deleteAllCartItems(userId: number) {
+		const deletedCartItems = await this.prisma.cartItem.deleteMany({ where: { userId } })
+		return deletedCartItems
+	}
+
+	async checkProductInCart(userId: number, productId: number): Promise<{ isInCart: boolean }> {
 		const product = await this.productService.findOneProduct({ id: productId })
 		if (!product) {
 			throw new NotFoundException('Product not found')

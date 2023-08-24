@@ -11,44 +11,48 @@ export class UserWishlistController {
 	constructor(private readonly userWishlistService: UserWishlistService) {}
 
 	@Get()
-	findAll(@GetUserId() userId: number) {
-		return this.userWishlistService.findAll(userId)
+	findAllWishlists(@GetUserId() userId: number) {
+		return this.userWishlistService.findAllWishlists(userId)
 	}
 
 	@Get(':id')
-	findById(@GetUserId() userId: number, @Param('id') id: string) {
+	findWishlistById(@GetUserId() userId: number, @Param('id') id: string) {
 		console.log('userId:', userId)
 
-		return this.userWishlistService.findById(userId, +id)
+		return this.userWishlistService.findWishlistById(userId, +id)
 	}
 
 	@Post('create')
-	create(@GetUserId() userId: number, @Body() createWishlistDto: CreateWishlistDto) {
-		return this.userWishlistService.create(userId, createWishlistDto)
+	createWishlist(@GetUserId() userId: number, @Body() createWishlistDto: CreateWishlistDto) {
+		return this.userWishlistService.createWishlist(userId, createWishlistDto)
 	}
 
-	@Patch('edit/:id')
-	update(@GetUserId() userId: number, @Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
-		return this.userWishlistService.update(userId, +id, updateWishlistDto)
+	@Patch('update/:id')
+	updateWishlist(@GetUserId() userId: number, @Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
+		return this.userWishlistService.updateWishlist(userId, +id, updateWishlistDto)
 	}
 
 	@Delete('delete/:id')
-	delete(@GetUserId() userId: number, @Param('id') id: string) {
-		return this.userWishlistService.delete(userId, +id)
+	deleteWishlist(@GetUserId() userId: number, @Param('id') id: string) {
+		return this.userWishlistService.deleteWishlist(userId, +id)
 	}
 
 	@Post(':listId/product/:productId')
-	addProduct(@GetUserId() userId: number, @Param('listId') listId: string, @Param('productId') productId: string) {
-		return this.userWishlistService.addProductToList(userId, +listId, +productId)
+	addProductToWishlist(
+		@GetUserId() userId: number,
+		@Param('listId') listId: string,
+		@Param('productId') productId: string
+	) {
+		return this.userWishlistService.addProductToWishlist(userId, +listId, +productId)
 	}
 
 	@Delete('product/:productId')
-	deleteProduct(@GetUserId() userId: number, @Param('productId') productId: string) {
-		return this.userWishlistService.deleteProductFromList(userId, +productId)
+	deleteProductFromWishlist(@GetUserId() userId: number, @Param('productId') productId: string) {
+		return this.userWishlistService.deleteProductFromWishlist(userId, +productId)
 	}
 
 	@Get('check/:productId')
 	checkProductInList(@GetUserId() userId: number, @Param('productId') productId: string) {
-		return this.userWishlistService.isProductInList(userId, +productId)
+		return this.userWishlistService.checkProductInWishlist(userId, +productId)
 	}
 }

@@ -15,7 +15,7 @@ export class AuthService {
 	async registerUser(registerUserDto: RegisterUserDto): Promise<User> {
 		const { firstName, lastName, email, password, phoneNumber } = registerUserDto
 
-		const existingUser = await this.userService.getOneUser({ email })
+		const existingUser = await this.userService.findOneUser({ email })
 		if (existingUser) throw new BadRequestException('This email is already in use')
 
 		const passwordHash = await argon.hash(password)
@@ -40,7 +40,7 @@ export class AuthService {
 	async loginUser(loginUserDto: LoginUserDto): Promise<UserFullType> {
 		const { email, password } = loginUserDto
 
-		const user = await this.userService.getOneUser({ email })
+		const user = await this.userService.findOneUser({ email })
 
 		if (!user) throw new NotFoundException('This user doesn`t exist')
 

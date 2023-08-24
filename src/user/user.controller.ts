@@ -9,18 +9,18 @@ export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@Get('all')
-	getAll() {
-		return this.userService.getAllUsers()
+	findAllUsers() {
+		return this.userService.findAllUsers()
 	}
 
 	@Get('')
-	getSelf(@GetUser() user: User) {
-		return this.userService.getUserById(user.id)
+	findSelf(@GetUser() user: User) {
+		return this.userService.findUserById(user.id)
 	}
 
 	@Get('u/:userId')
-	get(@Param('userId') userId: string) {
-		return this.userService.getUserById(+userId)
+	findUserById(@Param('userId') userId: string) {
+		return this.userService.findUserById(+userId)
 	}
 
 	@Patch('edit')
@@ -29,7 +29,7 @@ export class UserController {
 	}
 
 	@Patch('edit/:userId')
-	update(@Param('userId') userId: number, @Body() updateUserDto: UpdateUserDto) {
+	updateUser(@Param('userId') userId: number, @Body() updateUserDto: UpdateUserDto) {
 		return this.userService.updateUser(userId, updateUserDto)
 	}
 }

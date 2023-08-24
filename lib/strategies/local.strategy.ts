@@ -17,7 +17,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 		// eslint-disable-next-line no-console
 		// console.log(`Strategy: ${email}, ${password}`)
 
-		const user = await this.userService.getOneUser({ email })
+		const user = await this.userService.findOneUser({ email })
 
 		if (!user) throw new NotFoundException('User not found')
 

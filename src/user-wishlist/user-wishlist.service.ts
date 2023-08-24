@@ -9,11 +9,11 @@ import { WishlistFullType } from 'lib/types/full-model.types'
 export class UserWishlistService {
 	constructor(private prisma: PrismaService, @Inject(ProductService) private productService: ProductService) {}
 
-	findAll(userId: number): Promise<UserWishlist[]> {
+	findAllWishlists(userId: number): Promise<UserWishlist[]> {
 		return this.prisma.userWishlist.findMany({ where: { userId } })
 	}
 
-	async findOne(
+	async findOneWishlist(
 		where: Prisma.UserWishlistWhereUniqueInput,
 		wishlistSelect: Prisma.UserWishlistSelect = {}
 	): Promise<WishlistFullType> {
@@ -32,8 +32,8 @@ export class UserWishlistService {
 		return wishlist
 	}
 
-	async findById(userId: number, listId: number): Promise<WishlistFullType> {
-		const wishlist = await this.findOne({ id: listId })
+	async findWishlistById(userId: number, listId: number): Promise<WishlistFullType> {
+		const wishlist = await this.findOneWishlist({ id: listId })
 
 		if (!wishlist || wishlist.userId !== userId) {
 			throw new NotFoundException('List not found')
@@ -42,15 +42,15 @@ export class UserWishlistService {
 		return wishlist
 	}
 
-	async create(userId: number, createWishlistDto: CreateWishlistDto): Promise<UserWishlist> {
+	async createWishlist(userId: number, createWishlistDto: CreateWishlistDto): Promise<UserWishlist> {
 		const { name } = createWishlistDto
 
 		const newWishlist = await this.prisma.userWishlist.create({ data: { name, user: { connect: { id: userId } } } })
 		return newWishlist
 	}
 
-	async update(userId: number, listId: number, updateWishlistDto: UpdateWishlistDto): Promise<UserWishlist> {
-		await this.findById(userId, listId)
+	async updateWishlist(userId: number, listId: number, updateWishlistDto: UpdateWishlistDto): Promise<UserWishlist> {
+		await this.findWishlistById(userId, listId)
 
 		const updatedWishlist = await this.prisma.userWishlist.update({
 			where: { id: listId },
@@ -60,18 +60,18 @@ export class UserWishlistService {
 		return updatedWishlist
 	}
 
-	async delete(userId: number, listId: number) {
-		const wishlist = await this.findOne({ userId, id: listId })
+	async deleteWishlist(userId: number, listId: number) {
+		const wishlist = await this.findOneWishlist({ userId, id: listId })
 		if (!wishlist) throw new NotFoundException('List not found')
 
 		return this.prisma.userWishlist.delete({ where: { userId, id: listId } })
 	}
 
-	async addProductToList(userId: number, listId: number, productId: number): Promise<ProductToWishlist> {
-		const product = await this.productService.findOne({ id: productId })
+	async addProductToWishlist(userId: number, listId: number, productId: number): Promise<ProductToWishlist> {
+		const product = await this.productService.findOneProduct({ id: productId })
 		if (!product) throw new NotFoundException('Product not found')
 
-		const wishlist = await this.findOne({ userId, id: listId })
+		const wishlist = await this.findOneWishlist({ userId, id: listId })
 		if (!wishlist) throw new NotFoundException('List not found')
 
 		const existingProductInLists = await this.prisma.productToWishlist.findFirst({
@@ -95,8 +95,8 @@ export class UserWishlistService {
 		})
 	}
 
-	async deleteProductFromList(userId: number, productId: number): Promise<ProductToWishlist> {
-		const product = await this.productService.findOne({ id: productId })
+	async deleteProductFromWishlist(userId: number, productId: number): Promise<ProductToWishlist> {
+		const product = await this.productService.findOneProduct({ id: productId })
 		if (!product) throw new NotFoundException('Product not found')
 
 		const wishlist = await this.prisma.userWishlist.findFirst({
@@ -115,8 +115,8 @@ export class UserWishlistService {
 		})
 	}
 
-	async isProductInList(userId: number, productId: number): Promise<{ isInList: boolean }> {
-		const product = await this.productService.findOne({ id: productId })
+	async checkProductInWishlist(userId: number, productId: number): Promise<{ isInList: boolean }> {
+		const product = await this.productService.findOneProduct({ id: productId })
 		if (!product) {
 			throw new NotFoundException('Product not found')
 		}

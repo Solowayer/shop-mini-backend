@@ -8,12 +8,12 @@ import { UserFullType } from 'lib/types/full-model.types'
 export class UserService {
 	constructor(private prisma: PrismaService) {}
 
-	async getAllUsers() {
+	async findAllUsers() {
 		const users = await this.prisma.user.findMany()
 		return users
 	}
 
-	async getOneUser(where: Prisma.UserWhereUniqueInput, userSelect: Prisma.UserSelect = {}): Promise<UserFullType> {
+	async findOneUser(where: Prisma.UserWhereUniqueInput, userSelect: Prisma.UserSelect = {}): Promise<UserFullType> {
 		const defaultUserSelect: Prisma.UserSelectScalar = {
 			id: true,
 			createdAt: true,
@@ -28,8 +28,8 @@ export class UserService {
 		return user
 	}
 
-	async getUserById(userId: number): Promise<UserFullType> {
-		const user = await this.getOneUser({ id: userId })
+	async findUserById(userId: number): Promise<UserFullType> {
+		const user = await this.findOneUser({ id: userId })
 		if (!user) throw new NotFoundException('User not found')
 		return user
 	}
