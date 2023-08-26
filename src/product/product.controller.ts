@@ -32,7 +32,7 @@ export class ProductController {
 		return this.productService.findProductsByWishlistId(findAllProductsDto, +wishlistId)
 	}
 
-	@Roles(Role.SELLER)
+	@Roles(Role.SELLER, Role.ADMIN)
 	@Get('seller')
 	findProductsBySellerId(@GetUserId() userId: number, @Query() findAllProductsDto: FindAllProductsDto) {
 		return this.productService.findProductsBySellerId(userId, findAllProductsDto)
@@ -48,25 +48,25 @@ export class ProductController {
 		return this.productService.findProductBySlug(slug)
 	}
 
-	@Roles(Role.SELLER)
+	@Roles(Role.SELLER, Role.ADMIN)
 	@Post('create')
 	createProduct(@Body() createProductDto: CreateProductDto, @GetUserId() userId: number) {
 		return this.productService.createProduct(createProductDto, userId)
 	}
 
-	@Roles(Role.SELLER)
+	@Roles(Role.SELLER, Role.ADMIN)
 	@Post('create-many')
 	createManyProducts(@Body() createProductDtos: CreateProductDto[], @GetUserId() userId: number) {
 		return this.productService.createManyProducts(createProductDtos, userId)
 	}
 
-	@Roles(Role.SELLER)
+	@Roles(Role.SELLER, Role.ADMIN)
 	@Patch('product/:id')
 	updateProduct(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
 		return this.productService.updateProduct(+id, updateProductDto)
 	}
 
-	@Roles(Role.SELLER)
+	@Roles(Role.SELLER, Role.ADMIN)
 	@Delete('product/:id')
 	deleteProduct(@Param('id') id: string) {
 		return this.productService.deleteProduct(+id)

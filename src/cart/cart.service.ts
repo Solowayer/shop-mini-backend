@@ -75,6 +75,7 @@ export class CartService {
 		} else {
 			const cartItem = await this.prisma.cartItem.create({
 				data: {
+					image: product.images[0],
 					name: product.name,
 					price: product.price * quantity,
 					quantity,

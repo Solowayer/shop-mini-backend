@@ -58,7 +58,7 @@ export class CategoryService {
 	async findOneCategory(uniqueArgs: Prisma.CategoryWhereUniqueInput): Promise<Category> {
 		const category = await this.prisma.category.findUnique({
 			where: uniqueArgs,
-			include: { children: true }
+			include: { children: true, parent: true }
 		})
 
 		return category
@@ -133,7 +133,7 @@ export class CategoryService {
 		where: Prisma.CategoryWhereUniqueInput,
 		updateCategoryDto: UpdateCategoryDto
 	): Promise<Category> {
-		const { parentId, childrenIds } = updateCategoryDto
+		const { parentId, childrenIds, ...rest } = updateCategoryDto
 
 		const category = await this.findOneCategory(where)
 		if (!category) throw new NotFoundException('Category not found')
@@ -143,9 +143,9 @@ export class CategoryService {
 		const updatedCategory = await this.prisma.category.update({
 			where,
 			data: {
+				...rest,
 				parentId,
-				children: { connect: childrens },
-				...updateCategoryDto
+				children: { connect: childrens }
 			},
 			include: { parent: true, children: true }
 		})

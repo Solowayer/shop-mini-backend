@@ -6,7 +6,7 @@ import { Roles } from 'lib/decorators/roles.decorator'
 import { GetUserId } from 'lib/decorators/userId.decorator'
 
 @Controller('cart')
-@Roles(Role.USER, Role.SELLER)
+@Roles(Role.USER, Role.SELLER, Role.ADMIN)
 export class CartController {
 	constructor(private readonly cartService: CartService) {}
 

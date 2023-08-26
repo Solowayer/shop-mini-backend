@@ -6,7 +6,7 @@ import { Role } from '@prisma/client'
 import { Roles } from 'lib/decorators/roles.decorator'
 
 @Controller('lists')
-@Roles(Role.USER, Role.SELLER)
+@Roles(Role.USER, Role.SELLER, Role.ADMIN)
 export class UserWishlistController {
 	constructor(private readonly userWishlistService: UserWishlistService) {}
 

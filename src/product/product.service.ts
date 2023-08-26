@@ -151,7 +151,7 @@ export class ProductService {
 			data: {
 				...productData,
 				tags: {
-					createMany: { data: tags.map(tag => ({ name: tag })) }
+					createMany: tags && { data: tags.map(tag => ({ name: tag })) }
 				},
 				category: categoryExist && { connect: { id: categoryExist.id } },
 				seller: userId && { connect: { id: seller.id } }

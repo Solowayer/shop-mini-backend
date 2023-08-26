@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Get, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { SellerService } from './seller.service'
 import { CreateSellerDto, UpdateSellerDto } from './dto'
 import { GetUser } from 'lib/decorators/user.decorator'
@@ -25,7 +25,7 @@ export class SellerController {
 		return this.sellerService.getSellerByUserId(user.id)
 	}
 
-	@Roles(Role.USER)
+	@Roles(Role.USER, Role.ADMIN)
 	@Post('register')
 	create(@Body() createSellerDto: CreateSellerDto, @GetUser() user: User) {
 		return this.sellerService.createSeller(createSellerDto, user.id)
@@ -39,7 +39,6 @@ export class SellerController {
 
 	@Get('check-seller')
 	check(@GetUser() user: User) {
-		if (!user) throw new ForbiddenException('User is not authorized')
 		return this.sellerService.checkSeller(user.id)
 	}
 }

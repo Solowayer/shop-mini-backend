@@ -48,8 +48,6 @@ export class SellerService {
 	}
 
 	async createSeller(createSellerDto: CreateSellerDto, userId: number): Promise<Seller> {
-		// if (!userId) throw new BadRequestException('Can/`t/ create a seller')
-
 		const { name, adress, description, email, phoneNumber, pib } = createSellerDto
 
 		const existingSeller = await this.prisma.seller.findFirst({
@@ -60,7 +58,11 @@ export class SellerService {
 
 		if (existingSeller) throw new BadRequestException('This email or phone number is already exist')
 
-		await this.userService.updateUser(userId, { role: 'SELLER' })
+		const user = await this.userService.findUserById(userId)
+		if (user.role !== 'ADMIN') {
+			await this.userService.updateUser(userId, { role: 'SELLER' })
+		}
+
 		const newSeller = await this.prisma.seller.create({
 			data: {
 				name,

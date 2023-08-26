@@ -48,7 +48,7 @@ export class CategoryController {
 		return this.categoryService.findCategoryBreadcrumbs(+id)
 	}
 
-	// @Roles(Role.ADMIN)
+	@Roles(Role.ADMIN)
 	@Post('create')
 	createCategory(@Body() createCategoryDto: CreateCategoryDto) {
 		return this.categoryService.createCategory(createCategoryDto)
@@ -60,7 +60,7 @@ export class CategoryController {
 		return this.categoryService.updateCategory({ id: +id }, updateCategoryDto)
 	}
 
-	// @Roles(Role.ADMIN)
+	@Roles(Role.ADMIN)
 	@Delete(':id')
 	deleteCategory(@Param('id') id: string) {
 		return this.categoryService.deleteCategory({ id: +id })
