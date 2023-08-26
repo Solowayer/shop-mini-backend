@@ -5,6 +5,7 @@ import { Prisma, Product } from '@prisma/client'
 import { PaginationService } from 'src/pagination/pagination.service'
 import { CategoryService } from 'src/category/category.service'
 import { SellerService } from 'src/seller/seller.service'
+import * as fs from 'fs'
 
 @Injectable()
 export class ProductService {
@@ -18,9 +19,9 @@ export class ProductService {
 	async findAllProducts(
 		findAllProductsDto: FindAllProductsDto,
 		where: Prisma.ProductWhereInput = {}
-	): Promise<{ products: Product[]; length: number }> {
-		const { sort, min_price, max_price, q } = findAllProductsDto
-		const { perPage, skip } = this.paginationService.getPagination(findAllProductsDto)
+	): Promise<{ products: Product[]; length: number; totalPages: number }> {
+		const { sort, min_price, max_price, q, ...pagination } = findAllProductsDto
+		const { perPage, skip } = this.paginationService.getPagination(pagination)
 
 		const productSort: Prisma.ProductOrderByWithRelationInput = {
 			rating: sort === ProductsSort.RATING ? 'desc' : undefined,
@@ -31,7 +32,8 @@ export class ProductService {
 			OR: [
 				{ category: { name: { contains: q, mode: 'insensitive' } } },
 				{ name: { contains: q, mode: 'insensitive' } },
-				{ price: { gte: min_price, lte: max_price } }
+				{ price: { gte: min_price, lte: max_price } },
+				{ tags: { some: { name: { contains: q, mode: 'insensitive' } } } }
 			]
 		}
 
@@ -56,7 +58,9 @@ export class ProductService {
 			where: finalWhere
 		})
 
-		return { products, length }
+		const totalPages = this.paginationService.getTotalPages(length, perPage)
+
+		return { products, length, totalPages }
 	}
 
 	async findProductsByCategoryId(
@@ -91,9 +95,9 @@ export class ProductService {
 	): Promise<{ products: Product[]; length: number }> {
 		const productToWishlist = await this.prisma.productToWishlist.findMany({ where: { wishlistId } })
 
-		const productVariationIds = productToWishlist.map(item => item.productId)
+		const productIds = productToWishlist.map(item => item.productId)
 
-		const products = await this.findAllProducts(findAllProductsDto, { id: { in: productVariationIds } })
+		const products = await this.findAllProducts(findAllProductsDto, { id: { in: productIds } })
 
 		return products
 	}
@@ -192,6 +196,23 @@ export class ProductService {
 		const product = await this.findOneProduct({ id })
 		if (!product) throw new NotFoundException('Product not found')
 
-		return this.prisma.product.delete({ where: { id } })
+		const productImages = product.images
+
+		if (productImages) {
+			for (const imageUrl of productImages) {
+				const imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
+				const imagePath = `uploads/images/${imageName}`
+				try {
+					await fs.promises.unlink(imagePath)
+					console.log(`Видалено файл: ${imageUrl}`)
+				} catch (error) {
+					console.log(`Помилка при видаленні файлу: ${imageUrl}`, error)
+				}
+			}
+		}
+
+		const deletedProduct = await this.prisma.product.delete({ where: { id } })
+
+		return deletedProduct
 	}
 }

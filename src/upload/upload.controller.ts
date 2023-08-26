@@ -16,24 +16,6 @@ import * as fs from 'fs'
 
 @Controller('upload')
 export class UploadController {
-	@Post('file')
-	@UseInterceptors(
-		FileInterceptor('file', {
-			storage: diskStorage({
-				destination: './uploads/files',
-				filename: (req, file, callback) => {
-					const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
-					const filename = `${file.fieldname}-${uniqueSuffix}`
-					callback(null, filename)
-				}
-			})
-		})
-	)
-	uploadFile(@UploadedFile() file: Express.Multer.File) {
-		console.log(file)
-		return { message: 'Файл завантажено успішно' }
-	}
-
 	@Post('image')
 	@UseInterceptors(
 		FilesInterceptor('image', 10, {
