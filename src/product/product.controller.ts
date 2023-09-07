@@ -32,10 +32,15 @@ export class ProductController {
 		return this.productService.findProductsByWishlistId(findAllProductsDto, +wishlistId)
 	}
 
+	@Get('seller/:sellerId')
+	findProductsBySellerId(@Param('sellerId') sellerId: string, @Query() findAllProductsDto: FindAllProductsDto) {
+		return this.productService.findSellerProducts(+sellerId, findAllProductsDto)
+	}
+
 	@Roles(Role.SELLER, Role.ADMIN)
 	@Get('seller')
-	findProductsBySellerId(@GetUserId() userId: number, @Query() findAllProductsDto: FindAllProductsDto) {
-		return this.productService.findProductsBySellerId(userId, findAllProductsDto)
+	findSellerProducts(@GetUserId() userId: number, @Query() findAllProductsDto: FindAllProductsDto) {
+		return this.productService.findSellerProducts(userId, findAllProductsDto)
 	}
 
 	@Get('product/:id')

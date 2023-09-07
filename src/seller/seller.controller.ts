@@ -10,35 +10,35 @@ export class SellerController {
 	constructor(private readonly sellerService: SellerService) {}
 
 	@Get()
-	getAll() {
-		return this.sellerService.getAllSellers()
+	findAllSellers() {
+		return this.sellerService.findAllSellers()
 	}
 
 	@Get('s/:sellerId')
-	getById(@Param('sellerId') sellerId: string) {
-		return this.sellerService.getSellerById(+sellerId)
+	findSellerById(@Param('sellerId') sellerId: string) {
+		return this.sellerService.findSellerById(+sellerId)
 	}
 
-	@Roles(Role.SELLER)
+	@Roles(Role.SELLER, Role.ADMIN)
 	@Get('my-seller')
-	getByUserId(@GetUser() user: User) {
-		return this.sellerService.getSellerByUserId(user.id)
+	findUserSeller(@GetUser() user: User) {
+		return this.sellerService.findUserSeller(user.id)
 	}
 
 	@Roles(Role.USER, Role.ADMIN)
 	@Post('register')
-	create(@Body() createSellerDto: CreateSellerDto, @GetUser() user: User) {
+	createSeller(@Body() createSellerDto: CreateSellerDto, @GetUser() user: User) {
 		return this.sellerService.createSeller(createSellerDto, user.id)
 	}
 
-	@Roles(Role.SELLER)
+	@Roles(Role.SELLER, Role.ADMIN)
 	@Patch(':sellerId')
-	update(@Param('sellerId') sellerId: number, @Body() updateSellerDto: UpdateSellerDto) {
+	updateSeller(@Param('sellerId') sellerId: number, @Body() updateSellerDto: UpdateSellerDto) {
 		return this.sellerService.updateSeller({ id: sellerId }, updateSellerDto)
 	}
 
 	@Get('check-seller')
-	check(@GetUser() user: User) {
+	checkSeller(@GetUser() user: User) {
 		return this.sellerService.checkSeller(user.id)
 	}
 }

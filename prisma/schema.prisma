@@ -166,7 +166,7 @@ model Product {
   seller   Seller? @relation(fields: [sellerId], references: [id])
   sellerId Int?
 
-  cartItem CartItem[]
+  cartItems CartItem[]
 }
 
 model CartItem {

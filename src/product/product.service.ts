@@ -46,6 +46,7 @@ export class ProductService {
 			where: finalWhere,
 			orderBy: productSort,
 			include: {
+				cartItems: true,
 				tags: true
 			},
 			skip,
@@ -103,10 +104,24 @@ export class ProductService {
 	}
 
 	async findProductsBySellerId(
+		sellerId: number,
+		getAllProductsDto: FindAllProductsDto
+	): Promise<{ products: Product[]; length: number }> {
+		const seller = await this.sellerService.findOneSeller({ id: sellerId })
+		if (!seller) throw new NotFoundException('Seller not found')
+
+		const where: Prisma.ProductWhereInput = {
+			sellerId: seller.id
+		}
+
+		return await this.findAllProducts(getAllProductsDto, where)
+	}
+
+	async findSellerProducts(
 		userId: number,
 		getAllProductsDto: FindAllProductsDto
 	): Promise<{ products: Product[]; length: number }> {
-		const seller = await this.sellerService.getOneSeller({ userId }, { id: true })
+		const seller = await this.sellerService.findOneSeller({ userId })
 		if (!seller) throw new NotFoundException('Seller not found')
 
 		const where: Prisma.ProductWhereInput = {
@@ -143,7 +158,7 @@ export class ProductService {
 	async createProduct(createProductDto: CreateProductDto, userId?: number): Promise<Product> {
 		const { tags, categoryId, ...productData } = createProductDto
 
-		const seller = await this.sellerService.getSellerByUserId(userId)
+		const seller = await this.sellerService.findUserSeller(userId)
 
 		const categoryExist = await this.categoryService.findOneCategory({ id: categoryId })
 		if (!categoryExist) throw new NotFoundException('Category not found')

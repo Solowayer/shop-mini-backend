@@ -2,47 +2,30 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from 'prisma/prisma.service'
 import { CreateSellerDto, UpdateSellerDto } from './dto'
 import { Prisma, Seller } from '@prisma/client'
-import { SellerFullType } from 'lib/types/full-model.types'
 import { UserService } from 'src/user/user.service'
 
 @Injectable()
 export class SellerService {
 	constructor(private prisma: PrismaService, private userService: UserService) {}
 
-	async getAllSellers(): Promise<Seller[]> {
+	async findAllSellers(): Promise<Seller[]> {
 		return await this.prisma.seller.findMany({ include: { products: true } })
 	}
 
-	async getOneSeller(
-		where: Prisma.SellerWhereUniqueInput,
-		sellerSelect?: Prisma.SellerSelect
-	): Promise<SellerFullType> {
-		const defaultSellerSelect: Prisma.SellerSelectScalar = {
-			id: true,
-			createdAt: true,
-			updatedAt: true,
-			name: true,
-			adress: true,
-			description: true,
-			email: true,
-			phoneNumber: true,
-			pib: true,
-			userId: true
-		}
-
-		return await this.prisma.seller.findUnique({ where, select: { ...defaultSellerSelect, ...sellerSelect } })
+	async findOneSeller(where: Prisma.SellerWhereUniqueInput): Promise<Seller> {
+		return await this.prisma.seller.findUnique({ where })
 	}
 
-	async getSellerById(sellerId: number): Promise<SellerFullType> {
-		const seller = await this.getOneSeller({ id: sellerId })
+	async findSellerById(sellerId: number): Promise<Seller> {
+		const seller = await this.findOneSeller({ id: sellerId })
 
 		if (!seller) throw new NotFoundException('Seller not found')
 
 		return seller
 	}
 
-	async getSellerByUserId(userId: number): Promise<SellerFullType> {
-		const seller = await this.getOneSeller({ userId }, { products: true })
+	async findUserSeller(userId: number): Promise<Seller> {
+		const seller = await this.findOneSeller({ userId })
 		if (!seller) throw new NotFoundException('Seller not found')
 		return seller
 	}
@@ -84,7 +67,7 @@ export class SellerService {
 	}
 
 	async checkSeller(userId: number): Promise<boolean> {
-		const seller = await this.getOneSeller({ userId })
+		const seller = await this.findOneSeller({ userId })
 
 		if (!seller) return false
 
